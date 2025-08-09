@@ -7,11 +7,27 @@
   "compatibility_date": "2025-04-01",
   "main": "./workers/app.ts",
   "vars": {
-    "VALUE_FROM_CLOUDFLARE": "Hello from Cloudflare"
+    "VALUE_FROM_CLOUDFLARE": "Hello from Cloudflare",
+    "ADMIN_EMAIL": "admin@kimmy-app.com",
+    "VITE_R2_PUBLIC_URL": "https://kimmy-app-assets.r2.dev/",
+    "BASE_URL": "https://kimmy-app.workers.dev/"
   },
   "observability": {
     "enabled": true
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kimmy-app-db",
+      "database_id": "6d9a4a6c-81c4-4338-9c5d-4c688f57091a"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "bucket_name": "kimmy-app-assets",
+      "binding": "ASSETS"
+    }
+  ],
   /**
    * Smart Placement
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
