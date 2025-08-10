@@ -1,5 +1,5 @@
 /**
- * Core data model types for the Kimmy App household management system
+ * Core data model types for the Hey, Kimmy household management system
  */
 
 // User account types

@@ -5,8 +5,11 @@ export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   email: text('email').unique().notNull(),
+  hashedPassword: text('hashed_password'), // null for children without accounts
   familyId: text('family_id').notNull(),
   role: text('role').default('member'), // 'admin', 'member'
+  age: integer('age'), // for children
+  relationshipToAdmin: text('relationship_to_admin'), // 'self', 'spouse', 'child', etc.
   createdAt: text('created_at').default('CURRENT_TIMESTAMP'),
 });
 
@@ -19,6 +22,7 @@ export const recordTypes = sqliteTable('record_types', {
   fields: text('fields'), // JSON array of field definitions
   icon: text('icon'), // Icon name or emoji
   color: text('color'), // Color for the record type
+  allowPrivate: integer('allow_private').default(0), // 0 = no privacy option, 1 = privacy option available
   createdBy: integer('created_by').references(() => users.id),
   createdAt: text('created_at').default('CURRENT_TIMESTAMP'),
 });

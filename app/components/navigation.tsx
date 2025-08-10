@@ -37,7 +37,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, member, cat
             <BreadcrumbLink asChild>
               <Link to="/" className="flex items-center gap-2">
                 {getIcon('home')}
-                <span className="hidden sm:inline">Kimmy App</span>
+                <span className="hidden sm:inline">Hey, Kimmy</span>
                 <span className="sm:hidden">Home</span>
               </Link>
             </BreadcrumbLink>

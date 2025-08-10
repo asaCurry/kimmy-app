@@ -9,6 +9,7 @@ import {
 
 import type { Route } from "./+types/root";
 import { AuthProvider } from "~/contexts/auth-context";
+import { HouseholdProvider } from "~/contexts/household-context";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -45,7 +46,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <AuthProvider>
-      <Outlet />
+      <HouseholdProvider>
+        <Outlet />
+      </HouseholdProvider>
     </AuthProvider>
   );
 }

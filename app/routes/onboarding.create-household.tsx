@@ -1,38 +1,108 @@
 import type { Route } from "./+types/onboarding.create-household";
 import * as React from "react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useActionData, useNavigation } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Form, FormField, FormLabel, FormInput, FormError, FormDescription } from "~/components/ui/form";
 import { ArrowLeft, Home, Users } from "lucide-react";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
-import { authAPI } from "~/lib/auth";
+import { useHousehold } from "~/contexts/household-context";
+import { createAuthAPI } from "~/lib/auth-db";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Create Household - Kimmy App" },
+    { title: "Create Household - Hey, Kimmy" },
     { name: "description", content: "Set up your household and become the administrator" },
   ];
 }
 
+export async function action({ request, context }: Route.ActionArgs) {
+  try {
+    const env = (context.cloudflare as any)?.env;
+    
+    if (!env?.DB) {
+      throw new Response('Database not available', { status: 500 });
+    }
+
+    const formData = await request.formData();
+    const householdName = formData.get('householdName') as string;
+    const adminFirstName = formData.get('adminFirstName') as string;
+    const adminLastName = formData.get('adminLastName') as string;
+
+    // Validation
+    if (!householdName || !adminFirstName || !adminLastName) {
+      return { error: 'All fields are required' };
+    }
+
+    const authAPI = createAuthAPI(env);
+    const session = await authAPI.createHousehold({
+      name: householdName,
+      adminFirstName,
+      adminLastName,
+      adminEmail: 'placeholder@email.com', // This should come from the session
+    });
+
+    // Return success with session data
+    return { success: true, session };
+  } catch (error) {
+    console.error('Household creation action error:', error);
+    
+    if (error instanceof Response) {
+      throw error;
+    }
+    
+    return { 
+      error: error instanceof Error ? error.message : 'Household creation failed' 
+    };
+  }
+}
+
 const CreateHousehold: React.FC<Route.ComponentProps> = () => {
   const navigate = useNavigate();
-  const { updateSession } = useAuth();
+  const { updateSession, session } = useAuth();
+  const { addAdminMember } = useHousehold();
+  const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
   const [formData, setFormData] = useState({
     householdName: "",
     adminFirstName: "",
     adminLastName: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle action data changes
+  useEffect(() => {
+    if (actionData?.success && actionData.session) {
+      updateSession(actionData.session);
+      
+      // Create the admin member in the household
+      addAdminMember(
+        actionData.session.currentFamilyId,
+        actionData.session.userId,
+        {
+          firstName: formData.adminFirstName,
+          lastName: formData.adminLastName,
+          email: actionData.session.email,
+        }
+      );
+      
+      // Navigate to main app
+      navigate("/");
+    } else if (actionData?.error) {
+      setErrors({ submit: actionData.error });
+    }
+  }, [actionData, updateSession, addAdminMember, navigate, formData]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
+    }
+    if (errors.submit) {
+      setErrors(prev => ({ ...prev, submit: "" }));
     }
   };
 
@@ -56,32 +126,13 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+    // Don't prevent default - let the form submit naturally to the action
     if (!validateForm()) {
+      e.preventDefault();
       return;
     }
 
-    setIsSubmitting(true);
-    
-    try {
-      const updatedSession = await authAPI.createHousehold({
-        name: formData.householdName,
-        adminFirstName: formData.adminFirstName,
-        adminLastName: formData.adminLastName,
-      });
-      
-      // Update the auth context with new household
-      updateSession(updatedSession);
-      
-      // Navigate to main app
-      navigate("/");
-    } catch (error) {
-      console.error("Household creation failed:", error);
-      setErrors({ submit: error instanceof Error ? error.message : "Household creation failed" });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Form will submit naturally to the action
   };
 
   const generateInviteCode = () => {
@@ -119,11 +170,18 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
             <CardTitle className="text-xl text-slate-100">Household Setup</CardTitle>
           </CardHeader>
           <CardContent>
-            <Form onSubmit={handleSubmit}>
+            <form method="post" onSubmit={handleSubmit} className="space-y-6">
+              {errors.submit && (
+                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <p className="text-sm text-red-400">{errors.submit}</p>
+                </div>
+              )}
+              
               <FormField>
                 <FormLabel htmlFor="householdName" required>Household Name</FormLabel>
                 <FormInput
                   id="householdName"
+                  name="householdName"
                   type="text"
                   value={formData.householdName}
                   onChange={(e) => handleInputChange("householdName", e.target.value)}
@@ -161,6 +219,7 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
                     <FormLabel htmlFor="adminFirstName" required>First Name</FormLabel>
                     <FormInput
                       id="adminFirstName"
+                      name="adminFirstName"
                       type="text"
                       value={formData.adminFirstName}
                       onChange={(e) => handleInputChange("adminFirstName", e.target.value)}
@@ -173,6 +232,7 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
                     <FormLabel htmlFor="adminLastName" required>Last Name</FormLabel>
                     <FormInput
                       id="adminLastName"
+                      name="adminLastName"
                       type="text"
                       value={formData.adminLastName}
                       onChange={(e) => handleInputChange("adminLastName", e.target.value)}
@@ -186,10 +246,10 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
               <div className="flex flex-col space-y-3 pt-6">
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting}
+                  disabled={navigation.state === "submitting"}
                   className="w-full bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600"
                 >
-                  {isSubmitting ? "Creating Household..." : "Create Household"}
+                  {navigation.state === "submitting" ? "Creating Household..." : "Create Household"}
                 </Button>
                 
                 <Button 
@@ -201,7 +261,7 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
                   Cancel
                 </Button>
               </div>
-            </Form>
+            </form>
           </CardContent>
         </Card>
 

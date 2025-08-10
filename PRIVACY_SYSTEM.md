@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Kimmy App privacy system provides flexible record visibility while maintaining household collaboration as the default behavior.
+The Hey, Kimmy privacy system provides flexible record visibility while maintaining household collaboration as the default behavior.
 
 ## Privacy Model
 

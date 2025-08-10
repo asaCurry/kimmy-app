@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Kimmy App now includes a complete authentication system with session management, route protection, and seamless user flows.
+The Hey, Kimmy now includes a complete authentication system with session management, route protection, and seamless user flows.
 
 ## 🔐 Authentication Features
 
@@ -212,4 +212,4 @@ The system includes demo accounts for easy testing:
 4. **Session Persistence**: Reload page while authenticated
 5. **Logout Flow**: Sign out and verify session cleanup
 
-This authentication system provides a solid foundation for secure, user-friendly access to the Kimmy App while maintaining the existing UI/UX design principles.
+This authentication system provides a solid foundation for secure, user-friendly access to the Hey, Kimmy while maintaining the existing UI/UX design principles.

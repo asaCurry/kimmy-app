@@ -1,40 +1,86 @@
 import type { Route } from "./+types/login";
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useActionData, useNavigation } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Form, FormField, FormLabel, FormInput, FormError, FormDescription } from "~/components/ui/form";
 import { LogIn, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useAuth } from "~/contexts/auth-context";
-import { getDemoCredentials } from "~/lib/auth";
 import { useFormValidation, VALIDATION_RULE_SETS } from "~/lib/validation";
 import { PageLoading, ButtonLoading } from "~/components/ui/loading";
+import { createAuthAPI } from "~/lib/auth-db";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Sign In - Kimmy App" },
-    { name: "description", content: "Sign in to your Kimmy App account" },
+    { title: "Sign In - Hey, Kimmy" },
+    { name: "description", content: "Sign in to your Hey, Kimmy account" },
   ];
+}
+
+export async function action({ request, context }: Route.ActionArgs) {
+  try {
+    const env = (context.cloudflare as any)?.env;
+    
+    if (!env?.DB) {
+      throw new Response('Database not available', { status: 500 });
+    }
+
+    const formData = await request.formData();
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    if (!email || !password) {
+      return { error: 'Email and password are required' };
+    }
+
+    const authAPI = createAuthAPI(env);
+    const session = await authAPI.login(email, password);
+
+    // Return success with session data
+    return { success: true, session };
+  } catch (error) {
+    console.error('Login action error:', error);
+    
+    if (error instanceof Response) {
+      throw error;
+    }
+    
+    return { 
+      error: error instanceof Error ? error.message : 'Login failed' 
+    };
+  }
 }
 
 const Login: React.FC<Route.ComponentProps> = () => {
   const navigate = useNavigate();
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { updateSession, isAuthenticated, isLoading } = useAuth();
+  const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const { errors, validateAllFields, clearError } = useFormValidation(VALIDATION_RULE_SETS.login);
+  const { errors, validateAllFields, clearError, clearAllErrors } = useFormValidation(VALIDATION_RULE_SETS.login);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
 
+  // Handle action data changes
+  useEffect(() => {
+    if (actionData?.success && actionData.session) {
+      updateSession(actionData.session);
+      navigate("/", { replace: true });
+    } else if (actionData?.error) {
+      setLoginError(actionData.error);
+    }
+  }, [actionData, updateSession, navigate]);
+
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      navigate("/");
+      navigate("/", { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate]);
 
@@ -48,32 +94,23 @@ const Login: React.FC<Route.ComponentProps> = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+    // Don't prevent default - let the form submit naturally to the action
     if (!validateAllFields(formData)) {
+      e.preventDefault();
       return;
     }
 
     setIsSubmitting(true);
     setLoginError("");
     
-    try {
-      await login(formData.email, formData.password);
-      // Navigation will be handled by the useEffect above
-    } catch (error) {
-      setLoginError(error instanceof Error ? error.message : "Login failed");
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Form will submit naturally to the action
   };
 
   const handleDemoLogin = (credentials: { email: string; password: string }) => {
     setFormData(credentials);
-    setErrors({});
+    clearAllErrors();
     setLoginError("");
   };
-
-  const demoCredentials = getDemoCredentials();
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -81,7 +118,7 @@ const Login: React.FC<Route.ComponentProps> = () => {
   }
 
   return (
-    <PageLayout maxWidth="2xl">
+    <PageLayout maxWidth="2xl" showFooter={false}>
       <div className="max-w-md mx-auto">
         <PageHeader
           title="Welcome Back"
@@ -96,11 +133,11 @@ const Login: React.FC<Route.ComponentProps> = () => {
             <CardTitle className="text-xl text-slate-100">Sign In</CardTitle>
           </CardHeader>
           <CardContent>
-            <Form onSubmit={handleSubmit}>
-              {loginError && (
+            <form method="post" onSubmit={handleSubmit} className="space-y-6">
+              {(loginError || actionData?.error) && (
                 <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
-                  <p className="text-sm text-red-400">{loginError}</p>
+                  <p className="text-sm text-red-400">{loginError || actionData?.error}</p>
                 </div>
               )}
 
@@ -108,6 +145,7 @@ const Login: React.FC<Route.ComponentProps> = () => {
                 <FormLabel htmlFor="email" required>Email Address</FormLabel>
                 <FormInput
                   id="email"
+                  name="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
@@ -122,6 +160,7 @@ const Login: React.FC<Route.ComponentProps> = () => {
                 <div className="relative">
                   <FormInput
                     id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
@@ -143,15 +182,15 @@ const Login: React.FC<Route.ComponentProps> = () => {
               <div className="flex flex-col space-y-3 pt-4">
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || navigation.state === "submitting"}
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                 >
-                  <ButtonLoading isLoading={isSubmitting} loadingText="Signing In...">
+                  <ButtonLoading isLoading={isSubmitting || navigation.state === "submitting"} loadingText="Signing In...">
                     Sign In
                   </ButtonLoading>
                 </Button>
               </div>
-            </Form>
+            </form>
 
             <div className="mt-6 text-center">
               <p className="text-slate-400 text-sm">
@@ -164,24 +203,18 @@ const Login: React.FC<Route.ComponentProps> = () => {
           </CardContent>
         </Card>
 
-        {/* Demo Credentials */}
+        {/* Login Help */}
         <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-          <h4 className="text-sm font-medium text-blue-400 mb-3">Demo Accounts</h4>
-          <div className="space-y-2">
-            {demoCredentials.map((cred, index) => (
-              <button
-                key={index}
-                onClick={() => handleDemoLogin(cred)}
-                className="w-full text-left p-2 bg-slate-700/30 hover:bg-slate-700/50 rounded text-sm transition-colors"
-              >
-                <div className="text-slate-300">{cred.email}</div>
-                <div className="text-slate-500 text-xs">Password: {cred.password}</div>
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-slate-500 mt-2">
-            Click any demo account to auto-fill the form
+          <h4 className="text-sm font-medium text-blue-400 mb-2">New to Hey, Kimmy?</h4>
+          <p className="text-xs text-slate-400 mb-3">
+            Create an account to get started with managing your family's records.
           </p>
+          <Link 
+            to="/onboarding" 
+            className="inline-flex items-center text-sm text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            Create Account →
+          </Link>
         </div>
       </div>
     </PageLayout>

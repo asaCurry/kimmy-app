@@ -8,7 +8,7 @@ import { UserPlus, Home, ArrowRight } from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Get Started - Kimmy App" },
+    { title: "Get Started - Hey, Kimmy" },
     { name: "description", content: "Create your account and set up your household" },
   ];
 }
@@ -17,7 +17,7 @@ const Onboarding: React.FC<Route.ComponentProps> = () => {
   return (
     <PageLayout>
       <PageHeader
-        title="Welcome to Kimmy App"
+        title="Welcome to Hey, Kimmy"
         subtitle="Let's get you set up with your family records"
       />
 

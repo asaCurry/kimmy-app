@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the account and household modeling system for the Kimmy App, designed to support multi-user households with different permission levels and account types.
+This document outlines the account and household modeling system for the Hey, Kimmy, designed to support multi-user households with different permission levels and account types.
 
 ## Core Concepts
 

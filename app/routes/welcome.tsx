@@ -10,7 +10,7 @@ import { useAuth } from "~/contexts/auth-context";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Welcome to Kimmy App" },
+    { title: "Welcome to Hey, Kimmy" },
     { name: "description", content: "Manage your family's records and notes" },
   ];
 }
@@ -40,12 +40,12 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
   }
 
   return (
-    <PageLayout>
+    <PageLayout showFooter={false}>
       <div className="max-w-4xl mx-auto text-center">
         {/* Hero Section */}
         <div className="mb-12">
           <h1 className="mb-6 text-4xl sm:text-6xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            Welcome to Kimmy App
+            Welcome to Hey, Kimmy
           </h1>
           <p className="text-xl sm:text-2xl text-slate-300 mb-4">
             The simple way to manage your family's records
@@ -89,7 +89,7 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
             </CardHeader>
             <CardContent className="text-center">
               <p className="text-sm text-slate-400 mb-6">
-                New to Kimmy App? Create your account and set up your household.
+                New to Hey, Kimmy? Create your account and set up your household.
               </p>
               <Link to="/onboarding">
                 <Button className="w-full bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600">

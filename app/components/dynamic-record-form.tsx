@@ -37,32 +37,39 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
         </CardHeader>
         <CardContent className="p-4 sm:p-6 pt-0">
           <div className="space-y-3 sm:space-y-4">
-            {recordType.fields.map((field) => (
-              <div key={field.id} className="space-y-2">
-                <label className="text-sm font-medium leading-none text-slate-200">
-                  {field.label} {field.required && <span className="text-red-400">*</span>}
-                </label>
-                <DynamicField field={field} />
-              </div>
-            ))}
+            {/* TODO: Implement dynamic fields based on recordType.fields JSON */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none text-slate-200">
+                Title <span className="text-red-400">*</span>
+              </label>
+              <input 
+                type="text"
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter record title"
+              />
+            </div>
             
-            {recordType.allowPrivate && (
-              <div className="space-y-2 pt-2 border-t border-slate-700">
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="checkbox" 
-                    id="isPrivate"
-                    className="rounded border-slate-600 bg-slate-700/50 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900" 
-                  />
-                  <label htmlFor="isPrivate" className="text-sm text-slate-300">
-                    Make this record private (only visible to you and administrators)
-                  </label>
-                </div>
-                <p className="text-xs text-slate-500">
-                  By default, records are visible to all household members
-                </p>
-              </div>
-            )}
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none text-slate-200">
+                Content
+              </label>
+              <textarea 
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter record content"
+                rows={4}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none text-slate-200">
+                Tags
+              </label>
+              <input 
+                type="text"
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter tags separated by commas"
+              />
+            </div>
             
             <div className="flex flex-col-reverse sm:flex-row justify-end space-y-2 space-y-reverse sm:space-y-0 sm:space-x-2 pt-4">
               <Button 

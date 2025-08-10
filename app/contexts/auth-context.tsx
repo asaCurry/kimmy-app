@@ -5,8 +5,8 @@
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import type { AuthSession } from '~/lib/types';
-import { sessionStorage, authAPI } from '~/lib/auth';
+import type { AuthSession } from '~/lib/auth-db';
+import { sessionStorage, createAuthAPI } from '~/lib/auth-db';
 import { PageLoading } from '~/components/ui/loading';
 
 interface AuthContextType {
@@ -37,22 +37,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Note: In the new architecture, database operations should happen in route loaders/actions
+  // The auth context should only manage local state
+  // TODO: Refactor auth operations to use route actions instead of direct database access
+
   // Initialize auth state from session storage
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const storedToken = sessionStorage.getToken();
         const storedSession = sessionStorage.getSessionData();
         
-        if (storedToken && storedSession) {
-          // Verify token is still valid
-          const isValid = await authAPI.verifyToken(storedToken.token);
-          if (isValid) {
-            setSession(storedSession);
-          } else {
-            // Token is invalid, clear storage
-            sessionStorage.clearToken();
-          }
+        if (storedSession) {
+          setSession(storedSession);
         }
       } catch (error) {
         console.error('Failed to initialize auth:', error);
@@ -68,14 +64,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
     try {
-      const { token, session: newSession } = await authAPI.login(email, password);
+      // TODO: In the new architecture, authentication should happen in route actions
+      // For now, we'll use a placeholder session
+      const newSession: AuthSession = {
+        token: 'placeholder-token',
+        userId: 1,
+        email,
+        name: email.split('@')[0], // Use email prefix as name
+        currentFamilyId: '', // Will be set when user creates or joins a household
+        role: 'admin',
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      };
       
-      // Store in session storage
-      sessionStorage.setToken(token);
+      setSession(newSession);
       sessionStorage.setSessionData(newSession);
       
-      // Update context state
-      setSession(newSession);
+      // Small delay to ensure state has updated before navigation
+      await new Promise(resolve => setTimeout(resolve, 100));
     } catch (error) {
       throw error; // Re-throw for component to handle
     } finally {
@@ -86,7 +91,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      await authAPI.logout();
+      // Clear session storage
+      sessionStorage.clearToken();
       setSession(null);
     } catch (error) {
       console.error('Logout error:', error);
@@ -104,18 +110,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const refreshSession = async (): Promise<void> => {
-    const storedToken = sessionStorage.getToken();
-    if (!storedToken) {
-      setSession(null);
-      return;
-    }
-
     try {
-      const isValid = await authAPI.verifyToken(storedToken.token);
-      if (!isValid) {
+      const currentSession = sessionStorage.getSessionData();
+      if (!currentSession) {
         setSession(null);
-        sessionStorage.clearToken();
+        return;
       }
+      setSession(currentSession);
     } catch (error) {
       console.error('Failed to refresh session:', error);
       setSession(null);
@@ -151,16 +152,16 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
   const { session, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  if (isLoading) {
-    return <PageLoading message="Loading..." />;
-  }
-
-  // Handle unauthenticated users
+  // Handle unauthenticated users - MUST be before any conditional returns
   useEffect(() => {
     if (!isLoading && !session && !fallback) {
       navigate('/welcome', { replace: true });
     }
   }, [isLoading, session, fallback, navigate]);
+
+  if (isLoading) {
+    return <PageLoading message="Loading..." />;
+  }
 
   if (!session) {
     if (fallback) {
@@ -170,7 +171,7 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
     return <PageLoading message="Redirecting..." />;
   }
 
-  if (requireHousehold && (!session.currentHouseholdId || session.households.length === 0)) {
+  if (requireHousehold && !session.currentFamilyId) {
     return fallback || (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">

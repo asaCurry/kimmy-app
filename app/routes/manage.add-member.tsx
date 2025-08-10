@@ -1,13 +1,15 @@
 import type { Route } from "./+types/manage.add-member";
 import * as React from "react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useActionData, useNavigation } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Form, FormField, FormLabel, FormInput, FormSelect, FormError, FormDescription } from "~/components/ui/form";
 import { ArrowLeft, UserPlus, Users } from "lucide-react";
 import { RELATIONSHIP_TYPES } from "~/lib/types";
+import { RequireAuth, useAuth } from "~/contexts/auth-context";
+import { useHousehold } from "~/contexts/household-context";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -16,8 +18,99 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+export async function action({ request, context }: Route.ActionArgs) {
+  try {
+    const env = (context.cloudflare as any)?.env;
+    
+    if (!env?.DB) {
+      throw new Response('Database not available', { status: 500 });
+    }
+
+    const formData = await request.formData();
+    const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
+    const email = formData.get('email') as string;
+    const memberType = formData.get('memberType') as 'adult' | 'child';
+    const relationship = formData.get('relationship') as string;
+    const dateOfBirth = formData.get('dateOfBirth') as string;
+
+    // Validation
+    if (!firstName || !lastName || !relationship) {
+      return { error: 'Required fields are missing' };
+    }
+
+    if (memberType === 'adult' && !email) {
+      return { error: 'Email is required for adult members' };
+    }
+
+    // Get the current user's session to get the family ID
+    // In a real implementation, you'd verify the session token from cookies
+    // For now, we'll use a placeholder approach since the session management
+    // is handled client-side in this architecture
+    
+    // TODO: Implement proper session verification from cookies/headers
+    // For now, we'll use a demo family ID to test the functionality
+    const currentFamilyId = 'demo-family-001';
+    
+    // Import the database utilities
+    const { userDb } = await import('~/lib/db');
+    
+    // Create the member data
+    const memberData = {
+      name: `${firstName} ${lastName}`,
+      email: memberType === 'adult' ? email : `child-${Date.now()}@placeholder.com`, // Children need an email for the database schema
+      familyId: currentFamilyId,
+      role: 'member',
+      relationshipToAdmin: relationship,
+      age: dateOfBirth ? calculateAge(new Date(dateOfBirth)) : undefined,
+    };
+
+    try {
+      // Actually save to database
+      const newMember = await userDb.create(env, memberData);
+      console.log('Successfully created member:', newMember);
+      
+      return { 
+        success: true, 
+        member: { firstName, lastName, email, memberType, relationship, dateOfBirth },
+        newMemberId: newMember.id
+      };
+    } catch (dbError) {
+      console.error('Database error creating member:', dbError);
+      return { error: 'Failed to save member to database' };
+    }
+  } catch (error) {
+    console.error('Add member action error:', error);
+    
+    if (error instanceof Response) {
+      throw error;
+    }
+    
+    return { 
+      error: error instanceof Error ? error.message : 'Failed to add member' 
+    };
+  }
+}
+
+// Helper function to calculate age
+function calculateAge(dateOfBirth: Date): number {
+  const today = new Date();
+  const age = today.getFullYear() - dateOfBirth.getFullYear();
+  const monthDiff = today.getMonth() - dateOfBirth.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateOfBirth.getDate())) {
+    return age - 1;
+  }
+  
+  return age;
+}
+
 const AddMember: React.FC<Route.ComponentProps> = () => {
   const navigate = useNavigate();
+  const { session } = useAuth();
+  const { addMember } = useHousehold();
+  const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
   const [memberType, setMemberType] = useState<'adult' | 'child'>('adult');
   const [formData, setFormData] = useState({
     firstName: "",
@@ -28,6 +121,23 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle action data changes
+  useEffect(() => {
+    if (actionData?.success) {
+      // Show success message briefly before navigating
+      setErrors({});
+      setIsSubmitting(false);
+      
+      // Navigate back to management page on success
+      setTimeout(() => {
+        navigate("/manage");
+      }, 1500);
+    } else if (actionData?.error) {
+      setErrors({ submit: actionData.error });
+      setIsSubmitting(false);
+    }
+  }, [actionData, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -82,29 +192,13 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+    // Don't prevent default - let the form submit naturally to the action
     if (!validateForm()) {
+      e.preventDefault();
       return;
     }
 
-    setIsSubmitting(true);
-    
-    try {
-      // TODO: Implement actual add member API call
-      console.log("Adding member:", { memberType, ...formData });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Navigate back to management page
-      navigate("/manage");
-    } catch (error) {
-      console.error("Failed to add member:", error);
-      // Handle API errors here
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Form will submit naturally to the action
   };
 
   const getRelationshipOptions = () => {
@@ -125,7 +219,8 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
   };
 
   return (
-    <PageLayout maxWidth="2xl">
+    <RequireAuth requireHousehold={true}>
+      <PageLayout maxWidth="2xl">
       <div className="max-w-2xl mx-auto">
         <div className="mb-6">
           <Link 
@@ -190,12 +285,22 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Form onSubmit={handleSubmit}>
+            <form method="post" onSubmit={handleSubmit}>
+              {/* Hidden field for memberType */}
+              <input type="hidden" name="memberType" value={memberType} />
+              
+              {errors.submit && (
+                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <p className="text-sm text-red-400">{errors.submit}</p>
+                </div>
+              )}
+              
               <div className="grid grid-cols-2 gap-4">
                 <FormField>
                   <FormLabel htmlFor="firstName" required>First Name</FormLabel>
                   <FormInput
                     id="firstName"
+                    name="firstName"
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => handleInputChange("firstName", e.target.value)}
@@ -208,6 +313,7 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
                   <FormLabel htmlFor="lastName" required>Last Name</FormLabel>
                   <FormInput
                     id="lastName"
+                    name="lastName"
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => handleInputChange("lastName", e.target.value)}
@@ -222,6 +328,7 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
                   <FormLabel htmlFor="email" required>Email Address</FormLabel>
                   <FormInput
                     id="email"
+                    name="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
@@ -239,6 +346,7 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
                   <FormLabel htmlFor="dateOfBirth">Date of Birth</FormLabel>
                   <FormInput
                     id="dateOfBirth"
+                    name="dateOfBirth"
                     type="date"
                     value={formData.dateOfBirth}
                     onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
@@ -254,6 +362,7 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
                 <FormLabel htmlFor="relationship" required>Relationship</FormLabel>
                 <FormSelect
                   id="relationship"
+                  name="relationship"
                   value={formData.relationship}
                   onChange={(e) => handleInputChange("relationship", e.target.value)}
                 >
@@ -291,19 +400,45 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
                 </ul>
               </div>
 
+              {/* Success Message */}
+              {actionData?.success && (
+                <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4 text-center">
+                  <div className="text-green-400 font-medium mb-2">
+                    ✅ Member Added Successfully!
+                  </div>
+                  <p className="text-green-300 text-sm">
+                    Redirecting to management page...
+                  </p>
+                </div>
+              )}
+
+              {/* Error Message */}
+              {errors.submit && (
+                <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 text-center">
+                  <div className="text-red-400 font-medium mb-2">
+                    ❌ Error Adding Member
+                  </div>
+                  <p className="text-red-300 text-sm">
+                    {errors.submit}
+                  </p>
+                </div>
+              )}
+
               <div className="flex flex-col space-y-3 pt-4">
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || navigation.state === "submitting" || actionData?.success}
                   className={`w-full ${
                     memberType === 'adult' 
                       ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
                       : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
                   }`}
                 >
-                  {isSubmitting 
+                  {navigation.state === "submitting" 
                     ? `Adding ${memberType === 'adult' ? 'Member' : 'Child'}...` 
-                    : `Add ${memberType === 'adult' ? 'Member' : 'Child'}`
+                    : actionData?.success 
+                      ? 'Member Added Successfully!'
+                      : `Add ${memberType === 'adult' ? 'Member' : 'Child'}`
                   }
                 </Button>
                 
@@ -316,11 +451,12 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
                   Cancel
                 </Button>
               </div>
-            </Form>
+            </form>
           </CardContent>
         </Card>
       </div>
     </PageLayout>
+    </RequireAuth>
   );
 };
 
