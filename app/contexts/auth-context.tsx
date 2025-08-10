@@ -2,17 +2,17 @@
  * Authentication context and provider
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { sessionStorage, authApi } from '~/lib/auth-db';
-import { PageLoading } from '~/components/ui/loading';
-import type { AuthSession } from '~/lib/auth-db';
+import * as React from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { PageLoading } from "~/components/ui/loading";
+import { authApi, type AuthSession, sessionStorage } from "~/lib/auth-db";
 
 interface AuthContextType {
   session: AuthSession | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: (navigate?: () => void) => void;
   updateSession: (session: AuthSession) => void;
 }
 
@@ -21,7 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -81,10 +81,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
+  const logout = (navigate?: () => void) => {
+    // Clear all session data
     setSession(null);
     setIsAuthenticated(false);
     sessionStorage.clearSession();
+    
+    // Navigate to login page if callback provided
+    if (navigate) {
+      navigate();
+    }
   };
 
   const value: AuthContextType = {
@@ -116,28 +122,22 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
   requireHousehold = false 
 }) => {
   const { session, isLoading } = useAuth();
-  // const navigate = useNavigate(); // This line was removed as per the new_code
 
-  // Handle unauthenticated users - MUST be before any conditional returns
-  useEffect(() => {
-    if (!isLoading && !session && !fallback) {
-      // navigate('/welcome', { replace: true }); // This line was removed as per the new_code
+  // Handle unauthenticated users - redirect to login
+  if (!isLoading && !session) {
+    if (fallback) {
+      return fallback;
     }
-  }, [isLoading, session, fallback]); // This line was removed as per the new_code
+    // Redirect to login page
+    window.location.href = '/login';
+    return <PageLoading message="Redirecting to login..." />;
+  }
 
   if (isLoading) {
     return <PageLoading message="Loading..." />;
   }
 
-  if (!session) {
-    if (fallback) {
-      return fallback;
-    }
-    // Show loading while redirecting
-    return <PageLoading message="Redirecting..." />;
-  }
-
-  if (requireHousehold && !session.currentHouseholdId) {
+  if (requireHousehold && !session?.currentHouseholdId) {
     return fallback || (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">

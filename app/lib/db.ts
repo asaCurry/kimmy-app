@@ -319,14 +319,25 @@ export const recordDb = {
 // Authentication utilities
 export const authDb = {
   async authenticateUser(env: any, email: string, password: string): Promise<User | null> {
+    console.log('authenticateUser called with:', { email, passwordLength: password?.length });
+    
     try {
+      console.log('authenticateUser - calling userDb.findByEmail...');
       const user = await userDb.findByEmail(env, email);
-      if (!user || !user.hashedPassword) return null;
+      console.log('authenticateUser - userDb.findByEmail result:', user);
+      
+      if (!user || !user.hashedPassword) {
+        console.log('authenticateUser - No user or no hashed password');
+        return null;
+      }
 
+      console.log('authenticateUser - calling userDb.verifyPassword...');
       const isValid = await userDb.verifyPassword(password, user.hashedPassword);
+      console.log('authenticateUser - verifyPassword result:', isValid);
+      
       return isValid ? user : null;
     } catch (error) {
-      console.error('Authentication error:', error);
+      console.error('authenticateUser - Authentication error:', error);
       return null;
     }
   },

@@ -31,8 +31,7 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
   }, [isAuthenticated, session, navigate]);
 
   const handleClearSession = () => {
-    logout();
-    window.location.reload();
+    logout(() => navigate('/login'));
   };
 
   if (isLoading) {

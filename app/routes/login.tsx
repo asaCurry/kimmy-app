@@ -1,6 +1,6 @@
 import type { Route } from "./+types/login";
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useActionData, useNavigation } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -82,6 +82,7 @@ const Login: React.FC<Route.ComponentProps> = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const hasProcessedLogin = useRef(false);
 
   // Handle authentication state and redirects
   useEffect(() => {
@@ -91,14 +92,17 @@ const Login: React.FC<Route.ComponentProps> = () => {
       return;
     }
     
-    // If login was successful, update session and redirect
-    if (actionData?.success && actionData.session) {
+    // If login was successful and we haven't processed it yet, handle session update and redirect
+    if (actionData?.success && actionData.session && !hasProcessedLogin.current) {
+      hasProcessedLogin.current = true;
+      // Update session in auth context
       updateSession(actionData.session);
-      // Don't navigate here - let the isAuthenticated effect handle it
+      // Navigate to home after successful login
+      navigate("/", { replace: true });
     } else if (actionData?.error) {
       setLoginError(actionData.error);
     }
-  }, [actionData, isAuthenticated, isLoading, updateSession, navigate]);
+  }, [actionData, isAuthenticated, isLoading, navigate]); // Removed updateSession from dependencies
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -110,7 +114,8 @@ const Login: React.FC<Route.ComponentProps> = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    // Don't prevent default - let the form submit naturally to the action
+    // e.preventDefault();
     clearAllErrors();
     setLoginError("");
     

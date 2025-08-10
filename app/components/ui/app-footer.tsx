@@ -4,7 +4,7 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { LogOut, Shield, Heart, ExternalLink, Settings } from "lucide-react";
 import { Button } from "./button";
 import { useAuth } from "~/contexts/auth-context";
@@ -16,12 +16,14 @@ interface AppFooterProps {
 
 export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
   const { session, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await logout();
+      // Call logout with navigation callback to redirect to login
+      logout(() => navigate('/login'));
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {

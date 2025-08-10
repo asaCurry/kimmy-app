@@ -13,7 +13,6 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   try {
     // Check if user has a valid session first
     const cookieHeader = request.headers.get('cookie');
-    let sessionData = null;
     
     if (cookieHeader) {
       const cookies = parseCookies(cookieHeader);
@@ -105,7 +104,7 @@ export default function Index() {
             </button>
             
             <button
-              onClick={logout}
+              onClick={() => logout(() => navigate('/login'))}
               className="px-4 py-2 border border-slate-600 hover:bg-slate-800 text-slate-300 rounded-lg font-medium transition-colors"
             >
               Logout

@@ -94,9 +94,25 @@ export const sessionStorage = {
 
   clearSession(): void {
     if (typeof window !== 'undefined') {
+      // Clear sessionStorage
       window.sessionStorage.removeItem('kimmy_auth_session');
-      // Clear cookie
-      document.cookie = 'kimmy_auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      
+      // Clear all possible cookie variations with different attributes
+      const cookieNames = [
+        'kimmy_auth_session',
+        'kimmy_auth_session=',
+        'kimmy_auth_session=;',
+      ];
+      
+      cookieNames.forEach(cookieName => {
+        // Clear with different path and domain combinations
+        document.cookie = `${cookieName}; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        document.cookie = `${cookieName}; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        document.cookie = `${cookieName}; path=/; domain=.${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      });
+      
+      // Also try to clear with Max-Age=0
+      document.cookie = 'kimmy_auth_session=; path=/; Max-Age=0';
     }
   },
 };
@@ -104,13 +120,23 @@ export const sessionStorage = {
 // Authentication API functions
 export const authApi = {
   async login(env: any, email: string, password: string): Promise<AuthSession | null> {
+    console.log('authApi.login called with:', { email, passwordLength: password?.length });
+    console.log('authApi.login - env.DB available:', !!env?.DB);
+    
     if (!isDatabaseAvailable(env)) {
+      console.error('authApi.login - Database not available');
       throw new Error('Database not available');
     }
 
     try {
+      console.log('authApi.login - calling authDb.authenticateUser...');
       const user = await authDb.authenticateUser(env, email, password);
-      if (!user) return null;
+      console.log('authApi.login - authDb.authenticateUser result:', user);
+      
+      if (!user) {
+        console.log('authApi.login - No user returned from authenticateUser');
+        return null;
+      }
 
       // Create session
       const session: AuthSession = {
@@ -123,9 +149,10 @@ export const authApi = {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
 
+      console.log('authApi.login - Created session:', session);
       return session;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('authApi.login - Login failed:', error);
       return null;
     }
   },
