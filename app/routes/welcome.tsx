@@ -16,15 +16,24 @@ export function meta({}: Route.MetaArgs) {
 }
 
 const Welcome: React.FC<Route.ComponentProps> = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, session, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect authenticated users to the main app
+  // Debug logging
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      navigate("/");
+    if (isAuthenticated && session) {
+      if (session.currentHouseholdId) {
+        navigate('/');
+      } else {
+        navigate('/onboarding/create-household');
+      }
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, session, navigate]);
+
+  const handleClearSession = () => {
+    logout();
+    window.location.reload();
+  };
 
   if (isLoading) {
     return (
@@ -33,6 +42,20 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
             <p className="text-slate-300">Loading...</p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // If user is authenticated, show loading while redirecting
+  if (isAuthenticated && session) {
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-slate-300">Redirecting...</p>
           </div>
         </div>
       </PageLayout>

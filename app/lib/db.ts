@@ -3,11 +3,22 @@ import { createDatabase } from '../../db';
 import type { Database } from '../../db';
 import * as schema from '../../db/schema';
 import type { User, NewUser, RecordType, NewRecordType, Record, NewRecord } from '../../db/schema';
+import { isDatabaseAvailable } from './utils';
 
 /**
  * Database utilities for user, household, and record operations
  * Following the correct pattern: each function creates its own database instance
  */
+
+/**
+ * Helper function to ensure database is available and create database instance
+ */
+function ensureDatabase(env: any): Database {
+  if (!isDatabaseAvailable(env)) {
+    throw new Error('Database not available');
+  }
+  return createDatabase(env.DB);
+}
 
 // User operations
 export const userDb = {
@@ -20,11 +31,7 @@ export const userDb = {
     age?: number;
     relationshipToAdmin?: string;
   }): Promise<User> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     // Simple password hashing - in production, use proper bcrypt
     const hashedPassword = userData.password ? 
@@ -50,11 +57,7 @@ export const userDb = {
   },
 
   async findByEmail(env: any, email: string): Promise<User | undefined> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     try {
       const result = await db
@@ -71,11 +74,7 @@ export const userDb = {
   },
 
   async findById(env: any, id: number): Promise<User | undefined> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     try {
       const result = await db
@@ -92,11 +91,7 @@ export const userDb = {
   },
 
   async findByFamilyId(env: any, familyId: string): Promise<User[]> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     try {
       return await db
@@ -109,18 +104,8 @@ export const userDb = {
     }
   },
 
-  async verifyPassword(password: string, hashedPassword: string | null): Promise<boolean> {
-    if (!hashedPassword) return false;
-    // Simple password verification - in production, use proper bcrypt
-    return hashedPassword === `hashed_${password}`;
-  },
-
   async updateRole(env: any, userId: number, role: string): Promise<void> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     try {
       await db
@@ -131,6 +116,12 @@ export const userDb = {
       console.error('Failed to update user role:', error);
       throw new Error('Failed to update user role');
     }
+  },
+
+  async verifyPassword(password: string, hashedPassword: string | null): Promise<boolean> {
+    if (!hashedPassword) return false;
+    // Simple comparison - in production, use proper bcrypt comparison
+    return hashedPassword === `hashed_${password}`;
   },
 };
 
@@ -146,11 +137,7 @@ export const familyDb = {
   },
 
   async getAdmins(env: any, familyId: string): Promise<User[]> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     try {
       return await db
@@ -196,11 +183,7 @@ export const recordTypeDb = {
     createdBy: number;
     fields?: string;
   }): Promise<RecordType> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     const newRecordType: NewRecordType = {
       name: recordTypeData.name,
@@ -221,11 +204,7 @@ export const recordTypeDb = {
   },
 
   async findByFamilyId(env: any, familyId: string): Promise<RecordType[]> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     try {
       return await db
@@ -239,11 +218,7 @@ export const recordTypeDb = {
   },
 
   async findById(env: any, id: number): Promise<RecordType | undefined> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     try {
       const result = await db
@@ -271,11 +246,7 @@ export const recordDb = {
     tags?: string;
     attachments?: string;
   }): Promise<Record> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     const newRecord: NewRecord = {
       title: recordData.title,
@@ -297,11 +268,7 @@ export const recordDb = {
   },
 
   async findByFamilyId(env: any, familyId: string): Promise<Record[]> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     try {
       return await db
@@ -315,11 +282,7 @@ export const recordDb = {
   },
 
   async findByRecordType(env: any, recordTypeId: number, familyId: string): Promise<Record[]> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     try {
       return await db
@@ -336,11 +299,7 @@ export const recordDb = {
   },
 
   async findById(env: any, id: number): Promise<Record | undefined> {
-    if (!env?.DB) {
-      throw new Error('Database not available');
-    }
-    
-    const db = createDatabase(env.DB);
+    const db = ensureDatabase(env);
     
     try {
       const result = await db
@@ -352,7 +311,7 @@ export const recordDb = {
       return result[0];
     } catch (error) {
       console.error('Failed to find record by ID:', error);
-      throw new Error('Failed to find record');
+      throw new Error('Failed to find records');
     }
   },
 };

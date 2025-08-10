@@ -3,8 +3,12 @@ import { createRequestHandler } from "react-router";
 
 const app = new Hono();
 
-// Add more routes here
+// Handle Chrome DevTools well-known route to prevent console errors
+app.get("/.well-known/appspecific/com.chrome.devtools.json", (c) => {
+  return c.json({ message: "Chrome DevTools integration not available" }, 404);
+});
 
+// React Router handles all other routes
 app.all("*", (c) => {
   const requestHandler = createRequestHandler(
     () => import("virtual:react-router/server-build"),

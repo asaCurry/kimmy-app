@@ -23,7 +23,4 @@ export default [
   route("member/:memberId", "routes/member.$memberId.tsx"),
   route("member/:memberId/category/:category", "routes/member.$memberId.category.$category.tsx"),
   route("member/:memberId/category/:category/record/:recordTypeId", "routes/member.$memberId.category.$category.record.$recordTypeId.tsx"),
-  
-  // API routes
-  route("api/family/:familyId/members", "routes/api.family.$familyId.members.tsx"),
 ] satisfies RouteConfig;

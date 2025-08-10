@@ -1,15 +1,14 @@
 import type { Route } from "./+types/onboarding.create-household";
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useActionData, useNavigation } from "react-router";
+import { Link, useNavigate, useActionData, useNavigation, Form } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { Form, FormField, FormLabel, FormInput, FormError, FormDescription } from "~/components/ui/form";
+import { FormField, FormLabel, FormInput, FormError, FormDescription } from "~/components/ui/form";
 import { ArrowLeft, Home, Users } from "lucide-react";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
-import { useHousehold } from "~/contexts/household-context";
-import { createAuthAPI } from "~/lib/auth-db";
+import { authApi } from "~/lib/auth-db";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -36,13 +35,15 @@ export async function action({ request, context }: Route.ActionArgs) {
       return { error: 'All fields are required' };
     }
 
-    const authAPI = createAuthAPI(env);
-    const session = await authAPI.createHousehold({
+    const session = await authApi.createHousehold(env, {
       name: householdName,
       adminFirstName,
       adminLastName,
-      adminEmail: 'placeholder@email.com', // This should come from the session
     });
+
+    if (!session) {
+      return { error: 'Household creation failed' };
+    }
 
     // Return success with session data
     return { success: true, session };
@@ -62,7 +63,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 const CreateHousehold: React.FC<Route.ComponentProps> = () => {
   const navigate = useNavigate();
   const { updateSession, session } = useAuth();
-  const { addAdminMember } = useHousehold();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const [formData, setFormData] = useState({
@@ -78,22 +78,14 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
       updateSession(actionData.session);
       
       // Create the admin member in the household
-      addAdminMember(
-        actionData.session.currentFamilyId,
-        actionData.session.userId,
-        {
-          firstName: formData.adminFirstName,
-          lastName: formData.adminLastName,
-          email: actionData.session.email,
-        }
-      );
+      // This logic is now handled by the server-side action
       
       // Navigate to main app
       navigate("/");
     } else if (actionData?.error) {
       setErrors({ submit: actionData.error });
     }
-  }, [actionData, updateSession, addAdminMember, navigate, formData]);
+  }, [actionData, updateSession, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -188,9 +180,6 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
                   placeholder="e.g., The Johnson Family"
                 />
                 {errors.householdName && <FormError>{errors.householdName}</FormError>}
-                <FormDescription>
-                  This will be the name displayed for your household
-                </FormDescription>
               </FormField>
 
               {formData.householdName && (

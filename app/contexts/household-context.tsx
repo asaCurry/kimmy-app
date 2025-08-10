@@ -127,14 +127,8 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
   }, [familyMembers]);
 
   const refreshMembers = useCallback(async (familyId: string): Promise<void> => {
-    try {
-      // Note: In the new architecture, this should be handled by route loaders
-      // The loader will fetch members and pass them to the component
-      // This function is kept for backward compatibility but should be refactored
-      console.log('refreshMembers called - should be handled by route loader');
-    } catch (error) {
-      console.error('Failed to refresh members:', error);
-    }
+    // TODO: In the new architecture, this should be handled by route loaders
+    // For now, just do nothing - the loader will handle member fetching
   }, []);
 
   const value: HouseholdContextType = {

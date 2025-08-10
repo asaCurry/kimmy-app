@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Form, FormField, FormLabel, FormInput, FormError, FormDescription } from "~/components/ui/form";
 import { ArrowLeft, UserPlus } from "lucide-react";
-import { createAuthAPI } from "~/lib/auth-db";
+import { authApi } from "~/lib/auth-db";
 import { useAuth } from "~/contexts/auth-context";
 
 export function meta({}: Route.MetaArgs) {
@@ -66,13 +66,15 @@ export async function action({ request, context }: Route.ActionArgs) {
     }
 
     console.log('✅ Validation passed, creating account...');
-    const authAPI = createAuthAPI(env);
-    const session = await authAPI.createAccount({
-      firstName,
-      lastName,
+    const session = await authApi.createAccount(env, {
+      name: `${firstName} ${lastName}`,
       email,
       password,
     });
+
+    if (!session) {
+      return { error: 'Account creation failed' };
+    }
 
     console.log('✅ Account created successfully:', { userId: session.userId, email: session.email });
     // Return success with session data

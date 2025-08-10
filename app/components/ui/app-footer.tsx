@@ -48,14 +48,9 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
             <p className="text-sm text-slate-400">
               Securely manage your family's records and information in one place.
             </p>
-            {session?.currentFamilyId && (
-              <div className="text-sm">
-                <p className="text-slate-300 font-medium">
-                  Family ID: {session.currentFamilyId}
-                </p>
-                <p className="text-slate-500">
-                  Role: {session.role}
-                </p>
+            {session?.currentHouseholdId && (
+              <div className="text-xs text-slate-400">
+                Household ID: {session.currentHouseholdId}
               </div>
             )}
           </div>

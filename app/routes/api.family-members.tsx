@@ -1,6 +1,5 @@
-import type { Route } from '@remix-run/cloudflare';
-import { json } from '@remix-run/cloudflare';
-import { userDb } from '~/lib/db';
+import type { Route } from "./+types/api.family-members";
+import { userDb } from "~/lib/db";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   try {
@@ -10,38 +9,53 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       throw new Response('Database not available', { status: 500 });
     }
 
-    const url = new URL(request.url);
-    const familyId = url.searchParams.get('familyId');
-
+    // Extract family ID from session instead of URL
+    const cookieHeader = request.headers.get('cookie');
+    let familyId = null;
+    
+    if (cookieHeader) {
+      try {
+        const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+          const [key, value] = cookie.trim().split('=');
+          acc[key] = value;
+          return acc;
+        }, {} as Record<string, string>);
+        
+        const sessionData = cookies['kimmy_auth_session'];
+        if (sessionData) {
+          const session = JSON.parse(decodeURIComponent(sessionData));
+          familyId = session.currentHouseholdId || null;
+        }
+      } catch (error) {
+        console.error('Failed to parse session cookie:', error);
+      }
+    }
+    
     if (!familyId) {
-      return json({ error: 'Family ID is required' }, { status: 400 });
+      throw new Response('Family ID not found in session', { status: 400 });
     }
 
-    // Fetch all family members from the database
-    const members = await userDb.findByFamilyId(env, familyId);
+    // Fetch family members from database
+    const dbMembers = await userDb.findByFamilyId(env, familyId);
     
-    console.log(`Found ${members.length} members for family ${familyId}:`, members);
-
-    return json({ 
-      success: true,
-      members: members.map(member => ({
-        id: member.id,
-        name: member.name,
-        email: member.email,
-        role: member.role,
-        age: member.age,
-        relationshipToAdmin: member.relationshipToAdmin,
-        createdAt: member.createdAt
-      }))
-    });
-
+    // Transform database User type to FamilyMember type
+    const members = dbMembers.map(member => ({
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      role: (member.role || 'member') as 'admin' | 'member',
+      age: member.age,
+      relationshipToAdmin: member.relationshipToAdmin
+    }));
+    
+    return { members };
   } catch (error) {
-    console.error('Error fetching family members:', error);
+    console.error('Family members API error:', error);
     
     if (error instanceof Response) {
       throw error;
     }
     
-    return json({ error: 'Failed to fetch family members' }, { status: 500 });
+    throw new Response('Failed to fetch family members', { status: 500 });
   }
 }

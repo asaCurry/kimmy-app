@@ -1,26 +1,58 @@
 import type { Route } from "./+types/manage.add-member";
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useActionData, useNavigation } from "react-router";
+import { Link, useNavigate, useActionData, useNavigation, Form, useLoaderData, redirect } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { Form, FormField, FormLabel, FormInput, FormSelect, FormError, FormDescription } from "~/components/ui/form";
+import { FormField, FormLabel, FormInput, FormSelect, FormError, FormDescription } from "~/components/ui/form";
 import { ArrowLeft, UserPlus, Users } from "lucide-react";
 import { RELATIONSHIP_TYPES } from "~/lib/types";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
-import { useHousehold } from "~/contexts/household-context";
+import { loadFamilyData } from "~/lib/loader-helpers";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Add Member - Household Management" },
+    { title: "Add Family Member - Kimmy" },
     { name: "description", content: "Add a new member to your household" },
   ];
 }
 
+export async function loader({ request, context }: Route.LoaderArgs) {
+  try {
+    const env = (context as any).cloudflare?.env;
+    
+    if (!env?.DB) {
+      throw new Response('Database not available', { status: 500 });
+    }
+
+    // Load family data from URL params
+    const { familyId, familyMembers } = await loadFamilyData(request, env);
+    
+    // If no family data found, redirect to welcome
+    if (!familyId) {
+      console.log('❌ No family data found, redirecting to welcome');
+      throw redirect('/welcome');
+    }
+
+    return { 
+      familyId, 
+      familyMembers 
+    };
+  } catch (error) {
+    console.error('Add member loader error:', error);
+    
+    if (error instanceof Response) {
+      throw error;
+    }
+    
+    throw new Response('Failed to load family data', { status: 500 });
+  }
+}
+
 export async function action({ request, context }: Route.ActionArgs) {
   try {
-    const env = (context.cloudflare as any)?.env;
+    const env = (context as any).cloudflare?.env;
     
     if (!env?.DB) {
       throw new Response('Database not available', { status: 500 });
@@ -33,6 +65,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     const memberType = formData.get('memberType') as 'adult' | 'child';
     const relationship = formData.get('relationship') as string;
     const dateOfBirth = formData.get('dateOfBirth') as string;
+    const currentHouseholdId = formData.get('currentHouseholdId') as string;
 
     // Validation
     if (!firstName || !lastName || !relationship) {
@@ -43,15 +76,14 @@ export async function action({ request, context }: Route.ActionArgs) {
       return { error: 'Email is required for adult members' };
     }
 
-    // Get the current user's session to get the family ID
-    // In a real implementation, you'd verify the session token from cookies
-    // For now, we'll use a placeholder approach since the session management
-    // is handled client-side in this architecture
-    
-    // TODO: Implement proper session verification from cookies/headers
-    // For now, we'll use a demo family ID to test the functionality
-    const currentFamilyId = 'demo-family-001';
-    
+    if (!currentHouseholdId) {
+      return { error: 'Household ID is required' };
+    }
+
+    if (!currentHouseholdId.trim()) {
+      return { error: 'Household ID cannot be empty' };
+    }
+
     // Import the database utilities
     const { userDb } = await import('~/lib/db');
     
@@ -59,7 +91,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     const memberData = {
       name: `${firstName} ${lastName}`,
       email: memberType === 'adult' ? email : `child-${Date.now()}@placeholder.com`, // Children need an email for the database schema
-      familyId: currentFamilyId,
+      familyId: currentHouseholdId,
       role: 'member',
       relationshipToAdmin: relationship,
       age: dateOfBirth ? calculateAge(new Date(dateOfBirth)) : undefined,
@@ -108,9 +140,9 @@ function calculateAge(dateOfBirth: Date): number {
 const AddMember: React.FC<Route.ComponentProps> = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
-  const { addMember } = useHousehold();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
+  const { familyId, familyMembers } = useLoaderData<typeof loader>();
   const [memberType, setMemberType] = useState<'adult' | 'child'>('adult');
   const [formData, setFormData] = useState({
     firstName: "",
@@ -120,14 +152,13 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
     relationship: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  // Handle action data changes
+  // Handle action data changes (for backward compatibility)
   useEffect(() => {
     if (actionData?.success) {
-      // Show success message briefly before navigating
+      setIsSuccess(true);
       setErrors({});
-      setIsSubmitting(false);
       
       // Navigate back to management page on success
       setTimeout(() => {
@@ -135,9 +166,25 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
       }, 1500);
     } else if (actionData?.error) {
       setErrors({ submit: actionData.error });
-      setIsSubmitting(false);
     }
   }, [actionData, navigate]);
+
+  // If we have a family ID but no loader data, redirect to include the family ID in the URL
+  if (session?.currentHouseholdId && !familyId) {
+    const redirectUrl = `/manage/add-member?familyId=${encodeURIComponent(session.currentHouseholdId)}`;
+    console.log('🔄 Add member route redirecting to include family ID:', redirectUrl);
+    window.location.href = redirectUrl;
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-slate-300">Redirecting...</p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -189,16 +236,6 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    // Don't prevent default - let the form submit naturally to the action
-    if (!validateForm()) {
-      e.preventDefault();
-      return;
-    }
-
-    // Form will submit naturally to the action
   };
 
   const getRelationshipOptions = () => {
@@ -285,9 +322,10 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form method="post" onSubmit={handleSubmit}>
-              {/* Hidden field for memberType */}
+            <Form method="post">
+              {/* Hidden fields for form data */}
               <input type="hidden" name="memberType" value={memberType} />
+              <input type="hidden" name="currentHouseholdId" value={familyId || ''} />
               
               {errors.submit && (
                 <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
@@ -336,7 +374,7 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
                   />
                   {errors.email && <FormError>{errors.email}</FormError>}
                   <FormDescription>
-                    Adult members need an email address to receive invitations
+                    Email is required for adult members to access the system
                   </FormDescription>
                 </FormField>
               )}
@@ -353,7 +391,7 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
                   />
                   {errors.dateOfBirth && <FormError>{errors.dateOfBirth}</FormError>}
                   <FormDescription>
-                    Optional, but helpful for age-related records and reminders
+                    Date of birth helps with age-appropriate features and records
                   </FormDescription>
                 </FormField>
               )}
@@ -374,76 +412,19 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
                   ))}
                 </FormSelect>
                 {errors.relationship && <FormError>{errors.relationship}</FormError>}
-                <FormDescription>
-                  How is this person related to you (the administrator)?
-                </FormDescription>
               </FormField>
 
-              <div className="bg-slate-700/30 p-4 rounded-lg border border-slate-600">
-                <h4 className="text-sm font-medium text-slate-200 mb-2">
-                  {memberType === 'adult' ? 'Adult Member Info:' : 'Child Info:'}
-                </h4>
-                <ul className="text-sm text-slate-400 space-y-1">
-                  {memberType === 'adult' ? (
-                    <>
-                      <li>• Will receive an invitation email to join</li>
-                      <li>• Can create and manage their own records</li>
-                      <li>• Can view all household records</li>
-                    </>
-                  ) : (
-                    <>
-                      <li>• No account needed - managed by adults</li>
-                      <li>• Adults can create records for them</li>
-                      <li>• Records visible to all household members</li>
-                    </>
-                  )}
-                </ul>
-              </div>
-
-              {/* Success Message */}
-              {actionData?.success && (
-                <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4 text-center">
-                  <div className="text-green-400 font-medium mb-2">
-                    ✅ Member Added Successfully!
-                  </div>
-                  <p className="text-green-300 text-sm">
-                    Redirecting to management page...
-                  </p>
-                </div>
-              )}
-
-              {/* Error Message */}
-              {errors.submit && (
-                <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 text-center">
-                  <div className="text-red-400 font-medium mb-2">
-                    ❌ Error Adding Member
-                  </div>
-                  <p className="text-red-300 text-sm">
-                    {errors.submit}
-                  </p>
-                </div>
-              )}
-
-              <div className="flex flex-col space-y-3 pt-4">
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting || navigation.state === "submitting" || actionData?.success}
-                  className={`w-full ${
-                    memberType === 'adult' 
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
-                      : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
-                  }`}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="submit"
+                  disabled={navigation.state === "submitting"}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                 >
-                  {navigation.state === "submitting" 
-                    ? `Adding ${memberType === 'adult' ? 'Member' : 'Child'}...` 
-                    : actionData?.success 
-                      ? 'Member Added Successfully!'
-                      : `Add ${memberType === 'adult' ? 'Member' : 'Child'}`
-                  }
+                  {navigation.state === "submitting" ? "Adding Member..." : "Add Member"}
                 </Button>
                 
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   variant="outline"
                   onClick={() => navigate("/manage")}
                   className="border-slate-600 text-slate-300 hover:bg-slate-800"
@@ -451,11 +432,25 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
                   Cancel
                 </Button>
               </div>
-            </form>
+            </Form>
           </CardContent>
         </Card>
+
+        {/* Success Message */}
+        {isSuccess && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-slate-800 p-8 rounded-lg text-center max-w-md mx-4">
+              <div className="text-green-400 text-6xl mb-4">✓</div>
+              <h3 className="text-xl font-semibold text-white mb-2">Member Added Successfully!</h3>
+              <p className="text-slate-300 mb-4">
+                {formData.firstName} {formData.lastName} has been added to your household.
+              </p>
+              <p className="text-slate-400 text-sm">Redirecting to management page...</p>
+            </div>
+          </div>
+        )}
       </div>
-    </PageLayout>
+      </PageLayout>
     </RequireAuth>
   );
 };

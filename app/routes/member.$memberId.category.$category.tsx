@@ -1,43 +1,56 @@
 import type { Route } from "./+types/member.$memberId.category.$category";
 import * as React from "react";
-import { Link, redirect } from "react-router";
-import { PageLayout } from "~/components/ui/layout";
+import { Link, useLoaderData, redirect } from "react-router";
+import { PageLayout, PageHeader } from "~/components/ui/layout";
+import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
 import { RecordTypeCard } from "~/components/record-type-card";
 import { AddCard } from "~/components/ui/interactive-card";
-import { PageHeader } from "~/components/ui/layout";
-import { userDb, recordTypeDb } from "~/lib/db";
-import { RequireAuth, useAuth } from "~/contexts/auth-context";
+import { loadFamilyDataWithMember } from "~/lib/loader-helpers";
 
 export function meta({ params }: Route.MetaArgs) {
-  const category = decodeURIComponent(params.category);
   return [
-    { title: `Member - ${category} Records - Hey, Kimmy` },
-    { name: "description", content: `Manage family member's ${category.toLowerCase()} records` },
+    { title: `${params.category} Records - Kimmy` },
+    { name: "description", content: `View and manage ${params.category.toLowerCase()} records` },
   ];
 }
 
-export async function loader({ params, context }: Route.LoaderArgs) {
+export async function loader({ params, request, context }: Route.LoaderArgs) {
   try {
-    const env = (context.cloudflare as any)?.env;
+    const env = (context as any).cloudflare?.env;
     
     if (!env?.DB) {
       throw new Response('Database not available', { status: 500 });
     }
 
-    const memberId = params.memberId;
-    const category = decodeURIComponent(params.category);
+    const { memberId, category } = params;
     
     if (!memberId) {
       throw new Response('Member ID required', { status: 400 });
     }
 
-    // Get family ID from the authenticated user's session
-    // For now, we'll return empty data and let the component handle it via auth context
+    // Load family data from URL params
+    const { familyId, familyMembers, currentMember } = await loadFamilyDataWithMember(
+      request, 
+      env,
+      memberId
+    );
+    
+    // If no family data found, redirect to welcome
+    if (!familyId) {
+      console.log('❌ No family data found, redirecting to welcome');
+      throw redirect('/welcome');
+    }
+
+    // For now, return empty record types - this can be expanded later
+    const recordTypes: any[] = [];
+    
     return { 
-      member: null, 
+      member: currentMember, 
       category, 
-      recordTypes: [] 
+      recordTypes,
+      familyId,
+      familyMembers
     };
   } catch (error) {
     console.error('Category route loader error:', error);
@@ -50,38 +63,31 @@ export async function loader({ params, context }: Route.LoaderArgs) {
   }
 }
 
-const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({ loaderData }) => {
-  const { member, category, recordTypes } = loaderData;
+const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({ loaderData, params }) => {
+  const { member, category, recordTypes, familyId, familyMembers } = loaderData;
   const { session } = useAuth();
   
-  // Get the current family ID from the session
-  const currentFamilyId = session?.currentFamilyId;
+  // Create a basic member profile from session data if no member data from loader
+  const currentMember = member || (session ? {
+    id: session.userId,
+    name: session.name,
+    email: session.email,
+    role: session.role
+  } : null);
   
-  if (!currentFamilyId) {
+  // If no session and no member, show error
+  if (!currentMember) {
     return (
       <RequireAuth requireHousehold={true}>
         <PageLayout>
           <div className="text-center py-12">
-            <h2 className="text-xl font-semibold text-slate-200 mb-4">No Household Found</h2>
-            <p className="text-slate-400 mb-6">You need to create or join a household to view member records.</p>
-            <Link to="/onboarding/create-household">
-              <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-md hover:from-blue-600 hover:to-purple-700">
-                Create Household
-              </button>
-            </Link>
+            <h2 className="text-xl font-semibold text-slate-200 mb-4">No Member Found</h2>
+            <p className="text-slate-400 mb-6">Unable to load member information.</p>
           </div>
         </PageLayout>
       </RequireAuth>
     );
   }
-  
-  // Create a basic member profile from session data if no member data from loader
-  const currentMember = member || {
-    id: session.userId,
-    name: session.name,
-    email: session.email,
-    role: session.role
-  };
 
   return (
     <RequireAuth requireHousehold={true}>

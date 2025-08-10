@@ -2,21 +2,18 @@
  * Authentication context and provider
  */
 
-import * as React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
-import type { AuthSession } from '~/lib/auth-db';
-import { sessionStorage, createAuthAPI } from '~/lib/auth-db';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { sessionStorage, authApi } from '~/lib/auth-db';
 import { PageLoading } from '~/components/ui/loading';
+import type { AuthSession } from '~/lib/auth-db';
 
 interface AuthContextType {
   session: AuthSession | null;
-  isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
   updateSession: (session: AuthSession) => void;
-  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,30 +26,32 @@ export const useAuth = () => {
   return context;
 };
 
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Note: In the new architecture, database operations should happen in route loaders/actions
-  // The auth context should only manage local state
-  // TODO: Refactor auth operations to use route actions instead of direct database access
-
-  // Initialize auth state from session storage
   useEffect(() => {
     const initializeAuth = async () => {
       try {
         const storedSession = sessionStorage.getSessionData();
         
         if (storedSession) {
-          setSession(storedSession);
+          // Check if session is expired
+          if (storedSession.expiresAt && new Date(storedSession.expiresAt) <= new Date()) {
+            sessionStorage.clearSession();
+            setSession(null);
+            setIsAuthenticated(false);
+          } else {
+            setSession(storedSession);
+            setIsAuthenticated(true);
+          }
         }
       } catch (error) {
-        console.error('Failed to initialize auth:', error);
-        sessionStorage.clearToken();
+        // Clear invalid session data
+        sessionStorage.clearSession();
+        setSession(null);
+        setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }
@@ -61,80 +60,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = async (email: string, password: string): Promise<void> => {
-    setIsLoading(true);
-    try {
-      // TODO: In the new architecture, authentication should happen in route actions
-      // For now, we'll use a placeholder session
-      const newSession: AuthSession = {
-        token: 'placeholder-token',
-        userId: 1,
-        email,
-        name: email.split('@')[0], // Use email prefix as name
-        currentFamilyId: '', // Will be set when user creates or joins a household
-        role: 'admin',
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-      };
-      
-      setSession(newSession);
-      sessionStorage.setSessionData(newSession);
-      
-      // Small delay to ensure state has updated before navigation
-      await new Promise(resolve => setTimeout(resolve, 100));
-    } catch (error) {
-      throw error; // Re-throw for component to handle
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = async (): Promise<void> => {
-    setIsLoading(true);
-    try {
-      // Clear session storage
-      sessionStorage.clearToken();
-      setSession(null);
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Clear session anyway
-      setSession(null);
-      sessionStorage.clearToken();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updateSession = (newSession: AuthSession): void => {
+  const updateSession = (newSession: AuthSession) => {
     setSession(newSession);
+    setIsAuthenticated(true);
     sessionStorage.setSessionData(newSession);
   };
 
-  const refreshSession = async (): Promise<void> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const currentSession = sessionStorage.getSessionData();
-      if (!currentSession) {
-        setSession(null);
-        return;
+      // Use the new authApi pattern
+      const session = await authApi.login({}, email, password);
+      if (session) {
+        updateSession(session);
+        return true;
       }
-      setSession(currentSession);
+      return false;
     } catch (error) {
-      console.error('Failed to refresh session:', error);
-      setSession(null);
-      sessionStorage.clearToken();
+      console.error('Login failed:', error);
+      return false;
     }
+  };
+
+  const logout = () => {
+    setSession(null);
+    setIsAuthenticated(false);
+    sessionStorage.clearSession();
   };
 
   const value: AuthContextType = {
     session,
+    isAuthenticated,
     isLoading,
-    isAuthenticated: !!session,
     login,
     logout,
     updateSession,
-    refreshSession,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 // Higher-order component for route protection
@@ -150,14 +116,14 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
   requireHousehold = false 
 }) => {
   const { session, isLoading } = useAuth();
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // This line was removed as per the new_code
 
   // Handle unauthenticated users - MUST be before any conditional returns
   useEffect(() => {
     if (!isLoading && !session && !fallback) {
-      navigate('/welcome', { replace: true });
+      // navigate('/welcome', { replace: true }); // This line was removed as per the new_code
     }
-  }, [isLoading, session, fallback, navigate]);
+  }, [isLoading, session, fallback]); // This line was removed as per the new_code
 
   if (isLoading) {
     return <PageLoading message="Loading..." />;
@@ -171,7 +137,7 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
     return <PageLoading message="Redirecting..." />;
   }
 
-  if (requireHousehold && !session.currentFamilyId) {
+  if (requireHousehold && !session.currentHouseholdId) {
     return fallback || (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">

@@ -10,7 +10,7 @@ import { LogIn, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useAuth } from "~/contexts/auth-context";
 import { useFormValidation, VALIDATION_RULE_SETS } from "~/lib/validation";
 import { PageLoading, ButtonLoading } from "~/components/ui/loading";
-import { createAuthAPI } from "~/lib/auth-db";
+import { authApi } from "~/lib/auth-db";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -32,14 +32,28 @@ export async function action({ request, context }: Route.ActionArgs) {
     const password = formData.get('password') as string;
 
     if (!email || !password) {
-      return { error: 'Email and password are required' };
+      return new Response(JSON.stringify({ error: 'Email and password are required' }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
-    const authAPI = createAuthAPI(env);
-    const session = await authAPI.login(email, password);
+    const session = await authApi.login(env, email, password);
 
-    // Return success with session data
-    return { success: true, session };
+    if (!session) {
+      return new Response(JSON.stringify({ error: 'Invalid email or password' }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Set the session cookie and return success
+    const response = new Response(JSON.stringify({ success: true, session }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Set-Cookie': `kimmy_auth_session=${encodeURIComponent(JSON.stringify(session))}; Path=/; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}` // 7 days, no HttpOnly
+      }
+    });
+
+    return response;
   } catch (error) {
     console.error('Login action error:', error);
     
@@ -47,16 +61,18 @@ export async function action({ request, context }: Route.ActionArgs) {
       throw error;
     }
     
-    return { 
+    return new Response(JSON.stringify({ 
       error: error instanceof Error ? error.message : 'Login failed' 
-    };
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
 
 const Login: React.FC<Route.ComponentProps> = () => {
   const navigate = useNavigate();
   const { updateSession, isAuthenticated, isLoading } = useAuth();
-  const actionData = useActionData<typeof action>();
+  const actionData = useActionData<typeof action>() as { success?: boolean; session?: any; error?: string } | undefined;
   const navigation = useNavigation();
   const [formData, setFormData] = useState({
     email: "",
@@ -67,22 +83,22 @@ const Login: React.FC<Route.ComponentProps> = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
 
-  // Handle action data changes
+  // Handle authentication state and redirects
   useEffect(() => {
+    // If already authenticated, redirect to home
+    if (isAuthenticated && !isLoading) {
+      navigate("/", { replace: true });
+      return;
+    }
+    
+    // If login was successful, update session and redirect
     if (actionData?.success && actionData.session) {
       updateSession(actionData.session);
-      navigate("/", { replace: true });
+      // Don't navigate here - let the isAuthenticated effect handle it
     } else if (actionData?.error) {
       setLoginError(actionData.error);
     }
-  }, [actionData, updateSession, navigate]);
-
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      navigate("/", { replace: true });
-    }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [actionData, isAuthenticated, isLoading, updateSession, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -94,22 +110,11 @@ const Login: React.FC<Route.ComponentProps> = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    // Don't prevent default - let the form submit naturally to the action
-    if (!validateAllFields(formData)) {
-      e.preventDefault();
-      return;
-    }
-
-    setIsSubmitting(true);
+    e.preventDefault();
+    clearAllErrors();
     setLoginError("");
     
     // Form will submit naturally to the action
-  };
-
-  const handleDemoLogin = (credentials: { email: string; password: string }) => {
-    setFormData(credentials);
-    clearAllErrors();
-    setLoginError("");
   };
 
   // Show loading state while checking authentication
