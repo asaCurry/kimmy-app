@@ -5,7 +5,7 @@ import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { IconCard } from "~/components/ui/interactive-card";
-import { UserPlus, Users, Settings, Key, ArrowRight } from "lucide-react";
+import { UserPlus, Users, Settings, Key, ArrowRight, RefreshCw } from "lucide-react";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { userDb } from "~/lib/db";
 import { recordTypeDb } from "~/lib/db";
@@ -27,11 +27,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       throw new Response('Database not available', { status: 500 });
     }
 
-    // Get the current session from the request headers or cookies
-    // For now, we'll rely on the client-side auth context
-    // In a real implementation, you'd validate the session token server-side
-    
-    // Return empty data - the component will use the auth context
+    // For now, we'll return empty data since we need the session context
+    // The component will fetch members using the API endpoint
     return { 
       members: [], 
       familyId: null,
@@ -65,36 +62,39 @@ const Manage: React.FC<Route.ComponentProps> = () => {
       
       setIsLoadingMembers(true);
       try {
-        // For now, we'll use a simple fetch to get the data
-        // In a real implementation, you'd call the database directly
-        const response = await fetch(`/api/family/${currentFamilyId}/members`);
+        // Create a simple API endpoint call to fetch family members
+        // This will be handled by the loader in the future, but for now we'll use a fetch
+        const response = await fetch(`/api/family-members?familyId=${currentFamilyId}`);
+        
         if (response.ok) {
           const data = await response.json() as { members?: any[] };
-          let members = data.members || [];
-          console.log(members);
-          // If no members found, ensure the current user is at least one member
-          if (members.length === 0 && session) {
-            members = [{
-              id: session.userId,
-              name: session.name,
-              email: session.email,
-              role: session.role,
-              familyId: currentFamilyId,
-              relationshipToAdmin: 'self',
-              age: null,
-              createdAt: new Date().toISOString()
-            }];
+          console.log('Fetched family members:', data);
+          
+          if (data.members && data.members.length > 0) {
+            // Transform to FamilyMember type
+            const transformedMembers: FamilyMember[] = data.members.map((member: any) => ({
+              id: member.id,
+              name: member.name,
+              email: member.email,
+              role: (member.role as 'admin' | 'member') || 'member',
+              age: member.age
+            }));
+            
+            setHouseholdMembers(transformedMembers);
+          } else {
+            // If no members found, ensure the current user is at least one member
+            if (session) {
+              const basicUser: FamilyMember = {
+                id: session.userId,
+                name: session.name,
+                email: session.email,
+                role: (session.role as 'admin' | 'member') || 'member'
+              };
+              setHouseholdMembers([basicUser]);
+            } else {
+              setHouseholdMembers([]);
+            }
           }
-          
-          // Transform to FamilyMember type
-          const transformedMembers: FamilyMember[] = members.map(m => ({
-            id: m.id,
-            name: m.name,
-            email: m.email,
-            role: (m.role as 'admin' | 'member') || 'member'
-          }));
-          
-          setHouseholdMembers(transformedMembers);
         } else {
           // If the API doesn't exist yet, create a basic user profile
           if (session) {
@@ -130,6 +130,36 @@ const Manage: React.FC<Route.ComponentProps> = () => {
 
     fetchMembers();
   }, [currentFamilyId, session]);
+
+  // Refresh members when the page gains focus (e.g., returning from add-member page)
+  React.useEffect(() => {
+    const handleFocus = () => {
+      if (currentFamilyId && !isLoadingMembers) {
+        // Small delay to ensure we're not in the middle of another operation
+        setTimeout(() => {
+          fetch(`/api/family-members?familyId=${currentFamilyId}`)
+            .then(response => response.json())
+            .then((data) => {
+              const typedData = data as { members?: any[] };
+              if (typedData.members && typedData.members.length > 0) {
+                const transformedMembers: FamilyMember[] = typedData.members.map((member: any) => ({
+                  id: member.id,
+                  name: member.name,
+                  email: member.email,
+                  role: (member.role as 'admin' | 'member') || 'member',
+                  age: member.age
+                }));
+                setHouseholdMembers(transformedMembers);
+              }
+            })
+            .catch(error => console.error('Error refreshing members on focus:', error));
+        }, 100);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [currentFamilyId, isLoadingMembers]);
 
   // Show loading while checking auth
   if (isLoading) {
@@ -206,7 +236,44 @@ const Manage: React.FC<Route.ComponentProps> = () => {
       <div className="space-y-8">
         {/* Quick Actions */}
         <section>
-          <h2 className="text-xl font-semibold text-slate-200 mb-4">Quick Actions</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-slate-200">Quick Actions</h2>
+            <Button
+              onClick={() => {
+                if (currentFamilyId) {
+                  setIsLoadingMembers(true);
+                  fetch(`/api/family-members?familyId=${currentFamilyId}`)
+                    .then(response => response.json())
+                    .then((data) => {
+                      const typedData = data as { members?: any[] };
+                      if (typedData.members && typedData.members.length > 0) {
+                        const transformedMembers: FamilyMember[] = typedData.members.map((member: any) => ({
+                          id: member.id,
+                          name: member.name,
+                          email: member.email,
+                          role: (member.role as 'admin' | 'member') || 'member',
+                          age: member.age
+                        }));
+                        setHouseholdMembers(transformedMembers);
+                      }
+                    })
+                    .catch(error => console.error('Error refreshing members:', error))
+                    .finally(() => setIsLoadingMembers(false));
+                }
+              }}
+              disabled={isLoadingMembers}
+              variant="outline"
+              size="sm"
+              className="text-slate-300 border-slate-600 hover:bg-slate-700"
+            >
+              {isLoadingMembers ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-300"></div>
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              <span className="ml-2">Refresh</span>
+            </Button>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Link to="/manage/add-member">
               <IconCard
