@@ -12,20 +12,21 @@ import { eq } from "drizzle-orm";
 import type { FormField } from "~/lib/utils";
 import { useCallback } from "react";
 import type { RecordType } from "~/db/schema";
+import { convertFormDataToFields } from "~/lib/utils/dynamic-fields/field-serialization";
 
 // Local interface for parsed record type
 interface ParsedRecordType {
   id: number;
   name: string;
-  description: string | undefined;
+  description: string | null;
   category: string;
   familyId: string;
-  fields: FormField[];
-  icon: string | undefined;
-  color: string | undefined;
-  allowPrivate: number | undefined;
-  createdAt: string | undefined;
-  createdBy: number | undefined;
+  fields: any[]; // Will be parsed from JSON
+  icon: string | null;
+  color: string | null;
+  allowPrivate: number | null;
+  createdAt: string | null;
+  createdBy: number | null;
 }
 
 export function meta({ params }: Route.MetaArgs) {
@@ -115,11 +116,39 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       throw new Response("Record type not found", { status: 404 });
     }
 
-    const recordType: RecordType = {
+    console.log("recordTypeResult[0]:", recordTypeResult[0]);
+    console.log("recordTypeResult[0].fields:", recordTypeResult[0].fields);
+    console.log("recordTypeResult[0].fields type:", typeof recordTypeResult[0].fields);
+    
+    let parsedFields = [];
+    if (recordTypeResult[0].fields) {
+      try {
+        const parsed = JSON.parse(recordTypeResult[0].fields);
+        console.log("Parsed fields:", parsed);
+        console.log("Parsed fields type:", typeof parsed);
+        console.log("Parsed fields is array:", Array.isArray(parsed));
+        
+        // Extract the fields array from the parsed object
+        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.fields)) {
+          parsedFields = parsed.fields;
+        } else if (Array.isArray(parsed)) {
+          // Handle case where fields is directly an array
+          parsedFields = parsed;
+        } else {
+          console.warn("Unexpected fields structure:", parsed);
+          parsedFields = [];
+        }
+        
+        console.log("Final parsedFields:", parsedFields);
+      } catch (error) {
+        console.error("Error parsing fields:", error);
+        parsedFields = [];
+      }
+    }
+    
+    const recordType: ParsedRecordType = {
       ...recordTypeResult[0],
-      fields: recordTypeResult[0].fields
-        ? JSON.parse(recordTypeResult[0].fields)
-        : [],
+      fields: parsedFields,
     };
 
     return {
@@ -169,7 +198,6 @@ export async function action({
       return withDatabaseAndSession(request, context, async (db, session) => {
         try {
           // Parse dynamic fields from form data
-          const dynamicFields: Record<string, any> = {};
           const recordType = await db
             .select()
             .from(recordTypes)
@@ -180,25 +208,34 @@ export async function action({
             throw new Response("Record type not found", { status: 404 });
           }
 
-          const fields = JSON.parse(recordType[0].fields);
+          const fieldsJson = recordType[0].fields;
+          if (!fieldsJson) {
+            throw new Response("Record type has no fields", { status: 400 });
+          }
+          
+          const fields = JSON.parse(fieldsJson);
+          
+          // Convert form data to dynamic fields using the utility function
+          const dynamicFields: Record<string, any> = {};
+          if (Array.isArray(fields)) {
+            fields.forEach((field: any) => {
+              const fieldKey = `field_${field.id}`;
+              const fieldValue = formData.get(fieldKey);
 
-          fields.forEach(field => {
-            const fieldKey = `field_${field.id}`;
-            const fieldValue = formData.get(fieldKey);
-
-            if (fieldValue !== null) {
-              switch (field.type) {
-                case "number":
-                  dynamicFields[fieldKey] = fieldValue ? parseFloat(fieldValue.toString()) : null;
-                  break;
-                case "checkbox":
-                  dynamicFields[fieldKey] = fieldValue === "true";
-                  break;
-                default:
-                  dynamicFields[fieldKey] = fieldValue;
+              if (fieldValue !== null) {
+                switch (field.type) {
+                  case "number":
+                    dynamicFields[fieldKey] = fieldValue ? parseFloat(fieldValue.toString()) : null;
+                    break;
+                  case "checkbox":
+                    dynamicFields[fieldKey] = fieldValue === "true";
+                    break;
+                  default:
+                    dynamicFields[fieldKey] = fieldValue;
+                }
               }
-            }
-          });
+            });
+          }
 
           // Create the full content object
           const fullContent = {

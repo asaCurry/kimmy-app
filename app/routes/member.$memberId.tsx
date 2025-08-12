@@ -17,17 +17,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { LoadingSpinner } from "~/components/ui/loading";
+import { CreateRecordTypeForm } from "~/components/create-record-type-form";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -267,14 +257,7 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
   const { session } = useAuth();
   const fetcher = useFetcher();
   const [showCreateForm, setShowCreateForm] = React.useState(false);
-  const [newRecordType, setNewRecordType] = React.useState({
-    name: "",
-    description: "",
-    category: "",
-    icon: "📝",
-    color: "blue",
-    allowPrivate: false,
-  });
+
 
   // Create a basic member profile from session data if no member data from loader
   const currentMember =
@@ -320,41 +303,9 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
   const currentCategories =
     categories.length > 0 ? categories : defaultCategories;
 
-  const handleCreateRecordType = (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("_action", "create-record-type");
-    formData.append("name", newRecordType.name);
-    formData.append("description", newRecordType.description);
-    formData.append("category", newRecordType.category);
-    formData.append("familyId", loaderData.familyId);
-    formData.append("icon", newRecordType.icon);
-    formData.append("color", newRecordType.color);
-    formData.append("allowPrivate", newRecordType.allowPrivate.toString());
-    formData.append("createdBy", currentMember.id.toString());
-    formData.append("fields", JSON.stringify([]));
 
-    fetcher.submit(formData, { method: "post" });
 
-    // Reset form and hide
-    setNewRecordType({
-      name: "",
-      description: "",
-      category: "",
-      icon: "📝",
-      color: "blue",
-      allowPrivate: false,
-    });
-    setShowCreateForm(false);
-  };
 
-  // Handle successful submission
-  React.useEffect(() => {
-    if (fetcher.data?.success) {
-      // Refresh the page to show the new record type
-      window.location.reload();
-    }
-  }, [fetcher.data]);
 
   return (
     <RequireAuth requireHousehold={true}>
@@ -420,189 +371,13 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                   + Create Record Type
                 </Button>
               ) : (
-                <fetcher.Form
-                  onSubmit={handleCreateRecordType}
+                <CreateRecordTypeForm
+                  memberId={currentMember.id.toString()}
+                  familyId={loaderData.familyId}
+                  createdBy={currentMember.id}
+                  onCancel={() => setShowCreateForm(false)}
                   className="space-y-4"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name" className="text-slate-200">
-                        Name *
-                      </Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={newRecordType.name}
-                        onChange={e =>
-                          setNewRecordType(prev => ({
-                            ...prev,
-                            name: e.target.value,
-                          }))
-                        }
-                        placeholder="e.g., Health Record, School Event"
-                        required
-                        className="bg-slate-700 border-slate-600 text-slate-100 placeholder:text-slate-400"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="category" className="text-slate-200">
-                        Category *
-                      </Label>
-                      <Select
-                        name="category"
-                        required
-                        value={newRecordType.category}
-                        onValueChange={value =>
-                          setNewRecordType(prev => ({
-                            ...prev,
-                            category: value,
-                          }))
-                        }
-                      >
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100">
-                          <SelectValue placeholder="Choose a category" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-700 border-slate-600">
-                          <SelectItem value="Health">🏥 Health</SelectItem>
-                          <SelectItem value="Activities">
-                            🏃 Activities
-                          </SelectItem>
-                          <SelectItem value="Personal">📝 Personal</SelectItem>
-                          <SelectItem value="Education">
-                            🎓 Education
-                          </SelectItem>
-                          <SelectItem value="Finance">💰 Finance</SelectItem>
-                          <SelectItem value="Travel">✈️ Travel</SelectItem>
-                          <SelectItem value="Food">🍽️ Food</SelectItem>
-                          <SelectItem value="Home">🏠 Home</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description" className="text-slate-200">
-                      Description
-                    </Label>
-                    <Textarea
-                      id="description"
-                      name="description"
-                      value={newRecordType.description}
-                      onChange={e =>
-                        setNewRecordType(prev => ({
-                          ...prev,
-                          description: e.target.value,
-                        }))
-                      }
-                      placeholder="Describe what this record type is for..."
-                      className="bg-slate-700 border-slate-600 text-slate-100 placeholder:text-slate-400"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="icon" className="text-slate-200">
-                        Icon
-                      </Label>
-                      <Select
-                        name="icon"
-                        value={newRecordType.icon}
-                        onValueChange={value =>
-                          setNewRecordType(prev => ({ ...prev, icon: value }))
-                        }
-                      >
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100">
-                          <SelectValue placeholder="Choose an icon" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-700 border-slate-600">
-                          <SelectItem value="📝">📝 Note</SelectItem>
-                          <SelectItem value="🏥">🏥 Health</SelectItem>
-                          <SelectItem value="🎓">🎓 Education</SelectItem>
-                          <SelectItem value="⭐">⭐ Achievement</SelectItem>
-                          <SelectItem value="🎯">🎯 Goal</SelectItem>
-                          <SelectItem value="💊">💊 Medication</SelectItem>
-                          <SelectItem value="🏃">🏃 Activity</SelectItem>
-                          <SelectItem value="🍽️">🍽️ Meal</SelectItem>
-                          <SelectItem value="😴">😴 Sleep</SelectItem>
-                          <SelectItem value="🎨">🎨 Creative</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="color" className="text-slate-200">
-                        Color
-                      </Label>
-                      <Select
-                        name="color"
-                        value={newRecordType.color}
-                        onValueChange={value =>
-                          setNewRecordType(prev => ({ ...prev, color: value }))
-                        }
-                      >
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100">
-                          <SelectValue placeholder="Choose a color" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-700 border-slate-600">
-                          <SelectItem value="blue">Blue</SelectItem>
-                          <SelectItem value="green">Green</SelectItem>
-                          <SelectItem value="red">Red</SelectItem>
-                          <SelectItem value="yellow">Yellow</SelectItem>
-                          <SelectItem value="purple">Purple</SelectItem>
-                          <SelectItem value="pink">Pink</SelectItem>
-                          <SelectItem value="indigo">Indigo</SelectItem>
-                          <SelectItem value="gray">Gray</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="allowPrivate"
-                      name="allowPrivate"
-                      checked={newRecordType.allowPrivate}
-                      onChange={e =>
-                        setNewRecordType(prev => ({
-                          ...prev,
-                          allowPrivate: e.target.checked,
-                        }))
-                      }
-                      className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
-                    />
-                    <Label htmlFor="allowPrivate" className="text-slate-200">
-                      Allow private records
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center gap-3 pt-2">
-                    <Button
-                      type="submit"
-                      disabled={fetcher.state === "submitting"}
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                    >
-                      {fetcher.state === "submitting" ? (
-                        <>
-                          <LoadingSpinner className="w-4 h-4 mr-2" />
-                          Creating...
-                        </>
-                      ) : (
-                        "Create Record Type"
-                      )}
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowCreateForm(false)}
-                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </fetcher.Form>
+                />
               )}
             </CardContent>
           </Card>

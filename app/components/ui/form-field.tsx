@@ -18,7 +18,7 @@ interface DynamicFieldProps {
     label: string;
     placeholder?: string;
     required?: boolean;
-    options?: string[];
+    options?: any[]; // Changed from string[] to any[] to handle both string and object options
     validation?: {
       min?: number;
       max?: number;
@@ -30,6 +30,11 @@ interface DynamicFieldProps {
 }
 
 export const DynamicField: React.FC<DynamicFieldProps> = ({ field }) => {
+  // Debug: Log what's being passed to DynamicField
+  console.log("DynamicField - field:", field);
+  console.log("DynamicField - field.type:", field.type);
+  console.log("DynamicField - field.options:", field.options);
+  
   const baseClasses = cn(
     FORM_FIELD_STYLES.base,
     field.error && FORM_FIELD_STYLES.error
@@ -52,15 +57,31 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({ field }) => {
       return (
         <select {...field.register} className={baseClasses}>
           <option value="">Select {field.label.toLowerCase()}</option>
-          {field.options?.map((option: string) => (
-            <option
-              key={option}
-              value={option}
-              className="bg-slate-800 text-slate-100"
-            >
-              {option}
-            </option>
-          ))}
+          {field.options?.map((option: any) => {
+            // Handle both string and object options
+            if (typeof option === 'string') {
+              return (
+                <option
+                  key={option}
+                  value={option}
+                  className="bg-slate-800 text-slate-100"
+                >
+                  {option}
+                </option>
+              );
+            } else if (option && typeof option === 'object' && option.value && option.label) {
+              return (
+                <option
+                  key={option.value}
+                  value={option.value}
+                  className="bg-slate-800 text-slate-100"
+                >
+                  {option.label}
+                </option>
+              );
+            }
+            return null;
+          })}
         </select>
       );
 

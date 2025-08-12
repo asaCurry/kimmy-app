@@ -16,70 +16,14 @@ import { DynamicField } from "~/components/ui/form-field";
 import { Switch } from "~/components/ui/switch";
 import { Label } from "~/components/ui/label";
 import { LoadingSpinner } from "~/components/ui/loading-spinner";
-import type { FamilyMember, FormField } from "~/lib/utils";
+import type { FamilyMember } from "~/lib/utils";
 import type { RecordType as DbRecordType } from "~/db/schema";
+import { createRecordSchema } from "~/lib/utils/dynamic-fields/schema-generation";
 
 // Local interface that extends the database RecordType with parsed fields
 interface ParsedRecordType extends Omit<DbRecordType, "fields"> {
-  fields: FormField[];
+  fields: any[]; // Will be converted to DynamicField format
 }
-
-// Dynamic schema generation based on record type fields
-const createRecordSchema = (fields: FormField[]) => {
-  const baseSchema = z.object({
-    title: z.string().min(1, "Title is required"),
-    content: z.string().optional(),
-    tags: z.string().optional(),
-    isPrivate: z.boolean().default(false),
-    datetime: z.string().optional(), // ISO string for when the record occurred
-  });
-
-  // Add dynamic fields to the schema
-  const dynamicFields: Record<string, any> = {};
-
-  fields.forEach(field => {
-    let fieldSchema: any;
-
-    switch (field.type) {
-      case "text":
-      case "textarea":
-        fieldSchema = field.required
-          ? z.string().min(1, `${field.label} is required`)
-          : z.string().optional();
-        break;
-      case "number":
-        fieldSchema = field.required
-          ? z
-              .number()
-              .min(field.validation?.min || -Infinity)
-              .max(field.validation?.max || Infinity)
-          : z.number().optional();
-        break;
-      case "date":
-        fieldSchema = field.required
-          ? z.string().min(1, `${field.label} is required`)
-          : z.string().optional();
-        break;
-      case "select":
-        fieldSchema = field.required
-          ? z.string().min(1, `${field.label} is required`)
-          : z.string().optional();
-        break;
-      case "checkbox":
-        fieldSchema = z.boolean().default(false);
-        break;
-      case "file":
-        fieldSchema = z.any().optional();
-        break;
-      default:
-        fieldSchema = z.string().optional();
-    }
-
-    dynamicFields[`field_${field.id}`] = fieldSchema;
-  });
-
-  return baseSchema.extend(dynamicFields);
-};
 
 interface DynamicRecordFormProps {
   member: FamilyMember;
@@ -99,7 +43,16 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   const isSubmitting = fetcher.state === "submitting";
 
   // Generate schema based on record type fields
-  const schema = createRecordSchema(recordType.fields || []);
+  console.log("recordType:", recordType);
+  console.log("recordType.fields:", recordType.fields);
+  console.log("recordType.fields type:", typeof recordType.fields);
+  console.log("recordType.fields is array:", Array.isArray(recordType.fields));
+  
+  // Ensure fields is always an array
+  const normalizedFields = Array.isArray(recordType.fields) ? recordType.fields : [];
+  console.log("Normalized fields:", normalizedFields);
+  
+  const schema = createRecordSchema(normalizedFields);
   type FormData = z.infer<typeof schema>;
 
   const {
@@ -119,7 +72,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
       isPrivate: false,
       datetime: new Date().toISOString().slice(0, 16), // Format for datetime-local input (YYYY-MM-DDTHH:MM)
       ...Object.fromEntries(
-        (recordType.fields || []).map(field => [
+        normalizedFields.map(field => [
           `field_${field.id}`,
           field.type === "checkbox"
             ? false
@@ -159,7 +112,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
     }
 
     // Add dynamic field values
-    (recordType.fields || []).forEach(field => {
+    normalizedFields.forEach(field => {
       const fieldKey = `field_${field.id}` as keyof FormData;
       const value = data[fieldKey];
 
@@ -276,7 +229,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
             </div>
 
             {/* Dynamic Fields */}
-            {(recordType.fields || []).map(field => (
+            {normalizedFields.map(field => (
               <div key={field.id} className="space-y-2">
                 <Label
                   htmlFor={`field_${field.id}`}

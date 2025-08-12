@@ -50,10 +50,35 @@ export const RecordsList: React.FC<RecordsListProps> = ({
   // Parse record type fields for better content display
   const parsedRecordType = React.useMemo(() => {
     try {
-      return {
-        ...recordType,
-        fields: recordType.fields ? JSON.parse(recordType.fields) : [],
-      };
+      const fieldsJson = recordType.fields;
+      if (!fieldsJson) return { ...recordType, fields: [] };
+      
+      try {
+        const parsed = JSON.parse(fieldsJson);
+        console.log("RecordsList - Parsed fields:", parsed);
+        
+        // Extract the fields array from the parsed object
+        let normalizedFields = [];
+        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.fields)) {
+          normalizedFields = parsed.fields;
+        } else if (Array.isArray(parsed)) {
+          // Handle case where fields is directly an array
+          normalizedFields = parsed;
+        } else {
+          console.warn("RecordsList - Unexpected fields structure:", parsed);
+          normalizedFields = [];
+        }
+        
+        console.log("RecordsList - Final normalizedFields:", normalizedFields);
+        
+        return {
+          ...recordType,
+          fields: normalizedFields,
+        };
+      } catch (error) {
+        console.error("RecordsList - Error parsing record type fields:", error);
+        return { ...recordType, fields: [] };
+      }
     } catch (error) {
       console.error("RecordsList - Error parsing record type fields:", error);
       return { ...recordType, fields: [] };
