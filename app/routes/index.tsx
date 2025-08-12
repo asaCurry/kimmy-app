@@ -8,6 +8,10 @@ import type { FamilyMember } from "~/lib/utils";
 import { QuickActionButton } from "~/components/ui/quick-action-button";
 import { loadFamilyData } from "~/lib/loader-helpers";
 import { extractEnv, parseCookies } from "~/lib/utils";
+import { getDatabase } from "~/lib/db-utils";
+import { records, recordTypes } from "~/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { RecentRecordsList } from "~/components/recent-records-list";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   try {
@@ -26,7 +30,64 @@ export async function loader({ request, context }: Route.LoaderArgs) {
             const env = extractEnv(context);
             if (env) {
               const familyData = await loadFamilyData(request, env);
-              return { familyData };
+              
+              // Fetch recent records from all family members
+              const db = getDatabase(env);
+              const recentRecords = await db
+                .select({
+                  id: records.id,
+                  title: records.title,
+                  content: records.content,
+                  memberId: records.memberId,
+                  recordTypeId: records.recordTypeId,
+                  createdAt: records.createdAt,
+                  datetime: records.datetime,
+                  isPrivate: records.isPrivate,
+                  tags: records.tags,
+                })
+                .from(records)
+                .where(eq(records.familyId, session.currentHouseholdId))
+                .orderBy(desc(records.createdAt))
+                .limit(10);
+
+              // Fetch record types for the recent records
+              const recordTypeIds = recentRecords
+                .map(r => r.recordTypeId)
+                .filter(Boolean) as number[];
+              
+              let recordTypesData: any[] = [];
+              if (recordTypeIds.length > 0) {
+                recordTypesData = await db
+                  .select()
+                  .from(recordTypes)
+                  .where(eq(recordTypes.familyId, session.currentHouseholdId));
+              }
+
+              // Create a map of record types for quick lookup
+              const recordTypesMap = recordTypesData.reduce((acc, rt) => {
+                acc[rt.id] = rt;
+                return acc;
+              }, {} as Record<number, any>);
+
+              // Enrich recent records with member and record type info
+              const enrichedRecentRecords = recentRecords.map(record => {
+                const member = familyData.familyMembers.find(m => m.id === record.memberId);
+                const recordType = recordTypesMap[record.recordTypeId || 0];
+                
+                return {
+                  ...record,
+                  memberName: member?.name || "Unknown Member",
+                  recordTypeName: recordType?.name || "Unknown Type",
+                  recordTypeCategory: recordType?.category || "Personal",
+                  recordTypeIcon: recordType?.icon || "📝",
+                  recordTypeColor: recordType?.color || "blue",
+                };
+              });
+
+              return { 
+                familyData,
+                recentRecords: enrichedRecentRecords
+              };
             }
           }
         } catch (error) {
@@ -44,7 +105,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 }
 
 export default function Index() {
-  const { familyData } = useLoaderData<typeof loader>();
+  const { familyData, recentRecords } = useLoaderData<typeof loader>();
   const { session, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -122,6 +183,14 @@ export default function Index() {
               onSelect={() => navigate(`/member/${member.id}`)}
             />
           ))}
+        </div>
+
+        {/* Recent Records Section */}
+        <div className="mt-8">
+          <RecentRecordsList 
+            records={recentRecords || []} 
+            familyMembers={familyData.familyMembers} 
+          />
         </div>
       </div>
     </PageLayout>
