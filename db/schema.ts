@@ -35,7 +35,8 @@ export const records = sqliteTable("records", {
   content: text("content"), // JSON object with field values
   recordTypeId: integer("record_type_id").references(() => recordTypes.id),
   familyId: text("family_id").notNull(),
-  createdBy: integer("created_by").references(() => users.id),
+  memberId: integer("member_id").references(() => users.id), // Which family member this record is about
+  createdBy: integer("created_by").references(() => users.id), // Who created the record
   tags: text("tags"), // Comma-separated tags
   attachments: text("attachments"), // JSON array of file URLs
   isPrivate: integer("is_private").default(0), // 0 = shared, 1 = private

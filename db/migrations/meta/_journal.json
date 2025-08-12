@@ -29,6 +29,13 @@
       "when": 1754938362535,
       "tag": "0003_amusing_owl",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1754938362536,
+      "tag": "0004_add_member_id_to_records",
+      "breakpoints": true
     }
   ]
 }

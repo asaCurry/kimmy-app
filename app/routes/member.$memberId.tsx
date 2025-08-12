@@ -8,7 +8,7 @@ import { CategoryCard } from "~/components/category-card";
 import { loadFamilyDataWithMember } from "~/lib/loader-helpers";
 import { getDatabase, withDatabase } from "~/lib/db-utils";
 import { recordTypes, records } from "~/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import {
   Card,
   CardContent,
@@ -111,7 +111,12 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     const recordsResult = await db
       .select()
       .from(records)
-      .where(eq(records.familyId, familyId));
+      .where(
+        and(
+          eq(records.familyId, familyId),
+          eq(records.memberId, parseInt(params.memberId))
+        )
+      );
 
     // Get unique categories from record types
     const categories = Array.from(

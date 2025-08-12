@@ -127,7 +127,12 @@ export async function loader({
     const recordsResult = await db
       .select()
       .from(records)
-      .where(eq(records.familyId, familyId));
+      .where(
+        and(
+          eq(records.familyId, familyId),
+          eq(records.memberId, parseInt(params.memberId))
+        )
+      );
 
     // Get unique categories and their stats
     const categoryStats: Record<

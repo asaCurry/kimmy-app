@@ -143,9 +143,11 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 export async function action({
   request,
   context,
+  params,
 }: {
   request: Request;
   context: any;
+  params: Route.Params;
 }) {
   const formData = await request.formData();
   const action = formData.get("_action");
@@ -166,16 +168,39 @@ export async function action({
 
       return withDatabaseAndSession(request, context, async (db, session) => {
         try {
-          // Parse dynamic field values from form data
+          // Parse dynamic fields from form data
           const dynamicFields: Record<string, any> = {};
-          for (const [key, value] of formData.entries()) {
-            if (key.startsWith("field_") && key !== "field_") {
-              const fieldId = key.replace("field_", "");
-              dynamicFields[fieldId] = value;
-            }
+          const recordType = await db
+            .select()
+            .from(recordTypes)
+            .where(eq(recordTypes.id, parseInt(params.recordTypeId)))
+            .limit(1);
+
+          if (!recordType.length) {
+            throw new Response("Record type not found", { status: 404 });
           }
 
-          // Combine static and dynamic content
+          const fields = JSON.parse(recordType[0].fields);
+
+          fields.forEach(field => {
+            const fieldKey = `field_${field.id}`;
+            const fieldValue = formData.get(fieldKey);
+
+            if (fieldValue !== null) {
+              switch (field.type) {
+                case "number":
+                  dynamicFields[fieldKey] = fieldValue ? parseFloat(fieldValue.toString()) : null;
+                  break;
+                case "checkbox":
+                  dynamicFields[fieldKey] = fieldValue === "true";
+                  break;
+                default:
+                  dynamicFields[fieldKey] = fieldValue;
+              }
+            }
+          });
+
+          // Create the full content object
           const fullContent = {
             description: content || "No description provided", // Ensure description is never empty
             fields: dynamicFields,
@@ -189,6 +214,7 @@ export async function action({
             content: fullContent,
             recordTypeId,
             familyId,
+            memberId: params.memberId,
             createdBy: session.userId,
             createdByType: typeof session.userId,
             tags,
@@ -203,6 +229,7 @@ export async function action({
               content: JSON.stringify(fullContent),
               recordTypeId,
               familyId,
+              memberId: parseInt(params.memberId), // Associate record with the specific member
               createdBy: parseInt(session.userId.toString()),
               tags,
               isPrivate: isPrivate ? 1 : 0,

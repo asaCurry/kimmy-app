@@ -103,11 +103,16 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       fields: rt.fields ? JSON.parse(rt.fields) : [],
     }));
 
-    // Fetch records for each record type
+    // Fetch records for each record type, filtered by the specific member
     const recordsData = await db
       .select()
       .from(records)
-      .where(eq(records.familyId, familyId));
+      .where(
+        and(
+          eq(records.familyId, familyId),
+          eq(records.memberId, parseInt(memberId))
+        )
+      );
 
     // Group records by record type
     const recordsByType = recordsData.reduce(
