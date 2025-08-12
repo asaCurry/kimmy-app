@@ -119,7 +119,16 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     ).sort();
 
     // If no categories exist, use default ones
-    const defaultCategories = ["Health", "Activities", "Personal"];
+    const defaultCategories = [
+      "Health",
+      "Activities",
+      "Personal",
+      "Education",
+      "Finance",
+      "Food",
+      "Travel",
+      "Home",
+    ];
     const currentCategories =
       categories.length > 0 ? categories : defaultCategories;
 
@@ -293,7 +302,16 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
   }
 
   // Use default categories if none provided from loader
-  const defaultCategories = ["Health", "Activities", "Personal"];
+  const defaultCategories = [
+    "Health",
+    "Activities",
+    "Personal",
+    "Education",
+    "Finance",
+    "Food",
+    "Travel",
+    "Home",
+  ];
   const currentCategories =
     categories.length > 0 ? categories : defaultCategories;
 

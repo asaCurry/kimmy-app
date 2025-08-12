@@ -98,7 +98,11 @@ export async function loader({
   } catch (error) {
     console.log("❌ Error loading family data:", error);
     // If it's a redirect, re-throw it
-    if (error instanceof Response && error.status >= 300 && error.status < 400) {
+    if (
+      error instanceof Response &&
+      error.status >= 300 &&
+      error.status < 400
+    ) {
       throw error;
     }
     // For other errors, return empty data

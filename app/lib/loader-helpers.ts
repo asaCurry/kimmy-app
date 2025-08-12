@@ -118,6 +118,15 @@ export async function loadFamilyDataWithCategories(
     "Personal",
     "Education",
     "Finance",
+    "Food",
+    "Travel",
+    "Home",
+    "Work",
+    "Social",
+    "Technology",
+    "Creative",
+    "Fitness",
+    "Spiritual",
   ];
 
   return {
