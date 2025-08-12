@@ -11,26 +11,43 @@ const PageLayout = React.forwardRef<
     showHeader?: boolean;
     showFooter?: boolean;
   }
->(({ className, maxWidth = "4xl", showHeader = true, showFooter = true, children, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col",
-      className
-    )}
-    {...props}
-  >
-    {showHeader && <AppHeader />}
-    
-    <main className="flex-1 p-3 sm:p-4">
-      <div className={cn("mx-auto", maxWidth === "2xl" ? "max-w-2xl" : "max-w-4xl")}>
-        {children}
-      </div>
-    </main>
-    
-    {showFooter && <AppFooter />}
-  </div>
-));
+>(
+  (
+    {
+      className,
+      maxWidth = "4xl",
+      showHeader = true,
+      showFooter = true,
+      children,
+      ...props
+    },
+    ref
+  ) => (
+    <div
+      ref={ref}
+      className={cn(
+        "min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col",
+        className
+      )}
+      {...props}
+    >
+      {showHeader && <AppHeader />}
+
+      <main className="flex-1 p-3 sm:p-4">
+        <div
+          className={cn(
+            "mx-auto",
+            maxWidth === "2xl" ? "max-w-2xl" : "max-w-4xl"
+          )}
+        >
+          {children}
+        </div>
+      </main>
+
+      {showFooter && <AppFooter />}
+    </div>
+  )
+);
 PageLayout.displayName = "PageLayout";
 
 // Shared page header component

@@ -8,16 +8,21 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Parse cookies from a cookie header string
  */
-export function parseCookies(cookieHeader: string | null): Record<string, string> {
+export function parseCookies(
+  cookieHeader: string | null
+): Record<string, string> {
   if (!cookieHeader) return {};
-  
-  return cookieHeader.split(';').reduce((acc, cookie) => {
-    const [key, value] = cookie.trim().split('=');
-    if (key && value) {
-      acc[key] = value;
-    }
-    return acc;
-  }, {} as Record<string, string>);
+
+  return cookieHeader.split(";").reduce(
+    (acc, cookie) => {
+      const [key, value] = cookie.trim().split("=");
+      if (key && value) {
+        acc[key] = value;
+      }
+      return acc;
+    },
+    {} as Record<string, string>
+  );
 }
 
 /**
@@ -39,12 +44,12 @@ export function isDatabaseAvailable(env: any): boolean {
  */
 export function extractSessionFromCookies(cookieHeader: string | null): any {
   if (!cookieHeader) return null;
-  
+
   const cookies = parseCookies(cookieHeader);
-  const sessionData = cookies['kimmy_auth_session'];
-  
+  const sessionData = cookies["kimmy_auth_session"];
+
   if (!sessionData) return null;
-  
+
   try {
     return JSON.parse(decodeURIComponent(sessionData));
   } catch {
@@ -54,33 +59,40 @@ export function extractSessionFromCookies(cookieHeader: string | null): any {
 
 // Legacy types - these should be replaced with the actual database types
 export interface FamilyMember {
-  id: number
-  name: string
-  email: string
-  role: 'admin' | 'member'
-  age?: number
-  relationshipToAdmin?: string
+  id: number;
+  name: string;
+  email: string;
+  role: "admin" | "member";
+  age?: number;
+  relationshipToAdmin?: string;
 }
 
 export interface RecordType {
-  id: number
-  name: string
-  description?: string
-  icon?: string
-  color?: string
-  fields: FormField[]
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  fields: FormField[];
 }
 
 export interface FormField {
-  id: string
-  type: 'text' | 'textarea' | 'number' | 'date' | 'select' | 'checkbox' | 'file'
-  label: string
-  required: boolean
-  placeholder?: string
-  options?: string[] // For select fields
+  id: string;
+  type:
+    | "text"
+    | "textarea"
+    | "number"
+    | "date"
+    | "select"
+    | "checkbox"
+    | "file";
+  label: string;
+  required: boolean;
+  placeholder?: string;
+  options?: string[]; // For select fields
   validation?: {
-    min?: number
-    max?: number
-    pattern?: string
-  }
+    min?: number;
+    max?: number;
+    pattern?: string;
+  };
 }

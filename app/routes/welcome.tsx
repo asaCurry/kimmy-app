@@ -23,15 +23,15 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
   useEffect(() => {
     if (isAuthenticated && session) {
       if (session.currentHouseholdId) {
-        navigate('/');
+        navigate("/");
       } else {
-        navigate('/onboarding/create-household');
+        navigate("/onboarding/create-household");
       }
     }
   }, [isAuthenticated, session, navigate]);
 
   const handleClearSession = () => {
-    logout(() => navigate('/login'));
+    logout(() => navigate("/login"));
   };
 
   if (isLoading) {
@@ -73,8 +73,8 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
             The simple way to manage your family's records
           </p>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            Keep track of medical appointments, school events, achievements, and more. 
-            Share information securely with your household members.
+            Keep track of medical appointments, school events, achievements, and
+            more. Share information securely with your household members.
           </p>
         </div>
 
@@ -90,7 +90,8 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
             </CardHeader>
             <CardContent className="text-center">
               <p className="text-sm text-slate-400 mb-6">
-                Already have an account? Sign in to access your household records.
+                Already have an account? Sign in to access your household
+                records.
               </p>
               <Link to="/login">
                 <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
@@ -107,11 +108,14 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
               <div className="mx-auto w-16 h-16 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full flex items-center justify-center mb-4">
                 <UserPlus className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-xl text-slate-100">Get Started</CardTitle>
+              <CardTitle className="text-xl text-slate-100">
+                Get Started
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <p className="text-sm text-slate-400 mb-6">
-                New to Hey, Kimmy? Create your account and set up your household.
+                New to Hey, Kimmy? Create your account and set up your
+                household.
               </p>
               <Link to="/onboarding">
                 <Button className="w-full bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600">
@@ -129,9 +133,12 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
             <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
               <Home className="h-6 w-6 text-white" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-200 mb-2">Household Management</h3>
+            <h3 className="text-lg font-semibold text-slate-200 mb-2">
+              Household Management
+            </h3>
             <p className="text-slate-400">
-              Create households and manage family members with role-based permissions.
+              Create households and manage family members with role-based
+              permissions.
             </p>
           </div>
 
@@ -139,9 +146,12 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
             <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-lg flex items-center justify-center mb-4">
               <span className="text-2xl">📝</span>
             </div>
-            <h3 className="text-lg font-semibold text-slate-200 mb-2">Flexible Records</h3>
+            <h3 className="text-lg font-semibold text-slate-200 mb-2">
+              Flexible Records
+            </h3>
             <p className="text-slate-400">
-              Track health records, school events, achievements, and custom record types.
+              Track health records, school events, achievements, and custom
+              record types.
             </p>
           </div>
 
@@ -149,9 +159,12 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
             <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-4">
               <span className="text-2xl">🔒</span>
             </div>
-            <h3 className="text-lg font-semibold text-slate-200 mb-2">Privacy Control</h3>
+            <h3 className="text-lg font-semibold text-slate-200 mb-2">
+              Privacy Control
+            </h3>
             <p className="text-slate-400">
-              Keep records visible to the household or mark them private when needed.
+              Keep records visible to the household or mark them private when
+              needed.
             </p>
           </div>
         </div>

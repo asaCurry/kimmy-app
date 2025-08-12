@@ -9,14 +9,19 @@ interface RecordTypeCardProps {
   onSelect?: () => void;
 }
 
-export const RecordTypeCard: React.FC<RecordTypeCardProps> = ({ recordType, onSelect }) => {
+export const RecordTypeCard: React.FC<RecordTypeCardProps> = ({
+  recordType,
+  onSelect,
+}) => {
   const icon = (
-    <div className={`text-xl sm:text-2xl p-1.5 sm:p-2 rounded-lg bg-slate-700/50 ${recordType.color ? 'shadow-lg' : ''} flex-shrink-0`}>
+    <div
+      className={`text-xl sm:text-2xl p-1.5 sm:p-2 rounded-lg bg-slate-700/50 ${recordType.color ? "shadow-lg" : ""} flex-shrink-0`}
+    >
       {recordType.icon || "📝"}
     </div>
   );
 
-  const fieldCount = `${recordType.fields.length} field${recordType.fields.length !== 1 ? 's' : ''}`;
+  const fieldCount = `${recordType.fields.length} field${recordType.fields.length !== 1 ? "s" : ""}`;
 
   return (
     <IconCard

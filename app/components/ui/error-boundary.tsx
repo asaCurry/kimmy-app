@@ -20,7 +20,10 @@ interface ErrorBoundaryProps {
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -32,9 +35,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ error, errorInfo });
-    
+
     // Log error to console and call onError callback
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
     this.props.onError?.(error, errorInfo);
   }
 
@@ -49,10 +52,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }
 
       return (
-        <ErrorDisplay 
-          error={this.state.error}
-          onRetry={this.handleRetry}
-        />
+        <ErrorDisplay error={this.state.error} onRetry={this.handleRetry} />
       );
     }
 
@@ -75,11 +75,12 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   message,
   onRetry,
   showDetails = false,
-  actions
+  actions,
 }) => {
   const [showFullError, setShowFullError] = React.useState(false);
 
-  const defaultMessage = error?.message || "An unexpected error occurred. Please try again.";
+  const defaultMessage =
+    error?.message || "An unexpected error occurred. Please try again.";
   const displayMessage = message || defaultMessage;
 
   return (
@@ -93,14 +94,14 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-slate-300 text-center">{displayMessage}</p>
-          
+
           {error && (
             <div className="space-y-2">
               <button
                 onClick={() => setShowFullError(!showFullError)}
                 className="text-sm text-slate-400 hover:text-slate-300 underline"
               >
-                {showFullError ? 'Hide' : 'Show'} technical details
+                {showFullError ? "Hide" : "Show"} technical details
               </button>
               {showFullError && (
                 <div className="p-3 bg-slate-900/50 rounded border border-slate-700">
@@ -114,7 +115,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
             {onRetry && (
-              <Button 
+              <Button
                 onClick={onRetry}
                 className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
               >
@@ -122,9 +123,9 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
                 Try Again
               </Button>
             )}
-            <Button 
+            <Button
               variant="outline"
-              onClick={() => window.location.href = '/'}
+              onClick={() => (window.location.href = "/")}
               className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
             >
               <Home className="mr-2 h-4 w-4" />
@@ -133,9 +134,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
           </div>
 
           {actions && (
-            <div className="pt-2 border-t border-slate-700">
-              {actions}
-            </div>
+            <div className="pt-2 border-t border-slate-700">{actions}</div>
           )}
         </CardContent>
       </Card>
@@ -148,11 +147,17 @@ interface NetworkErrorProps {
   message?: string;
 }
 
-export const NetworkError: React.FC<NetworkErrorProps> = ({ onRetry, message }) => {
+export const NetworkError: React.FC<NetworkErrorProps> = ({
+  onRetry,
+  message,
+}) => {
   return (
     <ErrorDisplay
       title="Connection Problem"
-      message={message || "Unable to connect to the server. Please check your internet connection and try again."}
+      message={
+        message ||
+        "Unable to connect to the server. Please check your internet connection and try again."
+      }
       onRetry={onRetry}
     />
   );
@@ -163,14 +168,17 @@ interface NotFoundErrorProps {
   onGoHome?: () => void;
 }
 
-export const NotFoundError: React.FC<NotFoundErrorProps> = ({ resource = "page", onGoHome }) => {
+export const NotFoundError: React.FC<NotFoundErrorProps> = ({
+  resource = "page",
+  onGoHome,
+}) => {
   return (
     <ErrorDisplay
       title="Not Found"
       message={`The ${resource} you're looking for doesn't exist or has been moved.`}
       actions={
-        <Button 
-          onClick={onGoHome || (() => window.location.href = '/')}
+        <Button
+          onClick={onGoHome || (() => (window.location.href = "/"))}
           className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
         >
           <Home className="mr-2 h-4 w-4" />
@@ -192,8 +200,8 @@ export const AuthError: React.FC<AuthErrorProps> = ({ onSignIn, message }) => {
       title="Authentication Required"
       message={message || "You need to sign in to access this content."}
       actions={
-        <Button 
-          onClick={onSignIn || (() => window.location.href = '/login')}
+        <Button
+          onClick={onSignIn || (() => (window.location.href = "/login"))}
           className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
         >
           Sign In

@@ -38,9 +38,9 @@ export const createSuccessResponse = <T>(
     success: true,
     data,
     message,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
-  
+
   return c.json(response, statusCode);
 };
 
@@ -53,13 +53,13 @@ export const createErrorResponse = (
   const response: ApiResponse = {
     success: false,
     error,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
-  
+
   if (details) {
     response.data = details;
   }
-  
+
   return c.json(response, statusCode);
 };
 
@@ -69,14 +69,20 @@ export const validateDatabase = (env: any): void => {
   }
 };
 
-export const validateRequiredParam = (param: string | undefined, paramName: string): string => {
+export const validateRequiredParam = (
+  param: string | undefined,
+  paramName: string
+): string => {
   if (!param) {
     throw new ApiError(400, `${paramName} is required`);
   }
   return param;
 };
 
-export const validateRequiredBody = (body: any, requiredFields: string[]): void => {
+export const validateRequiredBody = (
+  body: any,
+  requiredFields: string[]
+): void => {
   for (const field of requiredFields) {
     if (!body[field]) {
       throw new ApiError(400, `${field} is required`);
@@ -86,14 +92,19 @@ export const validateRequiredBody = (body: any, requiredFields: string[]): void 
 
 export const handleApiError = (c: Context, error: unknown) => {
   console.error("API error:", error);
-  
+
   if (error instanceof ApiError) {
-    return createErrorResponse(c, error.message, error.statusCode, error.details);
+    return createErrorResponse(
+      c,
+      error.message,
+      error.statusCode,
+      error.details
+    );
   }
-  
+
   if (error instanceof Error) {
     return createErrorResponse(c, error.message, 500);
   }
-  
+
   return createErrorResponse(c, "An unexpected error occurred", 500);
 };

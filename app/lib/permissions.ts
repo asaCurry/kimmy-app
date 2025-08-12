@@ -2,19 +2,21 @@
  * Permission and access control utilities for household management
  */
 
-import type { 
-  HouseholdRole, 
-  HouseholdPermissions, 
-  HouseholdMember, 
-  AuthSession 
-} from './types';
+import type {
+  HouseholdRole,
+  HouseholdPermissions,
+  HouseholdMember,
+  AuthSession,
+} from "./types";
 
 /**
  * Get permissions for a user's role within a household
  */
-export function getHouseholdPermissions(role: HouseholdRole): HouseholdPermissions {
+export function getHouseholdPermissions(
+  role: HouseholdRole
+): HouseholdPermissions {
   switch (role) {
-    case 'ADMIN':
+    case "ADMIN":
       return {
         canInviteMembers: true,
         canManageMembers: true,
@@ -25,8 +27,8 @@ export function getHouseholdPermissions(role: HouseholdRole): HouseholdPermissio
         canManageRecordTypes: true,
         canManageHousehold: true,
       };
-    
-    case 'MEMBER':
+
+    case "MEMBER":
       return {
         canInviteMembers: false,
         canManageMembers: false,
@@ -37,8 +39,8 @@ export function getHouseholdPermissions(role: HouseholdRole): HouseholdPermissio
         canManageRecordTypes: false,
         canManageHousehold: false,
       };
-    
-    case 'CHILD':
+
+    case "CHILD":
       return {
         canInviteMembers: false,
         canManageMembers: false,
@@ -49,7 +51,7 @@ export function getHouseholdPermissions(role: HouseholdRole): HouseholdPermissio
         canManageRecordTypes: false,
         canManageHousehold: false,
       };
-    
+
     default:
       // No permissions for unknown roles
       return {
@@ -84,39 +86,39 @@ export function canAccessMemberRecords(
   viewerRole: HouseholdRole,
   viewerUserId: string,
   targetMember: HouseholdMember,
-  action: 'view' | 'edit' | 'delete'
+  action: "view" | "edit" | "delete"
 ): boolean {
   // Children can't access any records (they don't have accounts)
-  if (viewerRole === 'CHILD') {
+  if (viewerRole === "CHILD") {
     return false;
   }
-  
+
   // All members (including admins) can view all non-private records in the household
   // For private records, only the creator can access them
-  if (action === 'view') {
+  if (action === "view") {
     return true; // This function doesn't check private status - that's handled by canViewRecord
   }
-  
+
   // Admins can edit/delete any record (including private ones)
-  if (viewerRole === 'ADMIN') {
+  if (viewerRole === "ADMIN") {
     return true;
   }
-  
+
   // Members can edit/delete records they created or records for children
-  if (viewerRole === 'MEMBER') {
+  if (viewerRole === "MEMBER") {
     // Can edit their own records
     if (targetMember.userId === viewerUserId) {
       return true;
     }
-    
+
     // Can edit records for children (who don't have user accounts)
-    if (targetMember.role === 'CHILD') {
+    if (targetMember.role === "CHILD") {
       return true;
     }
-    
+
     return false;
   }
-  
+
   return false;
 }
 
@@ -130,20 +132,20 @@ export function canViewRecord(
   targetMember: HouseholdMember
 ): boolean {
   // Children can't view any records
-  if (viewerRole === 'CHILD') {
+  if (viewerRole === "CHILD") {
     return false;
   }
-  
+
   // If record is not private, all household members can view it
   if (!record.isPrivate) {
     return true;
   }
-  
+
   // For private records, only creator and admins can view
-  if (viewerRole === 'ADMIN' || record.createdByUserId === viewerUserId) {
+  if (viewerRole === "ADMIN" || record.createdByUserId === viewerUserId) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -155,10 +157,10 @@ export function canManageHouseholdMember(
   targetMemberRole: HouseholdRole
 ): boolean {
   // Only admins can manage members
-  if (managerRole !== 'ADMIN') {
+  if (managerRole !== "ADMIN") {
     return false;
   }
-  
+
   // Admins can manage all member types
   return true;
 }
@@ -188,7 +190,7 @@ export function isUserInHousehold(
  * Get all households where user has admin privileges
  */
 export function getAdminHouseholds(session: AuthSession) {
-  return session.households.filter(h => h.role === 'ADMIN');
+  return session.households.filter(h => h.role === "ADMIN");
 }
 
 /**
@@ -212,23 +214,23 @@ export function canInviteEmail(
   const existingMember = currentMembers.find(
     m => m.email?.toLowerCase() === email.toLowerCase() && m.isActive
   );
-  
+
   if (existingMember) {
     return {
       canInvite: false,
-      reason: 'This email is already a member of the household'
+      reason: "This email is already a member of the household",
     };
   }
-  
+
   // Basic email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return {
       canInvite: false,
-      reason: 'Invalid email address'
+      reason: "Invalid email address",
     };
   }
-  
+
   return { canInvite: true };
 }
 
@@ -237,14 +239,14 @@ export function canInviteEmail(
  */
 export function getRoleDisplayName(role: HouseholdRole): string {
   switch (role) {
-    case 'ADMIN':
-      return 'Administrator';
-    case 'MEMBER':
-      return 'Member';
-    case 'CHILD':
-      return 'Child';
+    case "ADMIN":
+      return "Administrator";
+    case "MEMBER":
+      return "Member";
+    case "CHILD":
+      return "Child";
     default:
-      return 'Unknown';
+      return "Unknown";
   }
 }
 
@@ -252,7 +254,7 @@ export function getRoleDisplayName(role: HouseholdRole): string {
  * Check if a member type can have an account
  */
 export function canHaveAccount(role: HouseholdRole): boolean {
-  return role !== 'CHILD';
+  return role !== "CHILD";
 }
 
 /**
@@ -264,13 +266,15 @@ export function isValidRelationship(
   relationship: string
 ): boolean {
   // Admin should be 'parent' role conceptually
-  if (adminRole !== 'ADMIN') return false;
-  
+  if (adminRole !== "ADMIN") return false;
+
   // Children should have child-appropriate relationships
-  if (memberRole === 'CHILD') {
-    return ['child', 'grandchild'].includes(relationship);
+  if (memberRole === "CHILD") {
+    return ["child", "grandchild"].includes(relationship);
   }
-  
+
   // Adults can have various relationships
-  return ['spouse', 'sibling', 'parent', 'grandparent', 'other'].includes(relationship);
+  return ["spouse", "sibling", "parent", "grandparent", "other"].includes(
+    relationship
+  );
 }

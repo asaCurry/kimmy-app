@@ -1,5 +1,11 @@
 import * as React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Users } from "lucide-react";
 import type { FamilyMember } from "~/lib/utils";
 
@@ -20,7 +26,7 @@ export const MemberCard: React.FC<MemberCardProps> = ({
   badgeColor,
   badgeText,
   emptyMessage,
-  showAge = false
+  showAge = false,
 }) => {
   const count = members.length;
   const singular = title.toLowerCase().slice(0, -1); // Remove 's' from end
@@ -40,14 +46,17 @@ export const MemberCard: React.FC<MemberCardProps> = ({
       <CardContent className="pt-0">
         <div className="space-y-2">
           {count > 0 ? (
-            members.map((member) => (
-              <div key={member.id} className="flex items-start justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors duration-200">
+            members.map(member => (
+              <div
+                key={member.id}
+                className="flex items-start justify-between p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors duration-200"
+              >
                 <div className="flex-1 min-w-0 mr-3">
-                  <p className="font-medium text-slate-200 truncate">{member.name}</p>
+                  <p className="font-medium text-slate-200 truncate">
+                    {member.name}
+                  </p>
                   <div className="text-sm text-slate-400 space-y-1 mt-1">
-                    {member.email && (
-                      <p className="truncate">{member.email}</p>
-                    )}
+                    {member.email && <p className="truncate">{member.email}</p>}
                     {showAge && (member.age || member.relationshipToAdmin) && (
                       <div className="flex flex-wrap gap-2 text-xs">
                         {member.age && (
@@ -64,7 +73,9 @@ export const MemberCard: React.FC<MemberCardProps> = ({
                     )}
                   </div>
                 </div>
-                <span className={`text-xs font-medium ${badgeColor} px-2.5 py-1 rounded-full flex-shrink-0 shadow-sm`}>
+                <span
+                  className={`text-xs font-medium ${badgeColor} px-2.5 py-1 rounded-full flex-shrink-0 shadow-sm`}
+                >
                   {badgeText}
                 </span>
               </div>

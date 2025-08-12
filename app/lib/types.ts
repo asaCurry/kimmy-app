@@ -34,8 +34,15 @@ export interface Household {
 }
 
 // Household member types
-export type HouseholdRole = 'ADMIN' | 'MEMBER' | 'CHILD';
-export type RelationshipType = 'parent' | 'child' | 'spouse' | 'sibling' | 'grandparent' | 'grandchild' | 'other';
+export type HouseholdRole = "ADMIN" | "MEMBER" | "CHILD";
+export type RelationshipType =
+  | "parent"
+  | "child"
+  | "spouse"
+  | "sibling"
+  | "grandparent"
+  | "grandchild"
+  | "other";
 
 export interface HouseholdMember {
   id: string; // UUID
@@ -67,7 +74,7 @@ export interface Invitation {
   id: string; // UUID
   householdId: string;
   email: string;
-  role: Exclude<HouseholdRole, 'CHILD'>; // Children don't get invitations
+  role: Exclude<HouseholdRole, "CHILD">; // Children don't get invitations
   invitedByUserId: string;
   token: string; // Unique invitation token
   expiresAt: Date;
@@ -79,7 +86,16 @@ export interface Invitation {
 // Record types (form templates)
 export interface FormField {
   id: string;
-  type: 'text' | 'textarea' | 'number' | 'date' | 'select' | 'checkbox' | 'file' | 'email' | 'phone';
+  type:
+    | "text"
+    | "textarea"
+    | "number"
+    | "date"
+    | "select"
+    | "checkbox"
+    | "file"
+    | "email"
+    | "phone";
   label: string;
   required: boolean;
   placeholder?: string;
@@ -170,7 +186,7 @@ export interface CreateHouseholdResponse {
 
 export interface InviteMemberRequest {
   email: string;
-  role: Exclude<HouseholdRole, 'CHILD'>;
+  role: Exclude<HouseholdRole, "CHILD">;
   firstName?: string;
   lastName?: string;
 }
@@ -215,28 +231,28 @@ export interface AppError {
 
 export class HouseholdError extends Error {
   constructor(
-    public code: string, 
-    message: string, 
+    public code: string,
+    message: string,
     public details?: any
   ) {
     super(message);
-    this.name = 'HouseholdError';
+    this.name = "HouseholdError";
   }
 }
 
 // Constants
 export const HOUSEHOLD_ROLES = {
-  ADMIN: 'ADMIN' as const,
-  MEMBER: 'MEMBER' as const,
-  CHILD: 'CHILD' as const,
+  ADMIN: "ADMIN" as const,
+  MEMBER: "MEMBER" as const,
+  CHILD: "CHILD" as const,
 };
 
 export const RELATIONSHIP_TYPES = {
-  PARENT: 'parent' as const,
-  CHILD: 'child' as const,
-  SPOUSE: 'spouse' as const,
-  SIBLING: 'sibling' as const,
-  GRANDPARENT: 'grandparent' as const,
-  GRANDCHILD: 'grandchild' as const,
-  OTHER: 'other' as const,
+  PARENT: "parent" as const,
+  CHILD: "child" as const,
+  SPOUSE: "spouse" as const,
+  SIBLING: "sibling" as const,
+  GRANDPARENT: "grandparent" as const,
+  GRANDCHILD: "grandchild" as const,
+  OTHER: "other" as const,
 } as const;

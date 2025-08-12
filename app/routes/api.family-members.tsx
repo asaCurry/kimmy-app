@@ -4,58 +4,61 @@ import { userDb } from "~/lib/db";
 export async function loader({ request, context }: Route.LoaderArgs) {
   try {
     const env = (context.cloudflare as any)?.env;
-    
+
     if (!env?.DB) {
-      throw new Response('Database not available', { status: 500 });
+      throw new Response("Database not available", { status: 500 });
     }
 
     // Extract family ID from session instead of URL
-    const cookieHeader = request.headers.get('cookie');
+    const cookieHeader = request.headers.get("cookie");
     let familyId = null;
-    
+
     if (cookieHeader) {
       try {
-        const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
-          const [key, value] = cookie.trim().split('=');
-          acc[key] = value;
-          return acc;
-        }, {} as Record<string, string>);
-        
-        const sessionData = cookies['kimmy_auth_session'];
+        const cookies = cookieHeader.split(";").reduce(
+          (acc, cookie) => {
+            const [key, value] = cookie.trim().split("=");
+            acc[key] = value;
+            return acc;
+          },
+          {} as Record<string, string>
+        );
+
+        const sessionData = cookies["kimmy_auth_session"];
         if (sessionData) {
           const session = JSON.parse(decodeURIComponent(sessionData));
           familyId = session.currentHouseholdId || null;
         }
       } catch (error) {
-        console.error('Failed to parse session cookie:', error);
+        console.error("Failed to parse session cookie:", error);
       }
     }
-    
+
     if (!familyId) {
-      throw new Response('Family ID not found in session', { status: 400 });
+      throw new Response("Family ID not found in session", { status: 400 });
     }
 
     // Fetch family members from database
     const dbMembers = await userDb.findByFamilyId(env, familyId);
-    
+
     // Transform database User type to FamilyMember type
     const members = dbMembers.map(member => ({
       id: member.id,
       name: member.name,
       email: member.email,
-      role: (member.role || 'member') as 'admin' | 'member',
+      role: (member.role || "member") as "admin" | "member",
       age: member.age,
-      relationshipToAdmin: member.relationshipToAdmin
+      relationshipToAdmin: member.relationshipToAdmin,
     }));
-    
+
     return { members };
   } catch (error) {
-    console.error('Family members API error:', error);
-    
+    console.error("Family members API error:", error);
+
     if (error instanceof Response) {
       throw error;
     }
-    
-    throw new Response('Failed to fetch family members', { status: 500 });
+
+    throw new Response("Failed to fetch family members", { status: 500 });
   }
 }

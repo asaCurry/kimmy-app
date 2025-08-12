@@ -23,7 +23,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
     setIsLoggingOut(true);
     try {
       // Call logout with navigation callback to redirect to login
-      logout(() => navigate('/login'));
+      logout(() => navigate("/login"));
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
@@ -32,10 +32,12 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
   };
 
   return (
-    <footer className={cn(
-      "border-t border-slate-700 bg-slate-900/50 backdrop-blur",
-      className
-    )}>
+    <footer
+      className={cn(
+        "border-t border-slate-700 bg-slate-900/50 backdrop-blur",
+        className
+      )}
+    >
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Main Footer Content */}
         <div className="grid gap-8 md:grid-cols-4">
@@ -45,10 +47,13 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <Heart className="h-4 w-4 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-200">Hey, Kimmy</h3>
+              <h3 className="text-lg font-semibold text-slate-200">
+                Hey, Kimmy
+              </h3>
             </div>
             <p className="text-sm text-slate-400">
-              Securely manage your family's records and information in one place.
+              Securely manage your family's records and information in one
+              place.
             </p>
             {session?.currentHouseholdId && (
               <div className="text-xs text-slate-400">
@@ -59,29 +64,49 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
 
           {/* Quick Links */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-slate-200">Quick Links</h4>
+            <h4 className="text-sm font-semibold text-slate-200">
+              Quick Links
+            </h4>
             <nav className="space-y-2">
               {isAuthenticated ? (
                 <>
-                  <Link to="/" className="block text-sm text-slate-400 hover:text-slate-300 transition-colors">
+                  <Link
+                    to="/"
+                    className="block text-sm text-slate-400 hover:text-slate-300 transition-colors"
+                  >
                     Home
                   </Link>
-                  <Link to="/manage" className="block text-sm text-slate-400 hover:text-slate-300 transition-colors">
+                  <Link
+                    to="/manage"
+                    className="block text-sm text-slate-400 hover:text-slate-300 transition-colors"
+                  >
                     Manage Household
                   </Link>
-                  <Link to="/manage/add-member" className="block text-sm text-slate-400 hover:text-slate-300 transition-colors">
+                  <Link
+                    to="/manage/add-member"
+                    className="block text-sm text-slate-400 hover:text-slate-300 transition-colors"
+                  >
                     Add Member
                   </Link>
                 </>
               ) : (
                 <>
-                  <Link to="/welcome" className="block text-sm text-slate-400 hover:text-slate-300 transition-colors">
+                  <Link
+                    to="/welcome"
+                    className="block text-sm text-slate-400 hover:text-slate-300 transition-colors"
+                  >
                     Welcome
                   </Link>
-                  <Link to="/login" className="block text-sm text-slate-400 hover:text-slate-300 transition-colors">
+                  <Link
+                    to="/login"
+                    className="block text-sm text-slate-400 hover:text-slate-300 transition-colors"
+                  >
                     Sign In
                   </Link>
-                  <Link to="/onboarding" className="block text-sm text-slate-400 hover:text-slate-300 transition-colors">
+                  <Link
+                    to="/onboarding"
+                    className="block text-sm text-slate-400 hover:text-slate-300 transition-colors"
+                  >
                     Get Started
                   </Link>
                 </>
@@ -93,16 +118,28 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
           <div className="space-y-3">
             <h4 className="text-sm font-semibold text-slate-200">Support</h4>
             <nav className="space-y-2">
-              <a href="#" className="block text-sm text-slate-400 hover:text-slate-300 transition-colors">
+              <a
+                href="#"
+                className="block text-sm text-slate-400 hover:text-slate-300 transition-colors"
+              >
                 Help Center
               </a>
-              <a href="#" className="block text-sm text-slate-400 hover:text-slate-300 transition-colors">
+              <a
+                href="#"
+                className="block text-sm text-slate-400 hover:text-slate-300 transition-colors"
+              >
                 Privacy Policy
               </a>
-              <a href="#" className="block text-sm text-slate-400 hover:text-slate-300 transition-colors">
+              <a
+                href="#"
+                className="block text-sm text-slate-400 hover:text-slate-300 transition-colors"
+              >
                 Terms of Service
               </a>
-              <a href="#" className="flex items-center text-sm text-slate-400 hover:text-slate-300 transition-colors">
+              <a
+                href="#"
+                className="flex items-center text-sm text-slate-400 hover:text-slate-300 transition-colors"
+              >
                 Contact Us
                 <ExternalLink className="ml-1 h-3 w-3" />
               </a>
@@ -115,9 +152,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
             {isAuthenticated ? (
               <div className="space-y-3">
                 <div className="text-sm">
-                  <p className="text-slate-300 font-medium">
-                    {session?.name}
-                  </p>
+                  <p className="text-slate-300 font-medium">{session?.name}</p>
                   <p className="text-slate-500">{session?.email}</p>
                 </div>
                 <div className="space-y-2">
@@ -144,12 +179,19 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
             ) : (
               <div className="space-y-2">
                 <Link to="/login">
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800"
+                  >
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/onboarding">
-                  <Button size="sm" className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                  <Button
+                    size="sm"
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                  >
                     Get Started
                   </Button>
                 </Link>
@@ -164,10 +206,11 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
             <span>© 2024 Hey, Kimmy</span>
             <span className="hidden sm:inline">•</span>
             <span className="flex items-center">
-              Made with <Heart className="mx-1 h-3 w-3 text-red-400" /> for families
+              Made with <Heart className="mx-1 h-3 w-3 text-red-400" /> for
+              families
             </span>
           </div>
-          
+
           <div className="flex items-center space-x-4 text-sm text-slate-500">
             <div className="flex items-center space-x-1">
               <Shield className="h-3 w-3" />

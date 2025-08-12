@@ -2,7 +2,7 @@
  * Reusable form validation utilities
  */
 
-import * as React from 'react';
+import * as React from "react";
 
 export interface ValidationRule {
   required?: boolean;
@@ -66,7 +66,11 @@ export const COMMON_RULES = {
 /**
  * Validate a single field
  */
-export function validateField(value: string, rule: ValidationRule, allValues?: Record<string, string>): string | null {
+export function validateField(
+  value: string,
+  rule: ValidationRule,
+  allValues?: Record<string, string>
+): string | null {
   // Required check
   if (rule.required && !value.trim()) {
     return "This field is required";
@@ -79,11 +83,11 @@ export function validateField(value: string, rule: ValidationRule, allValues?: R
 
   // Length validations
   if (rule.minLength && value.length < rule.minLength) {
-    return `Must be at least ${rule.minLength} character${rule.minLength !== 1 ? 's' : ''}`;
+    return `Must be at least ${rule.minLength} character${rule.minLength !== 1 ? "s" : ""}`;
   }
 
   if (rule.maxLength && value.length > rule.maxLength) {
-    return `Must be no more than ${rule.maxLength} character${rule.maxLength !== 1 ? 's' : ''}`;
+    return `Must be no more than ${rule.maxLength} character${rule.maxLength !== 1 ? "s" : ""}`;
   }
 
   // Pattern validation
@@ -113,11 +117,14 @@ export function validateField(value: string, rule: ValidationRule, allValues?: R
 /**
  * Validate an entire form
  */
-export function validateForm(values: Record<string, string>, rules: ValidationRules): ValidationResult {
+export function validateForm(
+  values: Record<string, string>,
+  rules: ValidationRules
+): ValidationResult {
   const errors: Record<string, string> = {};
 
   for (const [field, rule] of Object.entries(rules)) {
-    const error = validateField(values[field] || '', rule, values);
+    const error = validateField(values[field] || "", rule, values);
     if (error) {
       errors[field] = error;
     }
@@ -135,7 +142,11 @@ export function validateForm(values: Record<string, string>, rules: ValidationRu
 export function useFormValidation(rules: ValidationRules) {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
-  const validateSingleField = (field: string, value: string, allValues: Record<string, string>) => {
+  const validateSingleField = (
+    field: string,
+    value: string,
+    allValues: Record<string, string>
+  ) => {
     const rule = rules[field];
     if (!rule) return null;
 
@@ -178,7 +189,7 @@ export const VALIDATION_RULE_SETS = {
     email: COMMON_RULES.email,
     password: { required: true }, // Don't validate length on login
   },
-  
+
   createAccount: {
     firstName: COMMON_RULES.firstName,
     lastName: COMMON_RULES.lastName,
@@ -186,16 +197,16 @@ export const VALIDATION_RULE_SETS = {
     password: COMMON_RULES.password,
     confirmPassword: {
       required: true,
-      match: 'password',
+      match: "password",
     },
   },
-  
+
   createHousehold: {
     householdName: COMMON_RULES.householdName,
     adminFirstName: COMMON_RULES.firstName,
     adminLastName: COMMON_RULES.lastName,
   },
-  
+
   addMember: {
     firstName: COMMON_RULES.firstName,
     lastName: COMMON_RULES.lastName,

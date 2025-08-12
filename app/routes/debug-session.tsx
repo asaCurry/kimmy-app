@@ -50,7 +50,10 @@ const DebugSession: React.FC = () => {
             <div>
               <strong>Raw Storage Value:</strong>
               <pre className="bg-slate-800 p-2 rounded mt-2 text-xs overflow-auto">
-                {typeof window !== 'undefined' ? window.sessionStorage.getItem('kimmy_auth_session') || 'null' : 'Server side'}
+                {typeof window !== "undefined"
+                  ? window.sessionStorage.getItem("kimmy_auth_session") ||
+                    "null"
+                  : "Server side"}
               </pre>
             </div>
           </div>

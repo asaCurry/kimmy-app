@@ -10,18 +10,18 @@ interface LoadingSpinnerProps {
   className?: string;
 }
 
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
-  size = "md", 
-  className 
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = "md",
+  className,
 }) => {
   const sizeClasses = {
     sm: "h-4 w-4",
-    md: "h-8 w-8", 
-    lg: "h-12 w-12"
+    md: "h-8 w-8",
+    lg: "h-12 w-12",
   };
 
   return (
-    <div 
+    <div
       className={cn(
         "animate-spin rounded-full border-b-2 border-blue-500",
         sizeClasses[size],
@@ -38,11 +38,11 @@ interface LoadingStateProps {
   className?: string;
 }
 
-export const LoadingState: React.FC<LoadingStateProps> = ({ 
+export const LoadingState: React.FC<LoadingStateProps> = ({
   size = "md",
   message = "Loading...",
   fullScreen = false,
-  className 
+  className,
 }) => {
   const containerClasses = fullScreen
     ? "min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center"
@@ -69,7 +69,7 @@ export const ButtonLoading: React.FC<ButtonLoadingProps> = ({
   isLoading,
   children,
   loadingText,
-  className
+  className,
 }) => {
   if (isLoading) {
     return (
@@ -87,8 +87,8 @@ interface PageLoadingProps {
   message?: string;
 }
 
-export const PageLoading: React.FC<PageLoadingProps> = ({ 
-  message = "Loading..." 
+export const PageLoading: React.FC<PageLoadingProps> = ({
+  message = "Loading...",
 }) => {
   return <LoadingState fullScreen message={message} />;
 };
@@ -98,9 +98,9 @@ interface InlineLoadingProps {
   size?: "sm" | "md";
 }
 
-export const InlineLoading: React.FC<InlineLoadingProps> = ({ 
+export const InlineLoading: React.FC<InlineLoadingProps> = ({
   message = "Loading...",
-  size = "sm"
+  size = "sm",
 }) => {
   return (
     <div className="flex items-center justify-center py-4">

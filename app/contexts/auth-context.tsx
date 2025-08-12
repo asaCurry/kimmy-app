@@ -26,7 +26,9 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,10 +37,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       try {
         const storedSession = sessionStorage.getSessionData();
-        
+
         if (storedSession) {
           // Check if session is expired
-          if (storedSession.expiresAt && new Date(storedSession.expiresAt) <= new Date()) {
+          if (
+            storedSession.expiresAt &&
+            new Date(storedSession.expiresAt) <= new Date()
+          ) {
             sessionStorage.clearSession();
             setSession(null);
             setIsAuthenticated(false);
@@ -76,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return false;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       return false;
     }
   };
@@ -86,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSession(null);
     setIsAuthenticated(false);
     sessionStorage.clearSession();
-    
+
     // Navigate to login page if callback provided
     if (navigate) {
       navigate();
@@ -102,11 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateSession,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 // Higher-order component for route protection
@@ -116,10 +117,10 @@ interface RequireAuthProps {
   requireHousehold?: boolean;
 }
 
-export const RequireAuth: React.FC<RequireAuthProps> = ({ 
-  children, 
+export const RequireAuth: React.FC<RequireAuthProps> = ({
+  children,
   fallback,
-  requireHousehold = false 
+  requireHousehold = false,
 }) => {
   const { session, isLoading } = useAuth();
 
@@ -129,7 +130,7 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
       return fallback;
     }
     // Redirect to login page
-    window.location.href = '/login';
+    window.location.href = "/login";
     return <PageLoading message="Redirecting to login..." />;
   }
 
@@ -138,19 +139,25 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
   }
 
   if (requireHousehold && !session?.currentHouseholdId) {
-    return fallback || (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <h2 className="text-2xl font-bold text-slate-200 mb-4">Household Required</h2>
-          <p className="text-slate-400 mb-6">You need to be part of a household to access this page.</p>
-          <a 
-            href="/onboarding/create-household" 
-            className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-md hover:from-emerald-600 hover:to-blue-600 transition-colors"
-          >
-            Create Household
-          </a>
+    return (
+      fallback || (
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto p-6">
+            <h2 className="text-2xl font-bold text-slate-200 mb-4">
+              Household Required
+            </h2>
+            <p className="text-slate-400 mb-6">
+              You need to be part of a household to access this page.
+            </p>
+            <a
+              href="/onboarding/create-household"
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-md hover:from-emerald-600 hover:to-blue-600 transition-colors"
+            >
+              Create Household
+            </a>
+          </div>
         </div>
-      </div>
+      )
     );
   }
 

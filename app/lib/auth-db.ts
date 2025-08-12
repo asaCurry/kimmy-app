@@ -3,8 +3,8 @@
  * Replaces the mock authentication with real database operations
  */
 
-import { authDb, userDb, familyDb } from './db';
-import { isDatabaseAvailable } from './utils';
+import { authDb, userDb, familyDb } from "./db";
+import { isDatabaseAvailable } from "./utils";
 
 // Session management (unchanged for session storage)
 export interface SessionToken {
@@ -19,25 +19,25 @@ export interface AuthSession {
   email: string;
   name: string;
   currentHouseholdId?: string; // Optional - users might not have a household yet
-  role: 'admin' | 'member';
+  role: "admin" | "member";
   expiresAt: Date;
 }
 
 export const sessionStorage = {
   setToken(token: SessionToken): void {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Validate token before storing
       if (token.expiresAt && new Date(token.expiresAt) <= new Date()) {
         return;
       }
-      window.sessionStorage.setItem('kimmy_auth_token', JSON.stringify(token));
+      window.sessionStorage.setItem("kimmy_auth_token", JSON.stringify(token));
     }
   },
 
   getToken(): SessionToken | null {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
-        const tokenData = window.sessionStorage.getItem('kimmy_auth_token');
+        const tokenData = window.sessionStorage.getItem("kimmy_auth_token");
         if (tokenData) {
           const token = JSON.parse(tokenData);
           // Check if token is expired
@@ -56,25 +56,28 @@ export const sessionStorage = {
   },
 
   clearToken(): void {
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.removeItem('kimmy_auth_token');
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem("kimmy_auth_token");
     }
   },
 
   setSessionData(session: AuthSession): void {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Set session in sessionStorage for client-side access
-      window.sessionStorage.setItem('kimmy_auth_session', JSON.stringify(session));
-      
+      window.sessionStorage.setItem(
+        "kimmy_auth_session",
+        JSON.stringify(session)
+      );
+
       // Also set as a cookie for server-side access
       document.cookie = `kimmy_auth_session=${encodeURIComponent(JSON.stringify(session))}; path=/; max-age=${Math.floor((new Date(session.expiresAt).getTime() - Date.now()) / 1000)}`;
     }
   },
 
   getSessionData(): AuthSession | null {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
-        const sessionData = window.sessionStorage.getItem('kimmy_auth_session');
+        const sessionData = window.sessionStorage.getItem("kimmy_auth_session");
         if (sessionData) {
           const session = JSON.parse(sessionData);
           // Check if session is expired
@@ -93,48 +96,55 @@ export const sessionStorage = {
   },
 
   clearSession(): void {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Clear sessionStorage
-      window.sessionStorage.removeItem('kimmy_auth_session');
-      
+      window.sessionStorage.removeItem("kimmy_auth_session");
+
       // Clear all possible cookie variations with different attributes
       const cookieNames = [
-        'kimmy_auth_session',
-        'kimmy_auth_session=',
-        'kimmy_auth_session=;',
+        "kimmy_auth_session",
+        "kimmy_auth_session=",
+        "kimmy_auth_session=;",
       ];
-      
+
       cookieNames.forEach(cookieName => {
         // Clear with different path and domain combinations
         document.cookie = `${cookieName}; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
         document.cookie = `${cookieName}; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
         document.cookie = `${cookieName}; path=/; domain=.${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
       });
-      
+
       // Also try to clear with Max-Age=0
-      document.cookie = 'kimmy_auth_session=; path=/; Max-Age=0';
+      document.cookie = "kimmy_auth_session=; path=/; Max-Age=0";
     }
   },
 };
 
 // Authentication API functions
 export const authApi = {
-  async login(env: any, email: string, password: string): Promise<AuthSession | null> {
-    console.log('authApi.login called with:', { email, passwordLength: password?.length });
-    console.log('authApi.login - env.DB available:', !!env?.DB);
-    
+  async login(
+    env: any,
+    email: string,
+    password: string
+  ): Promise<AuthSession | null> {
+    console.log("authApi.login called with:", {
+      email,
+      passwordLength: password?.length,
+    });
+    console.log("authApi.login - env.DB available:", !!env?.DB);
+
     if (!isDatabaseAvailable(env)) {
-      console.error('authApi.login - Database not available');
-      throw new Error('Database not available');
+      console.error("authApi.login - Database not available");
+      throw new Error("Database not available");
     }
 
     try {
-      console.log('authApi.login - calling authDb.authenticateUser...');
+      console.log("authApi.login - calling authDb.authenticateUser...");
       const user = await authDb.authenticateUser(env, email, password);
-      console.log('authApi.login - authDb.authenticateUser result:', user);
-      
+      console.log("authApi.login - authDb.authenticateUser result:", user);
+
       if (!user) {
-        console.log('authApi.login - No user returned from authenticateUser');
+        console.log("authApi.login - No user returned from authenticateUser");
         return null;
       }
 
@@ -145,30 +155,36 @@ export const authApi = {
         email: user.email,
         name: user.name,
         currentHouseholdId: user.familyId || undefined, // Only set if user has a family
-        role: user.role as 'admin' | 'member',
+        role: user.role as "admin" | "member",
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
 
-      console.log('authApi.login - Created session:', session);
+      console.log("authApi.login - Created session:", session);
       return session;
     } catch (error) {
-      console.error('authApi.login - Login failed:', error);
+      console.error("authApi.login - Login failed:", error);
       return null;
     }
   },
 
-  async createAccount(env: any, userData: {
-    name: string;
-    email: string;
-    password: string;
-    familyName?: string;
-  }): Promise<AuthSession | null> {
+  async createAccount(
+    env: any,
+    userData: {
+      name: string;
+      email: string;
+      password: string;
+      familyName?: string;
+    }
+  ): Promise<AuthSession | null> {
     if (!isDatabaseAvailable(env)) {
-      throw new Error('Database not available');
+      throw new Error("Database not available");
     }
 
     try {
-      const { user, familyId } = await authDb.createUserWithFamily(env, userData);
+      const { user, familyId } = await authDb.createUserWithFamily(
+        env,
+        userData
+      );
 
       // Create session
       const session: AuthSession = {
@@ -177,24 +193,27 @@ export const authApi = {
         email: user.email,
         name: user.name,
         currentHouseholdId: familyId,
-        role: 'admin',
+        role: "admin",
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
 
       return session;
     } catch (error) {
-      console.error('Account creation failed:', error);
+      console.error("Account creation failed:", error);
       return null;
     }
   },
 
-  async createHousehold(env: any, householdData: {
-    name: string;
-    adminFirstName: string;
-    adminLastName: string;
-  }): Promise<AuthSession | null> {
+  async createHousehold(
+    env: any,
+    householdData: {
+      name: string;
+      adminFirstName: string;
+      adminLastName: string;
+    }
+  ): Promise<AuthSession | null> {
     if (!isDatabaseAvailable(env)) {
-      throw new Error('Database not available');
+      throw new Error("Database not available");
     }
 
     try {
@@ -203,30 +222,30 @@ export const authApi = {
       const session: AuthSession = {
         token: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId: 1, // Placeholder - would come from actual user creation
-        email: 'placeholder@email.com', // Placeholder
+        email: "placeholder@email.com", // Placeholder
         name: `${householdData.adminFirstName} ${householdData.adminLastName}`,
         currentHouseholdId: `household_${Date.now()}`, // Placeholder
-        role: 'admin',
+        role: "admin",
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
 
       return session;
     } catch (error) {
-      console.error('Household creation failed:', error);
+      console.error("Household creation failed:", error);
       return null;
     }
   },
 
   async getSession(env: any, token: string): Promise<AuthSession | null> {
     if (!isDatabaseAvailable(env)) {
-      throw new Error('Database not available');
+      throw new Error("Database not available");
     }
 
     try {
       // For now, we'll validate the token format and check if user exists
       // In a real implementation, you'd validate the token cryptographically
-      const tokenParts = token.split('_');
-      if (tokenParts.length !== 3 || tokenParts[0] !== 'session') {
+      const tokenParts = token.split("_");
+      if (tokenParts.length !== 3 || tokenParts[0] !== "session") {
         return null;
       }
 
@@ -245,11 +264,11 @@ export const authApi = {
         email: user.email,
         name: user.name,
         currentHouseholdId: user.familyId,
-        role: user.role as 'admin' | 'member',
+        role: user.role as "admin" | "member",
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Extend session
       };
     } catch (error) {
-      console.error('Session validation failed:', error);
+      console.error("Session validation failed:", error);
       return null;
     }
   },

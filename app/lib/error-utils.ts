@@ -13,41 +13,41 @@ export class AppError extends Error {
     public originalError?: Error
   ) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
   }
 }
 
 export const logError = (
   error: Error | string,
   context?: ErrorContext,
-  level: 'error' | 'warn' | 'info' = 'error'
+  level: "error" | "warn" | "info" = "error"
 ) => {
-  const errorMessage = typeof error === 'string' ? error : error.message;
+  const errorMessage = typeof error === "string" ? error : error.message;
   const errorStack = error instanceof Error ? error.stack : undefined;
-  
+
   const logData = {
     timestamp: new Date().toISOString(),
     level,
     message: errorMessage,
     context,
-    stack: errorStack
+    stack: errorStack,
   };
 
   // In development, log to console
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     console.group(`🚨 ${level.toUpperCase()}: ${errorMessage}`);
-    console.error('Context:', context);
+    console.error("Context:", context);
     if (errorStack) {
-      console.error('Stack:', errorStack);
+      console.error("Stack:", errorStack);
     }
     console.groupEnd();
   }
 
   // In production, you could send to an error tracking service
   // e.g., Sentry, LogRocket, etc.
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === "production") {
     // TODO: Implement production error tracking
-    console.error('Production error:', logData);
+    console.error("Production error:", logData);
   }
 
   return logData;
@@ -56,33 +56,33 @@ export const logError = (
 export const logApiError = (
   error: Error | string,
   endpoint: string,
-  context?: Omit<ErrorContext, 'action'>
+  context?: Omit<ErrorContext, "action">
 ) => {
   return logError(error, {
     ...context,
-    action: `API: ${endpoint}`
+    action: `API: ${endpoint}`,
   });
 };
 
 export const logComponentError = (
   error: Error | string,
   componentName: string,
-  context?: Omit<ErrorContext, 'component'>
+  context?: Omit<ErrorContext, "component">
 ) => {
   return logError(error, {
     ...context,
-    component: componentName
+    component: componentName,
   });
 };
 
 export const logActionError = (
   error: Error | string,
   actionName: string,
-  context?: Omit<ErrorContext, 'action'>
+  context?: Omit<ErrorContext, "action">
 ) => {
   return logError(error, {
     ...context,
-    action: actionName
+    action: actionName,
   });
 };
 

@@ -1,5 +1,5 @@
-import { drizzle } from 'drizzle-orm/d1';
-import * as schema from './schema';
+import { drizzle } from "drizzle-orm/d1";
+import * as schema from "./schema";
 
 export function createDatabase(db: D1Database) {
   return drizzle(db, { schema });
@@ -8,4 +8,4 @@ export function createDatabase(db: D1Database) {
 export type Database = ReturnType<typeof createDatabase>;
 
 // Re-export schema types for convenience
-export * from './schema';
+export * from "./schema";

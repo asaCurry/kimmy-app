@@ -7,18 +7,21 @@ This document outlines the account and household modeling system for the Hey, Ki
 ## Core Concepts
 
 ### 1. User Accounts
+
 - **User**: Someone with login credentials (email/password)
 - **UserProfile**: Public information about a user
 - Only adults/teens have user accounts
 - Children under a certain age don't need accounts
 
 ### 2. Households
+
 - **Household**: A family unit or group that shares records
 - Has a unique name and invite code
 - Can contain multiple members with different roles
 - One admin creates the household initially
 
 ### 3. Household Members
+
 - **HouseholdMember**: A person within a household (may or may not have a User account)
 - Can be linked to a User account (adults) or standalone (children)
 - Has role-based permissions
@@ -27,7 +30,7 @@ This document outlines the account and household modeling system for the Hey, Ki
 
 ### Roles
 
-1. **ADMIN** 
+1. **ADMIN**
    - The household creator and any other designated admins
    - Full control over household management
    - Can invite members, manage all records, create custom record types
@@ -45,18 +48,18 @@ This document outlines the account and household modeling system for the Hey, Ki
 
 ### Permission Matrix
 
-| Action | Admin | Member | Child |
-|--------|-------|---------|-------|
-| Invite new members | ✅ | ❌ | ❌ |
-| Add/remove children | ✅ | ❌ | ❌ |
-| Create records | ✅ | ✅ | ❌ |
-| View all records | ✅ | ✅ | ❌ |
-| Edit any record | ✅ | ❌* | ❌ |
-| Delete records | ✅ | ❌ | ❌ |
-| Manage record types | ✅ | ❌ | ❌ |
-| Manage household | ✅ | ❌ | ❌ |
+| Action              | Admin | Member | Child |
+| ------------------- | ----- | ------ | ----- |
+| Invite new members  | ✅    | ❌     | ❌    |
+| Add/remove children | ✅    | ❌     | ❌    |
+| Create records      | ✅    | ✅     | ❌    |
+| View all records    | ✅    | ✅     | ❌    |
+| Edit any record     | ✅    | ❌\*   | ❌    |
+| Delete records      | ✅    | ❌     | ❌    |
+| Manage record types | ✅    | ❌     | ❌    |
+| Manage household    | ✅    | ❌     | ❌    |
 
-*Members can only edit their own records
+\*Members can only edit their own records
 
 ## Data Model Architecture
 
@@ -92,6 +95,7 @@ User (1) ──── (M) HouseholdMember (M) ──── (1) Household
 ## User Flows
 
 ### 1. Creating a Household
+
 ```
 1. User signs up/logs in
 2. Creates household with name
@@ -101,6 +105,7 @@ User (1) ──── (M) HouseholdMember (M) ──── (1) Household
 ```
 
 ### 2. Inviting Adult Members
+
 ```
 1. Admin sends invitation by email
 2. Recipient gets email with join link
@@ -110,6 +115,7 @@ User (1) ──── (M) HouseholdMember (M) ──── (1) Household
 ```
 
 ### 3. Adding Children
+
 ```
 1. Admin adds child directly (no invitation)
 2. Provides name, birthday, relationship
@@ -118,6 +124,7 @@ User (1) ──── (M) HouseholdMember (M) ──── (1) Household
 ```
 
 ### 4. Multi-Household Support
+
 ```
 1. User can be member of multiple households
 2. Each household maintains separate permissions
@@ -128,11 +135,13 @@ User (1) ──── (M) HouseholdMember (M) ──── (1) Household
 ## Security Considerations
 
 ### Authentication
+
 - Email/password authentication
 - Session-based auth with household context
 - Secure password hashing (bcrypt/argon2)
 
 ### Authorization
+
 - Role-based permissions enforced server-side
 - Household membership verified for all operations
 - Records are household-visible by default
@@ -140,6 +149,7 @@ User (1) ──── (M) HouseholdMember (M) ──── (1) Household
 - Record type `allowPrivate` field controls privacy option availability
 
 ### Data Protection
+
 - Household data isolation
 - Audit trails for sensitive operations
 - Secure invitation tokens with expiration
@@ -147,24 +157,28 @@ User (1) ──── (M) HouseholdMember (M) ──── (1) Household
 ## Implementation Phases
 
 ### Phase 1: Basic Household System
+
 - [ ] User registration/authentication
 - [ ] Household creation and management
 - [ ] Basic member roles (admin/member)
 - [ ] Invitation system
 
 ### Phase 2: Children and Records
+
 - [ ] Child member support
 - [ ] Record creation and management
 - [ ] Permission enforcement
 - [ ] Basic record types
 
 ### Phase 3: Advanced Features
+
 - [ ] Custom record types per household
 - [ ] Advanced permissions (private records)
 - [ ] Audit logs and activity tracking
 - [ ] Bulk operations and reporting
 
 ### Phase 4: Enhanced UX
+
 - [ ] Mobile app support
 - [ ] Offline functionality
 - [ ] Rich media attachments
@@ -173,16 +187,19 @@ User (1) ──── (M) HouseholdMember (M) ──── (1) Household
 ## Database Schema Considerations
 
 ### Scalability
+
 - UUID primary keys for distributed systems
 - Indexed foreign keys for performance
 - Partitioning by household for large datasets
 
 ### Flexibility
+
 - JSON fields for dynamic form data
 - Soft deletes for audit trails
 - Versioning for record changes
 
 ### Security
+
 - Row-level security policies
 - Encrypted sensitive fields
 - Regular security audits
@@ -190,6 +207,7 @@ User (1) ──── (M) HouseholdMember (M) ──── (1) Household
 ## API Design Patterns
 
 ### RESTful Endpoints
+
 ```
 GET    /api/households/:id/members
 POST   /api/households/:id/members
@@ -203,6 +221,7 @@ DELETE /api/records/:id
 ```
 
 ### GraphQL Alternative
+
 - Single endpoint with flexible queries
 - Real-time subscriptions for updates
 - Strong typing with schema validation

@@ -7,12 +7,14 @@ The Hey, Kimmy privacy system provides flexible record visibility while maintain
 ## Privacy Model
 
 ### Default Behavior
+
 - **Records are visible to all household members by default**
 - This promotes family transparency and collaboration
 - All adults (ADMIN/MEMBER roles) can see records for all household members
 - Children don't have accounts, so this doesn't affect them
 
 ### Private Records Option
+
 - Users can optionally mark specific records as **private**
 - Private records are only visible to:
   - The record creator
@@ -22,11 +24,13 @@ The Hey, Kimmy privacy system provides flexible record visibility while maintain
 ## Record Type Privacy Control
 
 ### `allowPrivate` Field
+
 - Each `RecordType` has an `allowPrivate` boolean field
 - When `true`: Users see a privacy checkbox when creating records
 - When `false`: All records of this type are household-visible (no privacy option)
 
 ### Example Configuration
+
 ```typescript
 // Health records can be private (sensitive medical info)
 {
@@ -37,7 +41,7 @@ The Hey, Kimmy privacy system provides flexible record visibility while maintain
 
 // School events are always shared (family coordination)
 {
-  name: "School Event", 
+  name: "School Event",
   allowPrivate: false,
   // ... other fields
 }
@@ -46,12 +50,14 @@ The Hey, Kimmy privacy system provides flexible record visibility while maintain
 ## User Interface
 
 ### Record Creation Form
+
 - When `recordType.allowPrivate === true`:
   - Privacy checkbox appears at bottom of form
   - Unchecked by default (household-visible)
   - Clear explanation of privacy implications
 
 ### Privacy Checkbox Text
+
 ```
 ☐ Make this record private (only visible to you and administrators)
 By default, records are visible to all household members
@@ -60,20 +66,22 @@ By default, records are visible to all household members
 ## Permission Logic
 
 ### Viewing Records
+
 ```typescript
 function canViewRecord(record, viewer) {
   // Children can't view any records
-  if (viewer.role === 'CHILD') return false;
-  
+  if (viewer.role === "CHILD") return false;
+
   // Non-private records: all household members can view
   if (!record.isPrivate) return true;
-  
+
   // Private records: only creator and admins
-  return viewer.role === 'ADMIN' || record.createdByUserId === viewer.id;
+  return viewer.role === "ADMIN" || record.createdByUserId === viewer.id;
 }
 ```
 
 ### Editing Records
+
 - Admins can edit any record (private or public)
 - Members can edit:
   - Their own records (private or public)
@@ -83,6 +91,7 @@ function canViewRecord(record, viewer) {
 ## Database Schema
 
 ### Records Table
+
 ```sql
 records {
   id: UUID PRIMARY KEY
@@ -94,6 +103,7 @@ records {
 ```
 
 ### Record Types Table
+
 ```sql
 record_types {
   id: UUID PRIMARY KEY
@@ -105,20 +115,24 @@ record_types {
 ## Use Cases
 
 ### Family Health Management
+
 - **Public Health Records**: Vaccination schedules, regular checkups
 - **Private Health Records**: Personal medical consultations, sensitive diagnoses
 
 ### School & Activities
+
 - **Public Events**: School performances, sports games (family coordination)
 - **Private Notes**: Parent concerns, disciplinary discussions
 
 ### Personal Achievements
+
 - **Public Achievements**: Graduations, sports wins (family celebration)
 - **Private Goals**: Personal milestones, private aspirations
 
 ## Implementation Examples
 
 ### Mock Data Examples
+
 ```typescript
 // Public record (default)
 {
@@ -129,20 +143,22 @@ record_types {
 
 // Private record
 {
-  title: "Mike's Private Consultation", 
+  title: "Mike's Private Consultation",
   isPrivate: true, // Only visible to Mike and admins
   createdByUserId: "mike-id"
 }
 ```
 
 ### API Filtering
+
 ```typescript
 // Get records visible to current user
 function getVisibleRecords(userId, userRole) {
-  return records.filter(record => 
-    !record.isPrivate || 
-    userRole === 'ADMIN' || 
-    record.createdByUserId === userId
+  return records.filter(
+    record =>
+      !record.isPrivate ||
+      userRole === "ADMIN" ||
+      record.createdByUserId === userId
   );
 }
 ```
@@ -150,14 +166,17 @@ function getVisibleRecords(userId, userRole) {
 ## Future Enhancements
 
 ### Record Type Categories
+
 - System-wide privacy policies per category
 - e.g., "Health" category defaults to `allowPrivate: true`
 
 ### Granular Sharing
+
 - Share private records with specific household members
 - Time-limited privacy (auto-expire private status)
 
 ### Audit Trail
+
 - Track when records are marked private/public
 - Log who accessed private records
 

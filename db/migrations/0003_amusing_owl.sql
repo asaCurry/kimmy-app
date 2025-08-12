@@ -1,0 +1,1 @@
+ALTER TABLE record_types ADD `category` text DEFAULT 'Personal' NOT NULL;

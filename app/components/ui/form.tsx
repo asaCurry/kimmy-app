@@ -6,11 +6,7 @@ const Form = React.forwardRef<
   HTMLFormElement,
   React.HTMLAttributes<HTMLFormElement>
 >(({ className, ...props }, ref) => (
-  <form
-    ref={ref}
-    className={cn("space-y-6", className)}
-    {...props}
-  />
+  <form ref={ref} className={cn("space-y-6", className)} {...props} />
 ));
 Form.displayName = "Form";
 
@@ -19,11 +15,7 @@ const FormField = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("space-y-2", className)}
-    {...props}
-  />
+  <div ref={ref} className={cn("space-y-2", className)} {...props} />
 ));
 FormField.displayName = "FormField";
 
@@ -36,10 +28,7 @@ const FormLabel = React.forwardRef<
 >(({ className, required, children, ...props }, ref) => (
   <label
     ref={ref}
-    className={cn(
-      "text-sm font-medium leading-none text-slate-200",
-      className
-    )}
+    className={cn("text-sm font-medium leading-none text-slate-200", className)}
     {...props}
   >
     {children}
@@ -103,11 +92,7 @@ const FormError = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-red-400", className)}
-    {...props}
-  />
+  <p ref={ref} className={cn("text-sm text-red-400", className)} {...props} />
 ));
 FormError.displayName = "FormError";
 
@@ -116,11 +101,7 @@ const FormDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-slate-400", className)}
-    {...props}
-  />
+  <p ref={ref} className={cn("text-sm text-slate-400", className)} {...props} />
 ));
 FormDescription.displayName = "FormDescription";
 

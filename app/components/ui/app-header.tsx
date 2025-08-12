@@ -10,7 +10,6 @@ import { Button } from "./button";
 import { useAuth } from "~/contexts/auth-context";
 import { cn } from "~/lib/utils";
 
-
 interface AppHeaderProps {
   className?: string;
 }
@@ -20,10 +19,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <header className={cn(
-      "sticky top-0 z-50 w-full border-b border-slate-700 bg-slate-900/95 backdrop-blur supports-[backdrop-filter]:bg-slate-900/75",
-      className
-    )}>
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full border-b border-slate-700 bg-slate-900/95 backdrop-blur supports-[backdrop-filter]:bg-slate-900/75",
+        className
+      )}
+    >
       <div className="container flex h-16 items-center justify-between px-4 mx-auto max-w-7xl">
         {/* Logo/Home Section */}
         <div className="flex items-center space-x-4">
@@ -48,19 +49,31 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
         {isAuthenticated && (
           <nav className="hidden md:flex items-center space-x-2">
             <Link to="/">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-800">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-300 hover:text-white hover:bg-slate-800"
+              >
                 <Home className="mr-2 h-4 w-4" />
                 Home
               </Button>
             </Link>
             <Link to="/manage">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-800">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-300 hover:text-white hover:bg-slate-800"
+              >
                 <Users className="mr-2 h-4 w-4" />
                 Manage
               </Button>
             </Link>
             <Link to="/manage/add-member">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-800">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-300 hover:text-white hover:bg-slate-800"
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Member
               </Button>
@@ -74,22 +87,24 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
             <>
               {/* Mobile navigation menu button */}
               <div className="md:hidden">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   className="text-slate-300 hover:text-white hover:bg-slate-800"
                 >
-                  {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                  {isMobileMenuOpen ? (
+                    <X className="h-4 w-4" />
+                  ) : (
+                    <Menu className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
-              
+
               {/* User info */}
               <div className="hidden sm:flex items-center space-x-2 text-sm">
                 <div className="text-right">
-                  <p className="text-slate-300 font-medium">
-                    {session?.name}
-                  </p>
+                  <p className="text-slate-300 font-medium">{session?.name}</p>
                   <p className="text-slate-500 text-xs">
                     Role: {session?.role}
                   </p>
@@ -102,12 +117,19 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
           ) : (
             <div className="flex items-center space-x-2">
               <Link to="/login">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-800">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-slate-300 hover:text-white hover:bg-slate-800"
+                >
                   Sign In
                 </Button>
               </Link>
               <Link to="/onboarding">
-                <Button size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                >
                   Get Started
                 </Button>
               </Link>
@@ -115,9 +137,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
           )}
         </div>
       </div>
-      
+
       {/* Mobile Navigation Menu */}
-      <MobileNav isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      <MobileNav
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
     </header>
   );
 };
@@ -135,24 +160,24 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
   return (
     <div className="md:hidden border-b border-slate-700 bg-slate-900">
       <nav className="container mx-auto px-4 py-4 space-y-2">
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           onClick={onClose}
           className="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-colors"
         >
           <Home className="h-5 w-5 text-slate-400" />
           <span className="text-slate-300">Home</span>
         </Link>
-        <Link 
-          to="/manage" 
+        <Link
+          to="/manage"
           onClick={onClose}
           className="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-colors"
         >
           <Users className="h-5 w-5 text-slate-400" />
           <span className="text-slate-300">Manage Household</span>
         </Link>
-        <Link 
-          to="/manage/add-member" 
+        <Link
+          to="/manage/add-member"
           onClick={onClose}
           className="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-colors"
         >

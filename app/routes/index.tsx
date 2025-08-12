@@ -12,12 +12,12 @@ import { extractEnv, parseCookies } from "~/lib/utils";
 export async function loader({ request, context }: Route.LoaderArgs) {
   try {
     // Check if user has a valid session first
-    const cookieHeader = request.headers.get('cookie');
-    
+    const cookieHeader = request.headers.get("cookie");
+
     if (cookieHeader) {
       const cookies = parseCookies(cookieHeader);
-      const sessionData = cookies['kimmy_auth_session'];
-      
+      const sessionData = cookies["kimmy_auth_session"];
+
       if (sessionData) {
         try {
           const session = JSON.parse(decodeURIComponent(sessionData));
@@ -34,12 +34,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
         }
       }
     }
-    
+
     // No valid session or family, redirect to welcome
-    return redirect('/welcome');
+    return redirect("/welcome");
   } catch (error) {
-    console.error('Loader error:', error);
-    return redirect('/welcome');
+    console.error("Loader error:", error);
+    return redirect("/welcome");
   }
 }
 
@@ -58,20 +58,21 @@ export default function Index() {
               Welcome to Your Family Hub
             </h1>
             <p className="text-slate-300 max-w-md">
-              It looks like you don't have any family members yet. Let's get started by adding some!
+              It looks like you don't have any family members yet. Let's get
+              started by adding some!
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-4">
             <button
-              onClick={() => navigate('/manage/add-member')}
+              onClick={() => navigate("/manage/add-member")}
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
             >
               Add Family Member
             </button>
-            
+
             <button
-              onClick={() => navigate('/onboarding/create-household')}
+              onClick={() => navigate("/onboarding/create-household")}
               className="px-6 py-3 border border-slate-600 hover:bg-slate-800 text-slate-300 rounded-lg font-medium transition-colors"
             >
               Create Household
@@ -87,24 +88,22 @@ export default function Index() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-100">
-              Family Hub
-            </h1>
+            <h1 className="text-3xl font-bold text-slate-100">Family Hub</h1>
             <p className="text-slate-400">
-              Welcome back, {session?.name || 'Family Member'}!
+              Welcome back, {session?.name || "Family Member"}!
             </p>
           </div>
-          
+
           <div className="flex gap-3">
             <button
-              onClick={() => navigate('/manage/add-member')}
+              onClick={() => navigate("/manage/add-member")}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
             >
               Add Member
             </button>
-            
+
             <button
-              onClick={() => logout(() => navigate('/login'))}
+              onClick={() => logout(() => navigate("/login"))}
               className="px-4 py-2 border border-slate-600 hover:bg-slate-800 text-slate-300 rounded-lg font-medium transition-colors"
             >
               Logout
@@ -112,18 +111,18 @@ export default function Index() {
           </div>
         </div>
 
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-           {familyData.familyMembers.map((member) => (
-             <MemberCard
-               key={member.id}
-               member={{
-                 ...member,
-                 role: member.role as 'admin' | 'member'
-               }}
-               onSelect={() => navigate(`/member/${member.id}`)}
-             />
-           ))}
-         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {familyData.familyMembers.map(member => (
+            <MemberCard
+              key={member.id}
+              member={{
+                ...member,
+                role: member.role as "admin" | "member",
+              }}
+              onSelect={() => navigate(`/member/${member.id}`)}
+            />
+          ))}
+        </div>
       </div>
     </PageLayout>
   );
