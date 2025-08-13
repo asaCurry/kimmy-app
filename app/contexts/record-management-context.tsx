@@ -8,6 +8,17 @@ interface RecordManagementState {
   drawerMode: "view" | "edit";
   isDeleting: boolean;
   isUpdating: boolean;
+  familyMembers: Array<{
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    age?: number;
+    relationshipToAdmin?: string;
+  }>;
+  familyId: string;
+  memberId: string;
+  category: string;
 }
 
 interface RecordManagementActions {
@@ -26,7 +37,14 @@ const RecordManagementContext = React.createContext<RecordManagementContextValue
 
 interface RecordManagementProviderProps {
   children: React.ReactNode;
-  familyMembers: User[];
+  familyMembers: Array<{
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    age?: number;
+    relationshipToAdmin?: string;
+  }>;
   familyId: string;
   memberId: string;
   category: string;
@@ -50,6 +68,10 @@ export const RecordManagementProvider: React.FC<RecordManagementProviderProps> =
     drawerMode: "view",
     isDeleting: false,
     isUpdating: false,
+    familyMembers,
+    familyId,
+    memberId,
+    category,
   });
 
   const openRecord = React.useCallback((record: Record, recordType: RecordType) => {
@@ -139,6 +161,10 @@ export const RecordManagementProvider: React.FC<RecordManagementProviderProps> =
     updateRecord,
     setDeleting,
     setUpdating,
+    familyMembers,
+    familyId,
+    memberId,
+    category,
   ]);
 
   return (
@@ -162,8 +188,8 @@ export const useRecordManagementState = (): RecordManagementState => {
   if (context === undefined) {
     throw new Error("useRecordManagementState must be used within a RecordManagementProvider");
   }
-  const { selectedRecord, selectedRecordType, isDrawerOpen, drawerMode, isDeleting, isUpdating } = context;
-  return { selectedRecord, selectedRecordType, isDrawerOpen, drawerMode, isDeleting, isUpdating };
+  const { selectedRecord, selectedRecordType, isDrawerOpen, drawerMode, isDeleting, isUpdating, familyMembers, familyId, memberId, category } = context;
+  return { selectedRecord, selectedRecordType, isDrawerOpen, drawerMode, isDeleting, isUpdating, familyMembers, familyId, memberId, category };
 };
 
 // Hook for components that only need the actions

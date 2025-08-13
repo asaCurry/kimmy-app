@@ -4,14 +4,14 @@ export { AppHeader } from "./app-header";
 export { AppFooter } from "./app-footer";
 
 // Form Components
-export { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "./form";
+export { Form, FormField, FormLabel, FormInput, FormTextarea, FormSelect, FormError, FormDescription } from "./form";
 export { Input } from "./input";
 export { Textarea } from "./textarea";
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 export { Switch } from "./switch";
 export { Label } from "./label";
 export { DynamicFieldEditor } from "./dynamic-field-editor";
-export { FormField as FormFieldComponent } from "./form-field";
+export { DynamicField } from "./form-field";
 
 // Data Display Components
 export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./card";
@@ -32,6 +32,6 @@ export { Drawer, DrawerContent, DrawerFooter } from "./drawer";
 export { QuickActionButton } from "./quick-action-button";
 
 // Utility Components
-export { Loading } from "./loading";
+export { LoadingState, ButtonLoading, PageLoading, InlineLoading } from "./loading";
 export { LoadingSpinner } from "./loading-spinner";
 export { ErrorBoundary } from "./error-boundary";

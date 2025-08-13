@@ -324,16 +324,19 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                 (recordTypesByCategory as any)[category] || [];
               const recordCount = (categoryRecordCounts as any)[category] || 0;
               return (
-                <Link
+                <div
                   key={category}
-                  to={`/member/${currentMember.id}/category/${encodeURIComponent(category)}`}
+                  className="block cursor-pointer"
+                  onClick={() => {
+                    console.log(`Navigating to category: ${category}`);
+                    window.location.href = `/member/${currentMember.id}/category/${encodeURIComponent(category)}`;
+                  }}
                 >
                   <CategoryCard
                     category={category}
                     recordCount={recordCount}
-                    onSelect={() => {}}
                   />
-                </Link>
+                </div>
               );
             })}
           </div>

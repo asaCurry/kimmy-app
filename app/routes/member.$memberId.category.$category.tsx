@@ -9,6 +9,7 @@ import { AddCard } from "~/components/ui/interactive-card";
 import { Accordion } from "~/components/ui/accordion";
 import { loadFamilyDataWithMember } from "~/lib/loader-helpers";
 import { getDatabase } from "~/lib/db-utils";
+import { RecordManagementProvider } from "~/contexts/record-management-context";
 import { recordTypes, records } from "~/db/schema";
 import { eq, and } from "drizzle-orm";
 
@@ -24,9 +25,12 @@ export function meta({ params }: Route.MetaArgs) {
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
   try {
+    console.log("Category route loader - starting...");
+    console.log("Category route loader - params:", params);
     const env = (context as any).cloudflare?.env;
 
     if (!env?.DB) {
+      console.log("Category route loader - no DB available");
       throw new Response("Database not available", { status: 500 });
     }
 
@@ -70,9 +74,11 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       throw new Response("Member ID required", { status: 400 });
     }
 
+    console.log("Category route loader - about to load family data...");
     // Load family data from URL params
     const { familyId, familyMembers, currentMember } =
       await loadFamilyDataWithMember(request, env, memberId);
+    console.log("Category route loader - family data loaded:", { familyId, currentMember: currentMember?.name });
 
     // If no family data found, redirect to welcome
     if (!familyId) {
@@ -85,6 +91,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       throw redirect("/welcome");
     }
 
+    console.log("Category route loader - about to fetch record types...");
     // Fetch record types for this family and category
     const db = getDatabase(env);
     const recordTypesResult = await db
@@ -96,6 +103,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
           eq(recordTypes.category, category)
         )
       );
+    console.log("Category route loader - record types fetched:", recordTypesResult.length);
 
     // Parse the fields JSON for each record type
     const parsedRecordTypes = recordTypesResult.map(rt => {
@@ -124,6 +132,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       };
     });
 
+    console.log("Category route loader - about to fetch records...");
     // Fetch records for each record type, filtered by the specific member
     const recordsData = await db
       .select()
@@ -134,6 +143,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
           eq(records.memberId, parseInt(memberId))
         )
       );
+    console.log("Category route loader - records fetched:", recordsData.length);
 
     // Group records by record type
     const recordsByType = recordsData.reduce(
@@ -149,6 +159,13 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       {} as Record<number, any[]>
     );
 
+    console.log("Category route loader - returning data:", {
+      member: currentMember?.name,
+      category,
+      recordTypesCount: parsedRecordTypes.length,
+      recordsCount: Object.keys(recordsByType).length
+    });
+    
     return {
       member: currentMember,
       category,
@@ -172,6 +189,9 @@ const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
   loaderData,
   params,
 }) => {
+  console.log("CategoryRecordTypes component - loaderData:", loaderData);
+  console.log("CategoryRecordTypes component - params:", params);
+  
   const {
     member,
     category,
@@ -233,46 +253,61 @@ const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
           subtitle="Choose a record type to create a new record"
         />
 
-        {recordTypes.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">📝</div>
-            <h3 className="text-xl font-semibold text-slate-200 mb-2">
-              No record types configured yet
-            </h3>
-            <p className="text-slate-400 mb-6">
-              You'll need to create record types before you can start logging
-              records.
-            </p>
-            <AddCard
-              title="Add Record Type"
-              description={`Create a new ${category.toLowerCase()} record type`}
-              onClick={handleAddRecordType}
-            />
-          </div>
-        ) : (
-          <div className="space-y-8">
-            <Accordion>
-              {recordTypes.map(recordType => (
-                <RecordsList
-                  key={recordType.id}
-                  records={recordsByType[recordType.id] || []}
-                  recordType={recordType}
-                  memberId={currentMember.id.toString()}
-                  category={category}
-                  familyId={familyId}
-                />
-              ))}
-            </Accordion>
-
-            <div className="pt-4">
+        <RecordManagementProvider
+          familyMembers={familyMembers}
+          familyId={familyId}
+          memberId={currentMember.id.toString()}
+          category={category}
+          onRecordDelete={async (recordId: number) => {
+            // TODO: Implement record deletion
+            console.log("Deleting record:", recordId);
+          }}
+          onRecordUpdate={async (recordId: number, updates: any) => {
+            // TODO: Implement record update
+            console.log("Updating record:", recordId, updates);
+          }}
+        >
+          {recordTypes.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📝</div>
+              <h3 className="text-xl font-semibold text-slate-200 mb-2">
+                No record types configured yet
+              </h3>
+              <p className="text-slate-400 mb-6">
+                You'll need to create record types before you can start logging
+                records.
+              </p>
               <AddCard
                 title="Add Record Type"
                 description={`Create a new ${category.toLowerCase()} record type`}
                 onClick={handleAddRecordType}
               />
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="space-y-8">
+              <Accordion>
+                {recordTypes.map(recordType => (
+                  <RecordsList
+                    key={recordType.id}
+                    records={recordsByType[recordType.id] || []}
+                    recordType={recordType}
+                    memberId={currentMember.id.toString()}
+                    category={category}
+                    familyId={familyId}
+                  />
+                ))}
+              </Accordion>
+
+              <div className="pt-4">
+                <AddCard
+                  title="Add Record Type"
+                  description={`Create a new ${category.toLowerCase()} record type`}
+                  onClick={handleAddRecordType}
+                />
+              </div>
+            </div>
+          )}
+        </RecordManagementProvider>
       </PageLayout>
     </RequireAuth>
   );

@@ -24,14 +24,12 @@ import {
 import type { Record, RecordType, User } from "~/db/schema";
 
 interface RecordDrawerProps {
-  familyMembers: User[];
   familyId: string;
   memberId: string;
   category: string;
 }
 
 export const RecordDrawer: React.FC<RecordDrawerProps> = ({
-  familyMembers,
   familyId,
   memberId,
   category,
@@ -47,6 +45,7 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
     setDrawerMode: setMode,
     deleteRecord: onDelete,
     updateRecord: onUpdate,
+    familyMembers,
   } = useRecordManagement();
 
   // Reset mode when drawer opens/closes or record changes

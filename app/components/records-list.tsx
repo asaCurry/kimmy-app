@@ -15,7 +15,7 @@ import {
   RecordsTable,
   RecordDrawer
 } from "~/components/ui";
-import { RecordManagementProvider, useRecordManagement } from "~/contexts";
+import { useRecordManagement } from "~/contexts";
 import { Plus, Eye, Edit, Trash2, Lock, Grid3X3, Table } from "lucide-react";
 import type { Record, RecordType } from "~/db/schema";
 
@@ -344,7 +344,6 @@ const RecordsCards: React.FC<RecordsCardsProps> = ({
 
       {/* Record Drawer */}
       <RecordDrawer
-        familyMembers={[]} // TODO: Pass family members from parent
         familyId={familyId}
         memberId={memberId}
         category={category}
