@@ -139,8 +139,8 @@ export const userDb = {
   },
 };
 
-// Family/Household operations
-export const familyDb = {
+// Household/Household operations
+export const householdDb = {
   async generateHouseholdId(): Promise<string> {
     // Generate a unique household ID
     return `household_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -239,7 +239,7 @@ export const recordTypeDb = {
         .from(schema.recordTypes)
         .where(eq(schema.recordTypes.householdId, householdId));
     } catch (error) {
-      console.error("Failed to find record types by family ID:", error);
+      console.error("Failed to find record types by household ID:", error);
       throw new Error("Failed to find record types");
     }
   },
@@ -309,7 +309,7 @@ export const recordDb = {
         .from(schema.records)
         .where(eq(schema.records.householdId, householdId));
     } catch (error) {
-      console.error("Failed to find records by family ID:", error);
+      console.error("Failed to find records by household ID:", error);
       throw new Error("Failed to find records");
     }
   },
@@ -574,17 +574,17 @@ export const authDb = {
     }
   },
 
-  async createUserWithFamily(
+  async createUserWithHousehold(
     env: any,
     userData: {
       name: string;
       email: string;
       password: string;
-      familyName?: string;
+      householdName?: string;
     }
   ): Promise<{ user: User; householdId: string }> {
     try {
-      const householdId = await familyDb.generatehouseholdId();
+      const householdId = await householdDb.generateHouseholdId();
 
       const user = await userDb.create(env, {
         name: userData.name,
@@ -596,7 +596,7 @@ export const authDb = {
 
       return { user, householdId };
     } catch (error) {
-      console.error("Failed to create user with family:", error);
+      console.error("Failed to create user with household:", error);
       throw new Error("Failed to create user account");
     }
   },

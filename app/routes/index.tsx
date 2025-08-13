@@ -4,7 +4,7 @@ import { useNavigate, useLoaderData, redirect } from "react-router";
 import { PageLayout } from "~/components/ui/layout";
 import { useAuth, RequireAuth } from "~/contexts/auth-context";
 import { MemberCard } from "~/components/member-card";
-import type { FamilyMember } from "~/lib/utils";
+import type { Householdmember } from "~/lib/utils";
 import { QuickActionButton } from "~/components/ui/quick-action-button";
 
 import { extractEnv, parseCookies } from "~/lib/utils";
@@ -38,7 +38,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       }
     }
 
-    // No valid session or family, redirect to welcome
+    // No valid session or household, redirect to welcome
     return redirect("/welcome");
   } catch (error) {
     console.error("Loader error:", error);
@@ -47,18 +47,18 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 }
 
 // Component that loads data after authentication is confirmed
-function AuthenticatedFamilyHub() {
+function AuthenticatedHouseholdHub() {
   const { session, logout } = useAuth();
   const navigate = useNavigate();
-  const [familyData, setFamilyData] = React.useState<any>(null);
+  const [householdData, setHouseholdData] = React.useState<any>(null);
   const [recentRecords, setRecentRecords] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  // Load family data after authentication is confirmed
+  // Load household data after authentication is confirmed
   React.useEffect(() => {
     async function loadData() {
       try {
-        // Get the session data to access family ID
+        // Get the session data to access household ID
         const cookieHeader = document.cookie;
         const cookies = parseCookies(cookieHeader);
         const sessionData = cookies["kimmy_auth_session"];
@@ -76,7 +76,7 @@ function AuthenticatedFamilyHub() {
         // If we get here, redirect to welcome
         window.location.href = "/welcome";
       } catch (error) {
-        console.error("Failed to load family data:", error);
+        console.error("Failed to load household data:", error);
         window.location.href = "/welcome";
       }
     }
@@ -89,7 +89,7 @@ function AuthenticatedFamilyHub() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Redirecting to family dashboard...</p>
+          <p className="text-slate-400">Redirecting to household dashboard...</p>
         </div>
       </div>
     </PageLayout>
@@ -106,7 +106,7 @@ export default function Index() {
 
   return (
     <RequireAuth requireHousehold={true}>
-      <AuthenticatedFamilyHub />
+      <AuthenticatedHouseholdHub />
     </RequireAuth>
   );
 }

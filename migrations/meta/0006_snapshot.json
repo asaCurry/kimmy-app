@@ -583,10 +583,10 @@
     "schemas": {},
     "tables": {},
     "columns": {
-      "\"quick_notes\".\"family_id\"": "\"quick_notes\".\"household_id\"",
-      "\"record_types\".\"family_id\"": "\"record_types\".\"household_id\"",
-      "\"records\".\"family_id\"": "\"records\".\"household_id\"",
-      "\"users\".\"family_id\"": "\"users\".\"household_id\""
+      "\"quick_notes\".\"household_id\"": "\"quick_notes\".\"household_id\"",
+      "\"record_types\".\"household_id\"": "\"record_types\".\"household_id\"",
+      "\"records\".\"household_id\"": "\"records\".\"household_id\"",
+      "\"users\".\"household_id\"": "\"users\".\"household_id\""
     }
   }
 }

@@ -16,7 +16,7 @@ import {
   LoadingSpinner
 } from "~/components/ui";
 import { DynamicField } from "~/components/ui/form-field";
-import type { FamilyMember } from "~/lib/utils";
+import type { Householdmember } from "~/lib/utils";
 import type { RecordType as DbRecordType } from "~/db/schema";
 import { createRecordSchema } from "~/lib/utils/dynamic-fields/schema-generation";
 
@@ -26,7 +26,7 @@ interface ParsedRecordType extends Omit<DbRecordType, "fields"> {
 }
 
 interface DynamicRecordFormProps {
-  member?: FamilyMember;
+  member?: Householdmember;
   recordType: ParsedRecordType;
   householdId: string;
   memberId?: number;
@@ -201,7 +201,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
     <div>
       <PageHeader
         title={mode === "edit" ? `Edit ${recordType.name}` : `New ${recordType.name}`}
-        subtitle={mode === "edit" ? "Update record details" : `for ${member?.name || "Family Member"}`}
+        subtitle={mode === "edit" ? "Update record details" : `for ${member?.name || "Household member"}`}
       />
 
       <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">

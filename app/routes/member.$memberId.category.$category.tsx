@@ -52,7 +52,7 @@ export async function action({ request, context, params }: Route.ActionArgs) {
 
       const db = getDatabase(env);
       
-      // Verify record exists and belongs to family
+      // Verify record exists and belongs to household
       const record = await db
         .select()
         .from(records)
@@ -135,25 +135,25 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       throw new Response("Member ID required", { status: 400 });
     }
 
-    console.log("Category route loader - about to load family data...");
-    // Load family data from URL params
+    console.log("Category route loader - about to load household data...");
+    // Load household data from URL params
     const { householdId, householdMembers, currentMember } =
       await loadHouseholdDataWithMember(request, env, memberId);
-    console.log("Category route loader - family data loaded:", { householdId, currentMember: currentMember?.name });
+    console.log("Category route loader - household data loaded:", { householdId, currentMember: currentMember?.name });
 
-    // If no family data found, redirect to welcome
+    // If no household data found, redirect to welcome
     if (!householdId) {
-      console.log("❌ No family data found, redirecting to welcome");
+      console.log("❌ No household data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
-    // Verify the user is accessing their own family data
+    // Verify the user is accessing their own household data
     if (householdId !== session.currentHouseholdId) {
       throw redirect("/welcome");
     }
 
     console.log("Category route loader - about to fetch record types...");
-    // Fetch record types for this family and category
+    // Fetch record types for this household and category
     const db = getDatabase(env);
     const recordTypesResult = await db
       .select()

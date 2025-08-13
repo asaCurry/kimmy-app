@@ -58,7 +58,7 @@ export function extractSessionFromCookies(cookieHeader: string | null): any {
 }
 
 // Legacy types - these should be replaced with the actual database types
-export interface FamilyMember {
+export interface Householdmember {
   id: number;
   name: string;
   email: string;

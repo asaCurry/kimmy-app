@@ -89,17 +89,17 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       });
     }
 
-    // Load family data from URL params
+    // Load household data from URL params
           const { householdId, householdMembers, currentMember } =
         await loadHouseholdDataWithMember(request, env, memberId);
 
-    // If no family data found, redirect to welcome
+    // If no household data found, redirect to welcome
     if (!householdId) {
-      console.log("❌ No family data found, redirecting to welcome");
+      console.log("❌ No household data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
-    // Verify the user is accessing their own family data
+    // Verify the user is accessing their own household data
     if (householdId !== session.currentHouseholdId) {
       throw redirect("/welcome");
     }

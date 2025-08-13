@@ -123,7 +123,7 @@ app/
 1. **User Registration & Login** - Complete with demo accounts
 2. **Household Creation & Management** - Full CRUD operations
 3. **Member Management** - Add adults and children to households
-4. **Record System** - Create, view, and manage family records
+4. **Record System** - Create, view, and manage household records
 5. **Privacy Controls** - Household vs private record visibility
 6. **Role-Based Access** - Admin, Member, Child permission levels
 

@@ -1,4 +1,4 @@
-import type { Route } from "./+types/api.family-members.remove";
+import type { Route } from "./+types/api.household-members.remove";
 import { userDb } from "~/lib/db";
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -23,12 +23,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 
     return { success: true, message: "Member removed successfully" };
   } catch (error) {
-    console.error("Remove family member API error:", error);
+    console.error("Remove household member API error:", error);
 
     if (error instanceof Response) {
       throw error;
     }
 
-    return { error: "Failed to remove family member" };
+    return { error: "Failed to remove household member" };
   }
 }

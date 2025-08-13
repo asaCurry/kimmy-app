@@ -1,4 +1,4 @@
-import type { Route } from "./+types/api.family-members.update";
+import type { Route } from "./+types/api.household-members.update";
 import { userDb } from "~/lib/db";
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -35,12 +35,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 
     return { success: true, message: "Member updated successfully" };
   } catch (error) {
-    console.error("Update family member API error:", error);
+    console.error("Update household member API error:", error);
 
     if (error instanceof Response) {
       throw error;
     }
 
-    return { error: "Failed to update family member" };
+    return { error: "Failed to update household member" };
   }
 }

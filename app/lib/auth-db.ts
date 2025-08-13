@@ -3,7 +3,7 @@
  * Replaces the mock authentication with real database operations
  */
 
-import { authDb, userDb, familyDb } from "./db";
+import { authDb, userDb, householdDb } from "./db";
 import { isDatabaseAvailable } from "./utils";
 import { inviteCodeDb } from "./db";
 
@@ -155,7 +155,7 @@ export const authApi = {
         userId: user.id,
         email: user.email,
         name: user.name,
-        currentHouseholdId: user.householdId || undefined, // Only set if user has a family
+        currentHouseholdId: user.householdId || undefined, // Only set if user has a household
         role: user.role as "admin" | "member",
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
@@ -174,7 +174,7 @@ export const authApi = {
       name: string;
       email: string;
       password: string;
-      familyName?: string;
+      householdName?: string;
     }
   ): Promise<AuthSession | null> {
     if (!isDatabaseAvailable(env)) {
@@ -182,7 +182,7 @@ export const authApi = {
     }
 
     try {
-      const { user, householdId } = await authDb.createUserWithFamily(
+      const { user, householdId } = await authDb.createUserWithHousehold(
         env,
         userData
       );

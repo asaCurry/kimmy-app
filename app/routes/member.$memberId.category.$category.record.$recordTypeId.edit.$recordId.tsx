@@ -24,8 +24,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       memberId
     );
 
-    if (!family || !member) {
-      throw new Error("Family or member not found");
+    if (!household || !member) {
+      throw new Error("Household or member not found");
     }
 
     // Load the record type
@@ -37,7 +37,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         and(
           eq(recordTypes.id, parseInt(recordTypeId)),
           eq(recordTypes.category, category),
-          eq(recordTypes.householdId, family.id)
+          eq(recordTypes.householdId, household.id)
         )
       )
       .get();
@@ -54,7 +54,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         and(
           eq(records.id, parseInt(recordId)),
           eq(records.recordTypeId, parseInt(recordTypeId)),
-          eq(records.householdId, family.id)
+          eq(records.householdId, household.id)
         )
       )
       .get();
@@ -64,7 +64,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     return {
-      family,
+      household,
       member,
       householdMembers,
       recordType,
@@ -88,8 +88,8 @@ export async function action({ request, context, params }: { request: Request; c
 
   try {
     const { household } = await loadHouseholdDataWithMember(request, context, memberId);
-    if (!family) {
-      throw new Error("Family not found");
+    if (!household) {
+      throw new Error("Household not found");
     }
 
     const db = getDatabase(context);
@@ -102,7 +102,7 @@ export async function action({ request, context, params }: { request: Request; c
         .where(
           and(
             eq(records.id, parseInt(recordId)),
-            eq(records.householdId, family.id)
+            eq(records.householdId, household.id)
           )
         )
         .get();
@@ -126,7 +126,7 @@ export async function action({ request, context, params }: { request: Request; c
         .where(
           and(
             eq(records.id, parseInt(recordId)),
-            eq(records.householdId, family.id)
+            eq(records.householdId, household.id)
           )
         )
         .get();
@@ -168,7 +168,7 @@ export async function action({ request, context, params }: { request: Request; c
 }
 
 const RecordEditPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
-  const { family, member, householdMembers, recordType, record, category } = loaderData;
+  const { household, member, householdMembers, recordType, record, category } = loaderData;
   const { user } = useAuth();
 
   if (!record) {
@@ -187,7 +187,7 @@ const RecordEditPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
 
   return (
     <PageLayout>
-      <Navigation family={family} member={member} />
+      <Navigation household={household} member={member} />
       <PageHeader
         title={`Edit ${recordType.name}`}
         subtitle={`Editing record: ${record.title}`}
@@ -197,7 +197,7 @@ const RecordEditPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
         <DynamicRecordForm
           recordType={recordType}
           householdMembers={householdMembers}
-          householdId={family.id}
+          householdId={household.id}
           memberId={member.id}
           category={category}
           mode="edit"

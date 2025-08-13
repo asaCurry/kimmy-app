@@ -38,23 +38,23 @@
 
 ## 🔧 **Phase 2: Data Validation & Error Handling (MEDIUM PRIORITY)**
 
-### **2.1 Family Member Management & Invitation System (HIGH PRIORITY)**
-- [x] Refactor family member form into reusable component (`FamilyMemberForm`)
-- [x] Create family member edit component (`FamilyMemberEdit`)
-- [x] Create family member list component with edit/remove functionality (`FamilyMemberList`)
+### **2.1 Household member Management & Invitation System (HIGH PRIORITY)**
+- [x] Refactor household member form into reusable component (`HouseholdmemberForm`)
+- [x] Create household member edit component (`HouseholdmemberEdit`)
+- [x] Create household member list component with edit/remove functionality (`HouseholdmemberList`)
 - [x] Create invite code manager component (`InviteCodeManager`)
 - [x] Add optional invite code input to account creation form
 - [x] Implement basic invitation flow (placeholder for now)
 - [x] Create edit member route (`/manage/edit-member`)
 - [x] Create API endpoints for member operations (update/remove)
-- [x] Implement family member removal with confirmation
+- [x] Implement household member removal with confirmation
 - [x] Implement secure invitation system:
   - [x] Database schema for household invite codes (households table)
   - [x] Server-side invite code generation and validation
   - [x] API endpoints for invite code management
   - [x] User joining household with invite code
   - [x] Admin ability to regenerate invite codes
-- [ ] Implement family member editing API endpoints (backend logic)
+- [ ] Implement household member editing API endpoints (backend logic)
 - [ ] Add proper error handling for member operations
 - [ ] Add loading states for member operations
 
@@ -213,7 +213,7 @@
 - ✅ Database synchronization between local and remote
 - ✅ Dynamic field editor for record types
 - ✅ Record creation functionality
-- ✅ Basic family member management
+- ✅ Basic household member management
 - ✅ Authentication and session management
 
 ---

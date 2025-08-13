@@ -9,11 +9,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
-import type { FamilyMember, RecordType } from "~/lib/utils";
+import type { Householdmember, RecordType } from "~/lib/utils";
 
 interface NavigationProps {
   currentView: "home" | "categories" | "record-types" | "form";
-  member?: FamilyMember;
+  member?: Householdmember;
   category?: string;
   recordType?: RecordType;
 }

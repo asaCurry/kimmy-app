@@ -1,7 +1,7 @@
-ALTER TABLE `quick_notes` RENAME COLUMN `family_id` TO `household_id`;--> statement-breakpoint
-ALTER TABLE `record_types` RENAME COLUMN `family_id` TO `household_id`;--> statement-breakpoint
-ALTER TABLE `records` RENAME COLUMN `family_id` TO `household_id`;--> statement-breakpoint
-ALTER TABLE `users` RENAME COLUMN `family_id` TO `household_id`;--> statement-breakpoint
+ALTER TABLE `quick_notes` RENAME COLUMN `household_id` TO `household_id`;--> statement-breakpoint
+ALTER TABLE `record_types` RENAME COLUMN `household_id` TO `household_id`;--> statement-breakpoint
+ALTER TABLE `records` RENAME COLUMN `household_id` TO `household_id`;--> statement-breakpoint
+ALTER TABLE `users` RENAME COLUMN `household_id` TO `household_id`;--> statement-breakpoint
 /*
  SQLite does not support "Dropping foreign key" out of the box, we do not generate automatic migration for that, so it has to be done manually
  Please refer to: https://www.techonthenet.com/sqlite/tables/alter_table.php

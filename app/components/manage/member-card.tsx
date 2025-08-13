@@ -7,11 +7,11 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Users } from "lucide-react";
-import type { FamilyMember } from "~/lib/utils";
+import type { Householdmember } from "~/lib/utils";
 
 interface MemberCardProps {
   title: string;
-  members: FamilyMember[];
+  members: Householdmember[];
   iconColor: string;
   badgeColor: string;
   badgeText: string;

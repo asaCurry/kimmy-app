@@ -1,10 +1,10 @@
 import * as React from "react";
 import { UserCircle } from "lucide-react";
 import { IconCard } from "~/components/ui/interactive-card";
-import type { FamilyMember } from "~/lib/utils";
+import type { Householdmember } from "~/lib/utils";
 
 interface MemberCardProps {
-  member: FamilyMember;
+  member: Householdmember;
   onSelect?: () => void;
 }
 

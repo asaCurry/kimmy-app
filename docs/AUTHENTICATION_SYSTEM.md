@@ -223,13 +223,13 @@ The system includes demo accounts for easy testing:
 
 - Email: sarah.johnson@email.com
 - Password: password
-- Role: Administrator of "The Johnson Family"
+- Role: Administrator of "The Johnson Household"
 
 **Member User:**
 
 - Email: mike.johnson@email.com
 - Password: password
-- Role: Member of "The Johnson Family"
+- Role: Member of "The Johnson Household"
 
 ### Test Scenarios
 

@@ -93,7 +93,7 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
           <div>
             <CardTitle className="text-xl text-slate-100">Invite Code</CardTitle>
             <p className="text-sm text-slate-400">
-              Share this code with family members to let them join your household
+              Share this code with household members to let them join your household
             </p>
           </div>
         </div>
@@ -170,7 +170,7 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
             How to Use
           </h4>
           <div className="text-sm text-slate-300 space-y-1">
-            <p>• Share this code with family members via text, email, or social media</p>
+            <p>• Share this code with household members via text, email, or social media</p>
             <p>• They can enter this code when creating their account or joining</p>
             <p>• The code will automatically add them to your household</p>
             <p>• Generate a new code anytime for security</p>

@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { IconCard } from "~/components/ui/interactive-card";
 import { Button } from "~/components/ui/button";
 import { UserPlus, Key, Settings, RefreshCw } from "lucide-react";
-import type { FamilyMember } from "~/lib/utils";
+import type { Householdmember } from "~/lib/utils";
 
 interface QuickActionsProps {
   currentHouseholdId: string | undefined;
@@ -44,7 +44,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
               </div>
             }
             title="Add Member"
-            description="Add a new family member or child"
+            description="Add a new household member or child"
             showChevron={true}
             className="hover:scale-105 transition-transform duration-200"
           />

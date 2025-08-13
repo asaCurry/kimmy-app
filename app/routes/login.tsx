@@ -260,7 +260,7 @@ const Login: React.FC<Route.ComponentProps> = () => {
             New to Hey, Kimmy?
           </h4>
           <p className="text-xs text-slate-400 mb-3">
-            Create an account to get started with managing your family's
+            Create an account to get started with managing your household's records
             records.
           </p>
           <Link

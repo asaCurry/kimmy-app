@@ -23,7 +23,7 @@ export const LoadingStates: React.FC<LoadingStatesProps> = ({ type }) => {
       />
       <LoadingSpinner
         size="lg"
-        text="Loading family members..."
+        text="Loading household members..."
         className="min-h-[400px]"
       />
     </PageLayout>

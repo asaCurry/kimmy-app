@@ -1,4 +1,4 @@
-import type { Route } from "./+types/api.family-members";
+import type { Route } from "./+types/api.household-members";
 import { userDb } from "~/lib/db";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
@@ -9,7 +9,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       throw new Response("Database not available", { status: 500 });
     }
 
-    // Extract family ID from session instead of URL
+    // Extract household ID from session instead of URL
     const cookieHeader = request.headers.get("cookie");
     let householdId = null;
 
@@ -35,13 +35,13 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     }
 
     if (!householdId) {
-      throw new Response("Family ID not found in session", { status: 400 });
+      throw new Response("Household ID not found in session", { status: 400 });
     }
 
-    // Fetch family members from database
+    // Fetch household members from database
     const dbMembers = await userDb.findByhouseholdId(env, householdId);
 
-    // Transform database User type to FamilyMember type
+    // Transform database User type to Householdmember type
     const members = dbMembers.map(member => ({
       id: member.id,
       name: member.name,
@@ -53,12 +53,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
     return { members };
   } catch (error) {
-    console.error("Family members API error:", error);
+    console.error("Household members API error:", error);
 
     if (error instanceof Response) {
       throw error;
     }
 
-    throw new Response("Failed to fetch family members", { status: 500 });
+    throw new Response("Failed to fetch household members", { status: 500 });
   }
 }

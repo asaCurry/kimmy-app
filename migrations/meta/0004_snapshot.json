@@ -66,8 +66,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "family_id": {
-          "name": "family_id",
+        "household_id": {
+          "name": "household_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -166,8 +166,8 @@
           "autoincrement": false,
           "default": "'Personal'"
         },
-        "family_id": {
-          "name": "family_id",
+        "household_id": {
+          "name": "household_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -264,8 +264,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "family_id": {
-          "name": "family_id",
+        "household_id": {
+          "name": "household_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -395,8 +395,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "family_id": {
-          "name": "family_id",
+        "household_id": {
+          "name": "household_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

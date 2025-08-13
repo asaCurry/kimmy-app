@@ -6,7 +6,7 @@ import { PageLoading } from "~/components/ui/loading";
 import { NoHousehold } from "~/components/manage/no-household";
 import { QuickActions } from "~/components/manage/quick-actions";
 import { HouseholdOverview } from "~/components/manage/household-overview";
-import { FamilyMemberList } from "~/components/manage/family-member-list";
+import { HouseholdmemberList } from "~/components/manage/household-member-list";
 import { InviteCodeManager } from "~/components/manage/invite-code-manager";
 import { NavigationSection } from "~/components/manage/navigation-section";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
@@ -15,7 +15,7 @@ import { LoadingSpinner } from "~/components/ui/loading-spinner";
 import { loadHouseholdData } from "~/lib/loader-helpers";
 import { inviteCodeDb } from "~/lib/db";
 
-interface FamilyMember {
+interface Householdmember {
   id: number;
   name: string;
   email: string;
@@ -25,7 +25,7 @@ interface FamilyMember {
 }
 
 interface LoaderData {
-  members: FamilyMember[];
+  members: Householdmember[];
   householdId: string | null;
   inviteCode: string | undefined;
 }
@@ -99,6 +99,7 @@ export async function loader({
     if (householdId) {
       try {
         const household = await inviteCodeDb.getHouseholdById(context.cloudflare?.env, householdId);
+        console.log("household", household);
         inviteCode = household?.inviteCode;
       } catch (error) {
         console.error("Failed to load invite code:", error);
@@ -135,6 +136,7 @@ const Manage: React.FC = () => {
   const { session, isAuthenticated, isLoading } = useAuth();
   const { members: loaderMembers, householdId: loaderHouseholdId, inviteCode } =
     useLoaderData<LoaderData>();
+    console.log("inviteCode", inviteCode, loaderHouseholdId);
   const fetcher = useFetcher();
   const isSeeding = fetcher.state === "submitting";
 
@@ -245,8 +247,8 @@ const Manage: React.FC = () => {
           onRefresh={() => {}}
         />
 
-        {/* Family Member Management */}
-        <FamilyMemberList
+        {/* Household member Management */}
+        <HouseholdmemberList
           householdMembers={householdMembers}
           householdId={currentHouseholdId}
           onMemberUpdated={handleMemberUpdated}

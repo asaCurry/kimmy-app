@@ -14,7 +14,7 @@ import {
 import { UserPlus, Users } from "lucide-react";
 import { RELATIONSHIP_TYPES } from "~/lib/types";
 
-interface FamilyMemberFormProps {
+interface HouseholdmemberFormProps {
   householdId: string;
   onSubmit: (formData: FormData) => void;
   onCancel: () => void;
@@ -30,7 +30,7 @@ interface FamilyMemberFormProps {
   mode?: "add" | "edit";
 }
 
-export const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({
+export const HouseholdmemberForm: React.FC<HouseholdmemberFormProps> = ({
   householdId,
   onSubmit,
   onCancel,

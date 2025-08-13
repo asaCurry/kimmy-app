@@ -86,7 +86,7 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-slate-100">
           <Clock className="w-5 h-5 text-blue-400" />
-          Recent Family Activity
+          Recent Household Activity
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

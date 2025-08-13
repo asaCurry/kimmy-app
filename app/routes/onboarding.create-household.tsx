@@ -168,7 +168,7 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
 
           <PageHeader
             title="Create Your Household"
-            subtitle="Set up your family records space"
+            subtitle="Set up your household records space"
           />
 
           <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
@@ -200,7 +200,7 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
                     onChange={e =>
                       handleInputChange("householdName", e.target.value)
                     }
-                    placeholder="e.g., The Johnson Family"
+                    placeholder="e.g., The Johnson Household"
                   />
                   {errors.householdName && (
                     <FormError>{errors.householdName}</FormError>
@@ -217,7 +217,7 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
                       {generateInviteCode()}
                     </div>
                     <p className="text-xs text-slate-500 mt-1">
-                      Family members can use this code to join your household
+                      Household members can use this code to join your household
                     </p>
                   </div>
                 )}
@@ -302,8 +302,8 @@ const CreateHousehold: React.FC<Route.ComponentProps> = () => {
             </h4>
             <ul className="text-sm text-slate-300 space-y-1">
               <li>• You'll become the household administrator</li>
-              <li>• You can add family members and children</li>
-              <li>• Start creating and managing family records</li>
+              <li>• You can add household members and children</li>
+              <li>• Start creating and managing household records</li>
               <li>• Invite other adults to join your household</li>
             </ul>
           </div>

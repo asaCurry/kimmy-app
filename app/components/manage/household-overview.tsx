@@ -9,11 +9,11 @@ import {
 } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Users } from "lucide-react";
-import type { FamilyMember } from "~/lib/utils";
+import type { Householdmember } from "~/lib/utils";
 import { MemberCard } from "./member-card";
 
 interface HouseholdOverviewProps {
-  householdMembers: FamilyMember[];
+  householdMembers: Householdmember[];
 }
 
 export const HouseholdOverview: React.FC<HouseholdOverviewProps> = ({
@@ -48,15 +48,15 @@ export const HouseholdOverview: React.FC<HouseholdOverviewProps> = ({
             </svg>
           </div>
           <h3 className="text-2xl font-semibold text-white mb-3">
-            No Family Members Yet
+            No Household members Yet
           </h3>
           <p className="text-slate-400 mb-8 max-w-md mx-auto">
-            Get started by adding your first family member to begin managing
+            Get started by adding your first household member to begin managing
             your household.
           </p>
           <Link to="/manage/add-member">
             <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg">
-              Add Family Member
+              Add Household member
             </Button>
           </Link>
         </div>

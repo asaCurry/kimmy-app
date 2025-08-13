@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "05f9f9a9-95ab-4e0e-8ac2-fbe3eaed0704",
-  "prevId": "95e5f2d8-5600-41fa-83c2-124a6d82518a",
+  "id": "d1d15b2c-4442-41d5-b196-b891703b2331",
+  "prevId": "4a794765-534b-407b-97d7-c914cd6398d6",
   "tables": {
     "contact_submissions": {
       "name": "contact_submissions",
@@ -66,18 +66,11 @@
           "notNull": true,
           "autoincrement": false
         },
-        "inviteCode": {
-          "name": "inviteCode",
+        "invite_code": {
+          "name": "invite_code",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
           "autoincrement": false
         },
         "created_at": {
@@ -98,29 +91,15 @@
         }
       },
       "indexes": {
-        "households_inviteCode_unique": {
-          "name": "households_inviteCode_unique",
+        "households_invite_code_unique": {
+          "name": "households_invite_code_unique",
           "columns": [
-            "inviteCode"
+            "invite_code"
           ],
           "isUnique": true
         }
       },
-      "foreignKeys": {
-        "households_created_by_users_id_fk": {
-          "name": "households_created_by_users_id_fk",
-          "tableFrom": "households",
-          "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -187,6 +166,19 @@
       },
       "indexes": {},
       "foreignKeys": {
+        "quick_notes_household_id_households_id_fk": {
+          "name": "quick_notes_household_id_households_id_fk",
+          "tableFrom": "quick_notes",
+          "tableTo": "households",
+          "columnsFrom": [
+            "household_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "quick_notes_created_by_users_id_fk": {
           "name": "quick_notes_created_by_users_id_fk",
           "tableFrom": "quick_notes",
@@ -303,6 +295,19 @@
       },
       "indexes": {},
       "foreignKeys": {
+        "record_types_household_id_households_id_fk": {
+          "name": "record_types_household_id_households_id_fk",
+          "tableFrom": "record_types",
+          "tableTo": "households",
+          "columnsFrom": [
+            "household_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "record_types_created_by_users_id_fk": {
           "name": "record_types_created_by_users_id_fk",
           "tableFrom": "record_types",
@@ -433,6 +438,19 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
+        "records_household_id_households_id_fk": {
+          "name": "records_household_id_households_id_fk",
+          "tableFrom": "records",
+          "tableTo": "households",
+          "columnsFrom": [
+            "household_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "records_member_id_users_id_fk": {
           "name": "records_member_id_users_id_fk",
           "tableFrom": "records",
@@ -541,7 +559,21 @@
           "isUnique": true
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "users_household_id_households_id_fk": {
+          "name": "users_household_id_households_id_fk",
+          "tableFrom": "users",
+          "tableTo": "households",
+          "columnsFrom": [
+            "household_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     }
@@ -550,6 +582,8 @@
   "_meta": {
     "schemas": {},
     "tables": {},
-    "columns": {}
+    "columns": {
+      "\"households\".\"inviteCode\"": "\"households\".\"invite_code\""
+    }
   }
 }

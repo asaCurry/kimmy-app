@@ -1,5 +1,5 @@
 /**
- * Database-backed household data context for managing family members
+ * Database-backed household data context for managing household members
  */
 
 import React, { createContext, useContext, useState, useCallback } from "react";
@@ -184,7 +184,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
 };
 
 // Hook for getting current household members
-// This should be used in components that need to display family members
+// This should be used in components that need to display household members
 export const useCurrentHouseholdMembers = (householdId?: string): User[] => {
   const { householdMembers } = useHousehold();
 

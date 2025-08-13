@@ -14,7 +14,7 @@ import {
 import { UserPlus, Users, Edit3 } from "lucide-react";
 import { RELATIONSHIP_TYPES } from "~/lib/types";
 
-interface FamilyMemberEditProps {
+interface HouseholdmemberEditProps {
   householdId: string;
   member: {
     id: number;
@@ -28,7 +28,7 @@ interface FamilyMemberEditProps {
   onSuccess: () => void;
 }
 
-export const FamilyMemberEdit: React.FC<FamilyMemberEditProps> = ({
+export const HouseholdmemberEdit: React.FC<HouseholdmemberEditProps> = ({
   householdId,
   member,
   onCancel,

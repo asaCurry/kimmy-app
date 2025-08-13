@@ -15,7 +15,7 @@ This document outlines the account and household modeling system for the Hey, Ki
 
 ### 2. Households
 
-- **Household**: A family unit or group that shares records
+- **Household**: A household unit or group that shares records
 - Has a unique name and invite code
 - Can contain multiple members with different roles
 - One admin creates the household initially

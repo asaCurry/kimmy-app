@@ -33,7 +33,7 @@ db/
 
 app/
 ├── lib/
-│   ├── db.ts            # Database utility functions (userDb, familyDb, etc.)
+│   ├── db.ts            # Database utility functions (userDb, householdDb, etc.)
 │   └── auth-db.ts       # Authentication API functions
 └── routes/               # Route files that use database utilities
 ```
@@ -117,34 +117,34 @@ export async function loader({ context }: Route.LoaderArgs) {
 - `create(env, userData)` - Create new user
 - `findByEmail(env, email)` - Find user by email
 - `findById(env, id)` - Find user by ID
-- `findByhouseholdId(env, householdId)` - Find users in family
+- `findByhouseholdId(env, householdId)` - Find users in household
 - `updateRole(env, userId, role)` - Update user role
 - `verifyPassword(password, hashedPassword)` - Verify password
 
-### Family Operations (`familyDb`)
+### Household Operations (`householdDb`)
 
-- `generatehouseholdId()` - Generate unique family ID
-- `getMembers(env, householdId)` - Get family members
-- `getAdmins(env, householdId)` - Get family admins
-- `addMember(env, memberData)` - Add member to family
+- `generatehouseholdId()` - Generate unique household ID
+- `getMembers(env, householdId)` - Get household members
+- `getAdmins(env, householdId)` - Get household admins
+- `addMember(env, memberData)` - Add member to household
 
 ### Record Type Operations (`recordTypeDb`)
 
 - `create(env, recordTypeData)` - Create record type
-- `findByhouseholdId(env, householdId)` - Find record types in family
+- `findByhouseholdId(env, householdId)` - Find record types in household
 - `findById(env, id)` - Find record type by ID
 
 ### Record Operations (`recordDb`)
 
 - `create(env, recordData)` - Create record
-- `findByhouseholdId(env, householdId)` - Find records in family
+- `findByhouseholdId(env, householdId)` - Find records in household
 - `findByRecordType(env, recordTypeId, householdId)` - Find records by type
 - `findById(env, id)` - Find record by ID
 
 ### Authentication Operations (`authDb`)
 
 - `authenticateUser(env, email, password)` - Authenticate user
-- `createUserWithFamily(env, userData)` - Create user with family
+- `createUserWithHousehold(env, userData)` - Create user with household
 
 ## Development Setup
 

@@ -11,7 +11,7 @@ import { useAuth } from "~/contexts/auth-context";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Welcome to Hey, Kimmy" },
-    { name: "description", content: "Manage your family's records and notes" },
+    { name: "description", content: "Manage your household's records records and notes" },
   ];
 }
 
@@ -70,7 +70,7 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
             Welcome to Hey, Kimmy
           </h1>
           <p className="text-xl sm:text-2xl text-slate-300 mb-4">
-            The simple way to manage your family's records
+            The simple way to manage your household's records records
           </p>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
             Keep track of medical appointments, school events, achievements, and
@@ -137,7 +137,7 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
               Household Management
             </h3>
             <p className="text-slate-400">
-              Create households and manage family members with role-based
+              Create households and manage household members with role-based
               permissions.
             </p>
           </div>

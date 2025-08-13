@@ -13,12 +13,12 @@ import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { ArrowLeft } from "lucide-react";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { loadHouseholdData } from "~/lib/loader-helpers";
-import { FamilyMemberEdit } from "~/components/manage/family-member-edit";
+import { HouseholdmemberEdit } from "~/components/manage/household-member-edit";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Edit Family Member - Kimmy" },
-    { name: "description", content: "Edit a family member in your household" },
+    { title: "Edit Household member - Kimmy" },
+    { name: "description", content: "Edit a household member in your household" },
   ];
 }
 
@@ -37,12 +37,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       throw new Response("Member ID is required", { status: 400 });
     }
 
-    // Load family data from URL params
+    // Load household data from URL params
     const { householdId, householdMembers } = await loadHouseholdData(request, env);
 
-    // If no family data found, redirect to welcome
+    // If no household data found, redirect to welcome
     if (!householdId) {
-      console.log("❌ No family data found, redirecting to welcome");
+      console.log("❌ No household data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
@@ -64,7 +64,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       throw error;
     }
 
-    throw new Response("Failed to load family data", { status: 500 });
+    throw new Response("Failed to load household data", { status: 500 });
   }
 }
 
@@ -156,11 +156,11 @@ const EditMember: React.FC<Route.ComponentProps> = () => {
     }
   }, [actionData, navigate]);
 
-  // If we have a family ID but no loader data, redirect to include the family ID in the URL
+  // If we have a household ID but no loader data, redirect to include the household ID in the URL
   if (session?.currentHouseholdId && !householdId) {
     const redirectUrl = `/manage/edit-member?householdId=${encodeURIComponent(session.currentHouseholdId)}`;
     console.log(
-      "🔄 Edit member route redirecting to include family ID:",
+      "🔄 Edit member route redirecting to include household ID:",
       redirectUrl
     );
     window.location.href = redirectUrl;
@@ -202,11 +202,11 @@ const EditMember: React.FC<Route.ComponentProps> = () => {
           </div>
 
           <PageHeader
-            title="Edit Family Member"
+            title="Edit Household member"
             subtitle={`Edit ${member.name} in your household`}
           />
 
-          <FamilyMemberEdit
+          <HouseholdmemberEdit
             householdId={householdId || ""}
             member={member}
             onCancel={handleCancel}

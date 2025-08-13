@@ -1,8 +1,8 @@
 /**
- * Loader helper functions for family data
+ * Loader helper functions for household data
  */
 
-import { userDb, familyDb } from "./db";
+import { userDb, householdDb } from "./db";
 import { parseCookies, extractSessionFromCookies } from "./utils";
 
 export interface HouseholdData {

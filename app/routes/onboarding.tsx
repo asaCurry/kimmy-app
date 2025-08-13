@@ -27,7 +27,7 @@ const Onboarding: React.FC<Route.ComponentProps> = () => {
     <PageLayout>
       <PageHeader
         title="Welcome to Hey, Kimmy"
-        subtitle="Let's get you set up with your family records"
+        subtitle="Let's get you set up with your household records"
       />
 
       <div className="max-w-2xl mx-auto space-y-6">
@@ -74,7 +74,7 @@ const Onboarding: React.FC<Route.ComponentProps> = () => {
                 Create Household
               </CardTitle>
               <CardDescription className="text-slate-400">
-                Set up your family or household
+                Set up your household or household
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">

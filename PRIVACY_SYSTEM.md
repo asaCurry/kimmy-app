@@ -9,7 +9,7 @@ The Hey, Kimmy privacy system provides flexible record visibility while maintain
 ### Default Behavior
 
 - **Records are visible to all household members by default**
-- This promotes family transparency and collaboration
+- This promotes household transparency and collaboration
 - All adults (ADMIN/MEMBER roles) can see records for all household members
 - Children don't have accounts, so this doesn't affect them
 
@@ -39,7 +39,7 @@ The Hey, Kimmy privacy system provides flexible record visibility while maintain
   // ... other fields
 }
 
-// School events are always shared (family coordination)
+// School events are always shared (household coordination)
 {
   name: "School Event",
   allowPrivate: false,
@@ -114,19 +114,19 @@ record_types {
 
 ## Use Cases
 
-### Family Health Management
+### Household Health Management
 
 - **Public Health Records**: Vaccination schedules, regular checkups
 - **Private Health Records**: Personal medical consultations, sensitive diagnoses
 
 ### School & Activities
 
-- **Public Events**: School performances, sports games (family coordination)
+- **Public Events**: School performances, sports games (household coordination)
 - **Private Notes**: Parent concerns, disciplinary discussions
 
 ### Personal Achievements
 
-- **Public Achievements**: Graduations, sports wins (family celebration)
+- **Public Achievements**: Graduations, sports wins (household celebration)
 - **Private Goals**: Personal milestones, private aspirations
 
 ## Implementation Examples
@@ -180,4 +180,4 @@ function getVisibleRecords(userId, userRole) {
 - Track when records are marked private/public
 - Log who accessed private records
 
-This privacy system balances family transparency with personal privacy, giving users control while maintaining the collaborative household focus.
+This privacy system balances household transparency with personal privacy, giving users control while maintaining the collaborative household focus.

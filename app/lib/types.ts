@@ -26,7 +26,7 @@ export interface UserProfile {
 // Household types
 export interface Household {
   id: string; // UUID
-  name: string; // e.g., "The Johnson Family"
+  name: string; // e.g., "The Johnson Household"
   inviteCode: string; // Unique code for joining
   createdAt: Date;
   updatedAt: Date;

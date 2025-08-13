@@ -345,7 +345,7 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
                     className="font-mono"
                   />
                   <FormDescription>
-                    If you have an invite code from a family member, enter it here to join their household automatically.
+                    If you have an invite code from a household member, enter it here to join their household automatically.
                     Leave blank if you want to create your own household.
                   </FormDescription>
                 </FormField>

@@ -13,11 +13,11 @@ import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { ArrowLeft } from "lucide-react";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { loadHouseholdData } from "~/lib/loader-helpers";
-import { FamilyMemberForm } from "~/components/manage/family-member-form";
+import { HouseholdmemberForm } from "~/components/manage/household-member-form";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Add Family Member - Kimmy" },
+    { title: "Add Household member - Kimmy" },
     { name: "description", content: "Add a new member to your household" },
   ];
 }
@@ -30,7 +30,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       throw new Response("Database not available", { status: 500 });
     }
 
-    // Load family data from URL params
+    // Load household data from URL params
     const { householdId, householdMembers } = await loadHouseholdData(request, env);
 
     // If no household data found, redirect to welcome
@@ -50,7 +50,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       throw error;
     }
 
-    throw new Response("Failed to load family data", { status: 500 });
+    throw new Response("Failed to load household data", { status: 500 });
   }
 }
 
@@ -211,10 +211,10 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
 
           <PageHeader
             title="Add Household Member"
-            subtitle="Add a new family member to your household"
+            subtitle="Add a new household member to your household"
           />
 
-          <FamilyMemberForm
+          <HouseholdmemberForm
             householdId={householdId || ""}
             onSubmit={() => {}} // Form submission is handled by the Form component
             onCancel={handleCancel}
@@ -230,7 +230,7 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
                   Member Added Successfully!
                 </h3>
                 <p className="text-slate-300 mb-4">
-                  The new family member has been added to your household.
+                  The new household member has been added to your household.
                 </p>
                 <p className="text-slate-400 text-sm">
                   Redirecting to management page...

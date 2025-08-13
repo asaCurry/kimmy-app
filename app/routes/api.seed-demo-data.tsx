@@ -12,11 +12,11 @@ export async function action({
   const householdId = formData.get("householdId") as string;
 
   if (!householdId) {
-    throw new Response("Family ID required", { status: 400 });
+    throw new Response("Household ID required", { status: 400 });
   }
 
   return withDatabaseAndSession(request, context, async (db, session) => {
-    // Create basic record types for the family
+    // Create basic record types for the household
     const basicRecordTypes = [
       {
         name: "General Record",

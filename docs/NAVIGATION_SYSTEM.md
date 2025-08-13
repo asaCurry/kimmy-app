@@ -121,7 +121,7 @@ Sign In | Get Started
 ### **Quick Access:**
 
 - **Home Icon:** Always visible, one-click return to main page
-- **Add Member:** Direct access to add family members
+- **Add Member:** Direct access to add household members
 - **Manage:** Quick access to household management
 - **Logout:** Easily accessible in footer
 

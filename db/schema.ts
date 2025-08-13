@@ -4,12 +4,12 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 export const households = sqliteTable("households", {
   id: text("id").primaryKey(), // UUID string
   name: text("name").notNull(),
-  inviteCode: text("inviteCode").unique().notNull(),
+  inviteCode: text("invite_code").unique().notNull(),
   createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
   updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
 });
 
-// Users/Family members table
+// Users/Household members table
 export const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
@@ -44,7 +44,7 @@ export const records = sqliteTable("records", {
   content: text("content"), // JSON object with field values
   recordTypeId: integer("record_type_id").references(() => recordTypes.id),
   householdId: text("household_id").notNull().references(() => households.id),
-  memberId: integer("member_id").references(() => users.id), // Which family member this record is about
+  memberId: integer("member_id").references(() => users.id), // Which household member this record is about
   createdBy: integer("created_by").references(() => users.id), // Who created the record
   tags: text("tags"), // Comma-separated tags
   attachments: text("attachments"), // JSON array of file URLs

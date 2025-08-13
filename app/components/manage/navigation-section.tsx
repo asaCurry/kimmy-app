@@ -12,7 +12,7 @@ export const NavigationSection: React.FC = () => {
             Ready to add records?
           </h3>
           <p className="text-slate-400">
-            Start managing your family's information
+            Start managing your household's records information
           </p>
         </div>
         <Link to="/">

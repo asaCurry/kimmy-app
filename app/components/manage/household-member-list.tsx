@@ -16,7 +16,7 @@ import {
   Calendar
 } from "lucide-react";
 
-interface FamilyMember {
+interface Householdmember {
   id: number;
   name: string;
   email: string;
@@ -25,34 +25,34 @@ interface FamilyMember {
   relationshipToAdmin?: string;
 }
 
-interface FamilyMemberListProps {
-  householdMembers: FamilyMember[];
+interface HouseholdmemberListProps {
+  householdMembers: Householdmember[];
   householdId: string;
   onMemberUpdated: () => void;
   onMemberRemoved: () => void;
 }
 
-export const FamilyMemberList: React.FC<FamilyMemberListProps> = ({
+export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
   householdMembers,
   householdId,
   onMemberUpdated,
   onMemberRemoved,
 }) => {
-  const [removingMember, setRemovingMember] = useState<FamilyMember | null>(null);
+  const [removingMember, setRemovingMember] = useState<Householdmember | null>(null);
   const fetcher = useFetcher();
 
-  const handleRemove = (member: FamilyMember) => {
+  const handleRemove = (member: Householdmember) => {
     setRemovingMember(member);
   };
 
-  const handleRemoveConfirm = async (member: FamilyMember) => {
+  const handleRemoveConfirm = async (member: Householdmember) => {
     try {
       const formData = new FormData();
       formData.append("memberId", member.id.toString());
 
       fetcher.submit(formData, {
         method: "post",
-        action: "/api/family-members/remove",
+        action: "/api/household-members/remove",
       });
 
       setRemovingMember(null);
@@ -92,15 +92,15 @@ export const FamilyMemberList: React.FC<FamilyMemberListProps> = ({
             <Users className="w-16 h-16 mx-auto" />
           </div>
           <h3 className="text-xl font-semibold text-slate-200 mb-2">
-            No Family Members Yet
+            No Household members Yet
           </h3>
           <p className="text-slate-400 mb-6 max-w-md mx-auto">
-            Get started by adding your first family member to begin managing your household.
+            Get started by adding your first household member to begin managing your household.
           </p>
           <Link to="/manage/add-member">
             <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
               <UserPlus className="h-4 w-4 mr-2" />
-              Add Family Member
+              Add Household member
             </Button>
           </Link>
         </CardContent>
@@ -113,7 +113,7 @@ export const FamilyMemberList: React.FC<FamilyMemberListProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-slate-200">
-          Family Members ({householdMembers.length})
+          Household members ({householdMembers.length})
         </h2>
         <Link to="/manage/add-member">
           <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
@@ -195,7 +195,7 @@ export const FamilyMemberList: React.FC<FamilyMemberListProps> = ({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="max-w-md w-full bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle className="text-red-400">Remove Family Member</CardTitle>
+              <CardTitle className="text-red-400">Remove Household member</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-slate-300">
