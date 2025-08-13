@@ -53,6 +53,16 @@ const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
         : z.string().optional();
 
     case "select":
+      if (field.options && Array.isArray(field.options) && field.options.length > 0) {
+        const validValues = field.options.map(opt => 
+          typeof opt === 'string' ? opt : opt.value
+        );
+        const selectSchema = z.enum(validValues as [string, ...string[]], {
+          errorMap: () => ({ message: `${field.label} must be one of the available options` })
+        });
+        return field.required ? selectSchema : selectSchema.optional();
+      }
+      // Fallback if no options are defined
       return field.required
         ? z.string().min(1, `${field.label} is required`)
         : z.string().optional();
@@ -98,6 +108,26 @@ export const createFieldValidationSchema = (field: DynamicField): z.ZodTypeAny |
 
 export const validateFieldAgainstSchema = (field: DynamicField, value: any): { isValid: boolean; error?: string } => {
   try {
+    // Special validation for select fields
+    if (field.type === "select" && field.options && Array.isArray(field.options)) {
+      if (field.required && (!value || value.trim() === "")) {
+        return { isValid: false, error: `${field.label} is required` };
+      }
+      
+      if (value && value.trim() !== "") {
+        const validValues = field.options.map(opt => 
+          typeof opt === 'string' ? opt : opt.value
+        );
+        
+        if (!validValues.includes(value)) {
+          return { isValid: false, error: `${field.label} must be one of the available options` };
+        }
+      }
+      
+      return { isValid: true };
+    }
+    
+    // Use schema validation for other field types
     const schema = createFieldSchema(field);
     if (!schema) return { isValid: true };
     

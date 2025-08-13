@@ -17,8 +17,9 @@ export const createDefaultField = (type: FieldType, order: number): DynamicField
     defaultValue: getDefaultValueForType(type),
     validation: getDefaultValidationForType(type),
     options: type === "select" ? [
-      { value: "option1", label: "Option 1" },
-      { value: "option2", label: "Option 2" }
+      { value: "option_1", label: "Option 1" },
+      { value: "option_2", label: "Option 2" },
+      { value: "option_3", label: "Option 3" }
     ] : undefined,
     order,
     isActive: true

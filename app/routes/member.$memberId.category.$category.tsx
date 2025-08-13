@@ -98,10 +98,31 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       );
 
     // Parse the fields JSON for each record type
-    const parsedRecordTypes = recordTypesResult.map(rt => ({
-      ...rt,
-      fields: rt.fields ? JSON.parse(rt.fields) : [],
-    }));
+    const parsedRecordTypes = recordTypesResult.map(rt => {
+      let parsedFields = [];
+      if (rt.fields) {
+        try {
+          const parsed = JSON.parse(rt.fields);
+          
+          // Extract the fields array from the parsed object
+          if (parsed && typeof parsed === 'object' && Array.isArray(parsed.fields)) {
+            parsedFields = parsed.fields;
+          } else if (Array.isArray(parsed)) {
+            // Handle case where fields is directly an array
+            parsedFields = parsed;
+          } else {
+            parsedFields = [];
+          }
+        } catch (error) {
+          parsedFields = [];
+        }
+      }
+      
+      return {
+        ...rt,
+        fields: parsedFields,
+      };
+    });
 
     // Fetch records for each record type, filtered by the specific member
     const recordsData = await db

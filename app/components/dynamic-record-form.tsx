@@ -3,19 +3,19 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useFetcher, useNavigate } from "react-router";
-import { PageHeader } from "~/components/ui/layout";
 import {
+  PageHeader,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
+  Button,
+  Switch,
+  Label,
+  LoadingSpinner
+} from "~/components/ui";
 import { DynamicField } from "~/components/ui/form-field";
-import { Switch } from "~/components/ui/switch";
-import { Label } from "~/components/ui/label";
-import { LoadingSpinner } from "~/components/ui/loading-spinner";
 import type { FamilyMember } from "~/lib/utils";
 import type { RecordType as DbRecordType } from "~/db/schema";
 import { createRecordSchema } from "~/lib/utils/dynamic-fields/schema-generation";
@@ -26,31 +26,40 @@ interface ParsedRecordType extends Omit<DbRecordType, "fields"> {
 }
 
 interface DynamicRecordFormProps {
-  member: FamilyMember;
+  member?: FamilyMember;
   recordType: ParsedRecordType;
   familyId: string;
-  onBack: () => void;
+  memberId?: number;
+  createdBy?: number;
+  onBack?: () => void;
+  onSubmit?: (data: any) => Promise<void>;
+  onCancel?: () => void;
+  initialData?: any;
+  isSubmitting?: boolean;
+  mode?: "create" | "edit";
 }
 
 export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   member,
   recordType,
   familyId,
+  memberId,
+  createdBy,
   onBack,
+  onSubmit: customOnSubmit,
+  onCancel,
+  initialData,
+  isSubmitting: customIsSubmitting = false,
+  mode = "create",
 }) => {
   const navigate = useNavigate();
   const fetcher = useFetcher();
-  const isSubmitting = fetcher.state === "submitting";
+  const isSubmitting = customIsSubmitting || fetcher.state === "submitting";
 
   // Generate schema based on record type fields
-  console.log("recordType:", recordType);
-  console.log("recordType.fields:", recordType.fields);
-  console.log("recordType.fields type:", typeof recordType.fields);
-  console.log("recordType.fields is array:", Array.isArray(recordType.fields));
   
   // Ensure fields is always an array
   const normalizedFields = Array.isArray(recordType.fields) ? recordType.fields : [];
-  console.log("Normalized fields:", normalizedFields);
   
   const schema = createRecordSchema(normalizedFields);
   type FormData = z.infer<typeof schema>;
@@ -62,24 +71,40 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
     formState: { errors, isValid },
     setValue,
     watch,
+    reset,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     mode: "onChange",
     defaultValues: {
-      title: "",
-      content: "",
-      tags: "",
-      isPrivate: false,
-      datetime: new Date().toISOString().slice(0, 16), // Format for datetime-local input (YYYY-MM-DDTHH:MM)
+      title: mode === "edit" && initialData ? initialData.title : recordType.name,
+      content: mode === "edit" && initialData ? initialData.content || "" : "",
+      tags: mode === "edit" && initialData ? initialData.tags || "" : "",
+      isPrivate: mode === "edit" && initialData ? Boolean(initialData.isPrivate) : false,
+      datetime: mode === "edit" && initialData && initialData.datetime 
+        ? new Date(initialData.datetime).toISOString().slice(0, 16)
+        : new Date().toISOString().slice(0, 16),
       ...Object.fromEntries(
-        normalizedFields.map(field => [
-          `field_${field.id}`,
-          field.type === "checkbox"
-            ? false
-            : field.type === "number"
-              ? undefined
-              : "",
-        ])
+        normalizedFields.map(field => {
+          if (mode === "edit" && initialData && initialData.content) {
+            try {
+              const parsedContent = JSON.parse(initialData.content);
+              const fieldValue = parsedContent.fields?.[`field_${field.id}`];
+              if (fieldValue !== undefined) {
+                return [`field_${field.id}`, fieldValue];
+              }
+            } catch (error) {
+              console.error("Failed to parse initial content:", error);
+            }
+          }
+          return [
+            `field_${field.id}`,
+            field.type === "checkbox"
+              ? false
+              : field.type === "number"
+                ? undefined
+                : "",
+          ];
+        })
       ),
     },
   });
@@ -90,8 +115,63 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   });
 
   const watchedIsPrivate = watch("isPrivate");
+  const watchedTitle = watch("title");
+
+  // Set title to record type name on mount
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setValue("title", recordType.name);
+      reset({
+        title: recordType.name,
+        content: "",
+        tags: "",
+        isPrivate: false,
+        datetime: new Date().toISOString().slice(0, 16),
+        ...Object.fromEntries(
+          normalizedFields.map(field => [
+            `field_${field.id}`,
+            field.type === "checkbox"
+              ? false
+              : field.type === "number"
+                ? undefined
+                : "",
+          ])
+        ),
+      });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [recordType.name, setValue, reset, normalizedFields]);
 
   const onSubmit = async (data: FormData) => {
+    if (customOnSubmit) {
+      // Custom submit handler for edit mode
+      const fieldValues: Record<string, any> = {};
+      normalizedFields.forEach(field => {
+        const fieldKey = `field_${field.id}` as keyof FormData;
+        const value = data[fieldKey];
+        if (value !== undefined && value !== null && value !== "") {
+          fieldValues[fieldKey] = value;
+        }
+      });
+
+      const content = {
+        description: data.content || "No description provided",
+        fields: fieldValues,
+      };
+
+      const recordData = {
+        title: data.title,
+        content: JSON.stringify(content),
+        tags: data.tags || "",
+        isPrivate: data.isPrivate,
+        datetime: data.datetime ? new Date(data.datetime).toISOString() : undefined,
+      };
+
+      await customOnSubmit(recordData);
+      return;
+    }
+
+    // Default submit handler for create mode
     const formData = new FormData();
     formData.append("_action", "create");
     formData.append("title", data.title);
@@ -103,8 +183,6 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
 
     // Handle datetime field - convert to ISO string if provided
     if (data.datetime) {
-      // The datetime-local input gives us YYYY-MM-DDTHH:MM format
-      // We need to convert this to a full ISO string
       const dateTime = new Date(data.datetime);
       if (!isNaN(dateTime.getTime())) {
         formData.append("datetime", dateTime.toISOString());
@@ -134,15 +212,17 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   React.useEffect(() => {
     if (fetcher.data?.success) {
       // Navigate back to the member's category view
-      onBack();
+      if (onBack) {
+        onBack();
+      }
     }
-  }, [fetcher.data]); // Removed onBack from dependencies
+  }, [fetcher.data, onBack]);
 
   return (
     <div>
       <PageHeader
-        title={`New ${recordType.name}`}
-        subtitle={`for ${member.name}`}
+        title={mode === "edit" ? `Edit ${recordType.name}` : `New ${recordType.name}`}
+        subtitle={mode === "edit" ? "Update record details" : `for ${member?.name || "Family Member"}`}
       />
 
       <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
@@ -168,18 +248,62 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
               >
                 Title <span className="text-red-400">*</span>
               </Label>
-              <input
-                {...register("title")}
-                type="text"
-                id="title"
-                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter record title"
-              />
+              <div className="relative">
+                <input
+                  {...register("title")}
+                  type="text"
+                  id="title"
+                  defaultValue={recordType.name}
+                  className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter record title"
+                />
+                {watchedTitle && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (watchedTitle === recordType.name) {
+                        setValue("title", "");
+                      } else if (watchedTitle === "") {
+                        setValue("title", recordType.name);
+                      } else {
+                        setValue("title", recordType.name);
+                      }
+                    }}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-200 hover:bg-slate-600 rounded-full p-1.5 transition-all duration-200 hover:scale-110"
+                    title={watchedTitle === recordType.name ? "Clear title" : "Restore default title"}
+                    aria-label={watchedTitle === recordType.name ? "Clear title" : "Restore default title"}
+                  >
+                    <span className="text-lg font-bold leading-none">
+                      {watchedTitle === recordType.name ? "×" : "↺"}
+                    </span>
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-slate-400">
+                {watchedTitle === recordType.name 
+                  ? `Using default title "${recordType.name}". Click the × to clear and enter a custom title.`
+                  : watchedTitle === ""
+                    ? `Title cleared. Click the ↺ to restore default title "${recordType.name}".`
+                    : "Custom title entered. Click the ↺ to restore default title."
+                }
+              </p>
               {errors.title && (
                 <p className="text-red-400 text-sm">
                   {String(errors.title.message) || "Title is required"}
                 </p>
               )}
+              
+              {/* Debug button - remove this after testing */}
+              <button
+                type="button"
+                onClick={() => {
+                  console.log("Manual set title clicked");
+                  setValue("title", recordType.name);
+                }}
+                className="text-xs text-blue-400 hover:text-blue-300 underline"
+              >
+                Debug: Set title to "{recordType.name}"
+              </button>
             </div>
 
             {/* Datetime Field */}
@@ -314,11 +438,11 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
               <Button
                 type="button"
                 variant="outline"
-                onClick={onBack}
+                onClick={mode === "edit" && onCancel ? onCancel : onBack}
                 className="border-slate-600 text-slate-300 hover:bg-slate-800 w-full sm:w-auto"
                 disabled={isSubmitting}
               >
-                Cancel
+                {mode === "edit" ? "Cancel" : "Back"}
               </Button>
               <Button
                 type="submit"
@@ -328,10 +452,10 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
                 {isSubmitting ? (
                   <>
                     <LoadingSpinner className="w-4 h-4 mr-2" />
-                    Saving...
+                    {mode === "edit" ? "Updating..." : "Saving..."}
                   </>
                 ) : (
-                  "Save Record"
+                  mode === "edit" ? "Update Record" : "Save Record"
                 )}
               </Button>
             </div>

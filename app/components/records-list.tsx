@@ -6,13 +6,17 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
+  Button,
+  DateDisplay,
+  RelativeDate,
+  RecordContentDisplay,
+  Accordion,
+  AccordionItem,
+  RecordsTable,
+  RecordDrawer
+} from "~/components/ui";
+import { RecordManagementProvider, useRecordManagement } from "~/contexts";
 import { Plus, Eye, Edit, Trash2, Lock, Grid3X3, Table } from "lucide-react";
-import { DateDisplay, RelativeDate } from "~/components/ui/date-display";
-import { RecordContentDisplay } from "~/components/ui/record-content-display";
-import { Accordion, AccordionItem } from "~/components/ui/accordion";
-import { RecordsTable } from "~/components/ui/records-table";
 import type { Record, RecordType } from "~/db/schema";
 
 interface RecordsListProps {
@@ -47,41 +51,50 @@ export const RecordsList: React.FC<RecordsListProps> = ({
     }
   };
 
-  // Parse record type fields for better content display
+  const handleRecordUpdate = async (recordId: number, updates: Partial<Record>) => {
+    // TODO: Implement record update functionality
+    console.log("Updating record:", recordId, updates);
+  };
+
+  // Parse the fields JSON for each record type
   const parsedRecordType = React.useMemo(() => {
+    if (!recordType?.fields) return null;
+    
     try {
-      const fieldsJson = recordType.fields;
-      if (!fieldsJson) return { ...recordType, fields: [] };
-      
-      try {
-        const parsed = JSON.parse(fieldsJson);
-        console.log("RecordsList - Parsed fields:", parsed);
-        
-        // Extract the fields array from the parsed object
-        let normalizedFields = [];
-        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.fields)) {
-          normalizedFields = parsed.fields;
-        } else if (Array.isArray(parsed)) {
-          // Handle case where fields is directly an array
-          normalizedFields = parsed;
-        } else {
-          console.warn("RecordsList - Unexpected fields structure:", parsed);
-          normalizedFields = [];
-        }
-        
-        console.log("RecordsList - Final normalizedFields:", normalizedFields);
-        
-        return {
-          ...recordType,
-          fields: normalizedFields,
-        };
-      } catch (error) {
-        console.error("RecordsList - Error parsing record type fields:", error);
-        return { ...recordType, fields: [] };
+      // Check if fields is already parsed (object) or still a JSON string
+      let parsed;
+      if (typeof recordType.fields === 'string') {
+        // Fields is still a JSON string, parse it
+        parsed = JSON.parse(recordType.fields);
+      } else if (Array.isArray(recordType.fields)) {
+        // Fields is already parsed as an array
+        parsed = recordType.fields;
+      } else {
+        // Fields is already parsed as an object with nested fields
+        parsed = recordType.fields;
       }
+      
+      // Extract the actual fields array
+      let normalizedFields = [];
+      if (parsed && typeof parsed === 'object' && Array.isArray(parsed.fields)) {
+        // Structure: { fields: [...], version: "1.0", lastModified: "..." }
+        normalizedFields = parsed.fields;
+      } else if (Array.isArray(parsed)) {
+        // Structure: directly an array of fields
+        normalizedFields = parsed;
+      } else {
+        normalizedFields = [];
+      }
+      
+      return {
+        ...recordType,
+        fields: normalizedFields,
+      };
     } catch (error) {
-      console.error("RecordsList - Error parsing record type fields:", error);
-      return { ...recordType, fields: [] };
+      return {
+        ...recordType,
+        fields: [],
+      };
     }
   }, [recordType]);
 
@@ -138,16 +151,16 @@ export const RecordsList: React.FC<RecordsListProps> = ({
 
         {/* Records Display */}
         {viewMode === "cards" ? (
-          <RecordsCards
-            records={records}
-            recordType={recordType}
-            memberId={memberId}
-            category={category}
-            familyId={familyId}
-            parsedRecordType={parsedRecordType}
-            onDelete={handleDelete}
-            isDeleting={isDeleting}
-          />
+                      <RecordsCards
+              records={records}
+              recordType={recordType}
+              memberId={memberId}
+              category={category}
+              familyId={familyId}
+              parsedRecordType={parsedRecordType}
+              onDelete={handleDelete}
+              isDeleting={isDeleting}
+            />
         ) : (
           <RecordsTable
             records={records}
@@ -186,6 +199,7 @@ const RecordsCards: React.FC<RecordsCardsProps> = ({
   onDelete,
   isDeleting,
 }) => {
+  const { openRecord } = useRecordManagement();
   if (records.length === 0) {
     return (
       <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
@@ -216,14 +230,19 @@ const RecordsCards: React.FC<RecordsCardsProps> = ({
       {records.map(record => (
         <Card
           key={record.id}
-          className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 hover:border-slate-600 transition-colors cursor-pointer"
+          className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 hover:border-slate-600 transition-colors"
         >
           <CardHeader className="p-4">
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
-                <CardTitle className="text-sm font-semibold text-slate-100 mb-2 line-clamp-2">
-                  {record.title}
-                </CardTitle>
+                <button
+                  onClick={() => openRecord(record, recordType)}
+                  className="block hover:opacity-80 transition-opacity text-left w-full"
+                >
+                  <CardTitle className="text-sm font-semibold text-slate-100 mb-2 line-clamp-2 cursor-pointer">
+                    {record.title}
+                  </CardTitle>
+                </button>
 
                 {/* Date Information */}
                 <div className="space-y-1">
@@ -258,6 +277,13 @@ const RecordsCards: React.FC<RecordsCardsProps> = ({
           <CardContent className="p-4 pt-0">
             {/* Record Content */}
             <div className="mb-4">
+              {/* Debug logging for record content */}
+              {(() => {
+                console.log(`RecordsList - Record ${record.id} content:`, record.content);
+                console.log(`RecordsList - Record ${record.id} parsedRecordType:`, parsedRecordType);
+                return null;
+              })()}
+              
               <RecordContentDisplay
                 content={record.content}
                 recordType={parsedRecordType}
@@ -294,18 +320,11 @@ const RecordsCards: React.FC<RecordsCardsProps> = ({
                 <Button
                   variant="outline"
                   size="sm"
+                  onClick={() => openRecord(record, recordType)}
                   className="border-slate-600 text-slate-300 hover:bg-slate-700 h-8 px-3"
                 >
                   <Eye className="w-3 h-3 mr-1" />
                   View
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-slate-600 text-slate-300 hover:bg-slate-700 h-8 px-3"
-                >
-                  <Edit className="w-3 h-3 mr-1" />
-                  Edit
                 </Button>
               </div>
 
@@ -322,6 +341,14 @@ const RecordsCards: React.FC<RecordsCardsProps> = ({
           </CardContent>
         </Card>
       ))}
+
+      {/* Record Drawer */}
+      <RecordDrawer
+        familyMembers={[]} // TODO: Pass family members from parent
+        familyId={familyId}
+        memberId={memberId}
+        category={category}
+      />
     </div>
   );
 };

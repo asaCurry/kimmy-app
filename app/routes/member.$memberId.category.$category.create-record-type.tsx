@@ -8,8 +8,6 @@ import { PageHeader } from "~/components/ui/layout";
 import { loadFamilyDataWithMember } from "~/lib/loader-helpers";
 import { withDatabase } from "~/lib/db-utils";
 import { recordTypes } from "~/db/schema";
-
-
 import { CreateRecordTypeForm } from "~/components/create-record-type-form";
 
 export function meta({ params }: Route.MetaArgs) {
@@ -73,7 +71,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     // Load family data from URL params
-    const { familyId, familyMembers, currentMember } =
+    const { familyId, currentMember } =
       await loadFamilyDataWithMember(request, env, memberId);
 
     // If no family data found, redirect to welcome
@@ -91,7 +89,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       member: currentMember,
       category,
       familyId,
-      familyMembers,
     };
   } catch (error) {
     console.error("Create record type route loader error:", error);
@@ -217,7 +214,6 @@ const CreateRecordType: React.FC<Route.ComponentProps> = ({ loaderData, params }
         />
 
         <CreateRecordTypeForm
-          memberId={currentMember.id.toString()}
           familyId={familyId}
           createdBy={currentMember.id}
           category={category}

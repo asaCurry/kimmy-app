@@ -17,7 +17,6 @@ import {
 } from "~/components/ui/select";
 
 interface CreateRecordTypeFormProps {
-  memberId: string;
   familyId: string;
   createdBy: number;
   category?: string; // Optional - if not provided, user can select
@@ -28,7 +27,6 @@ interface CreateRecordTypeFormProps {
 }
 
 export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
-  memberId,
   familyId,
   createdBy,
   category: initialCategory,

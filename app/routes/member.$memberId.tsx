@@ -1,6 +1,6 @@
 import type { Route } from "./+types/member.$memberId";
 import * as React from "react";
-import { Link, redirect, useFetcher } from "react-router";
+import { Link, redirect } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
@@ -255,7 +255,6 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
     categoryRecordCounts,
   } = loaderData;
   const { session } = useAuth();
-  const fetcher = useFetcher();
   const [showCreateForm, setShowCreateForm] = React.useState(false);
 
 
@@ -372,7 +371,6 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                 </Button>
               ) : (
                 <CreateRecordTypeForm
-                  memberId={currentMember.id.toString()}
                   familyId={loaderData.familyId}
                   createdBy={currentMember.id}
                   onCancel={() => setShowCreateForm(false)}

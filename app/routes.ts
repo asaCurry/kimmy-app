@@ -38,6 +38,14 @@ export default [
     "routes/member.$memberId.category.$category.record.$recordTypeId.tsx"
   ),
   route(
+    "member/:memberId/category/:category/record/:recordTypeId/view/:recordId",
+    "routes/member.$memberId.category.$category.record.$recordTypeId.view.$recordId.tsx"
+  ),
+  route(
+    "member/:memberId/category/:category/record/:recordTypeId/edit/:recordId",
+    "routes/member.$memberId.category.$category.record.$recordTypeId.edit.$recordId.tsx"
+  ),
+  route(
     "member/:memberId/category/:category/create-record-type",
     "routes/member.$memberId.category.$category.create-record-type.tsx"
   ),

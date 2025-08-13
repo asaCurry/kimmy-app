@@ -21,10 +21,11 @@ export const RecordContentDisplay: React.FC<RecordContentDisplayProps> = ({
   className = "",
   maxFields = 3,
 }) => {
+  // If no content at all, show a clean fallback
   if (!content) {
     return (
       <div className={`text-slate-500 italic ${className}`}>
-        No content available
+        No additional information
       </div>
     );
   }
@@ -45,6 +46,19 @@ export const RecordContentDisplay: React.FC<RecordContentDisplayProps> = ({
   // Handle the actual record content structure
   // Content has: { description: "...", fields: { field_1: "value1", field_2: "value2" } }
   const { description, fields: contentFields } = parsedContent;
+
+  // Check if this is the default empty structure
+  const isDefaultEmptyStructure = 
+    description === "No description provided" && 
+    (!contentFields || Object.keys(contentFields).length === 0);
+
+  if (isDefaultEmptyStructure) {
+    return (
+      <div className={`text-slate-500 italic ${className}`}>
+        No additional information recorded
+      </div>
+    );
+  }
 
   // If we have record type fields, use them to display the content properly
   if (recordType?.fields && recordType.fields.length > 0) {
@@ -84,72 +98,77 @@ export const RecordContentDisplay: React.FC<RecordContentDisplayProps> = ({
             </div>
           );
         })}
-
-        {recordType.fields.length > maxFields && (
-          <div className="text-slate-500 text-xs">
-            +{recordType.fields.length - maxFields} more fields
-          </div>
-        )}
       </div>
     );
   }
 
-  // No record type fields defined - prioritize showing description
+  // No record type fields defined - show a clean view of available data
+  const availableData: Array<{ key: string; value: any; label: string }> = [];
+
+  // Add description if available and meaningful
   if (description && description !== "No description provided") {
-    return <div className={`text-slate-300 ${className}`}>{description}</div>;
+    availableData.push({ key: "description", value: description, label: "Description" });
   }
 
-  // Show content fields if available
-  if (
-    contentFields &&
-    typeof contentFields === "object" &&
-    Object.keys(contentFields).length > 0
-  ) {
-    const entries = Object.entries(contentFields)
+  // Add field values if available - this is where the actual field data is
+  if (contentFields && typeof contentFields === "object") {
+    Object.entries(contentFields)
       .filter(([key, value]) => {
         // Skip internal fields and empty values
-        return (
+        const shouldInclude = (
           !key.startsWith("_") &&
           value !== undefined &&
           value !== null &&
           value !== "" &&
           key !== "description"
         );
+        return shouldInclude;
       })
-      .slice(0, maxFields);
-
-    if (entries.length === 0) {
+      .forEach(([key, value]) => {
+        availableData.push({ key, value, label: formatKey(key) });
+      });
+  }
+  
+  // Show available data in a clean format
+  if (availableData.length === 0) {
+    // If we have a description but it's the default, show a simple message
+    if (description === "No description provided") {
       return (
         <div className={`text-slate-500 italic ${className}`}>
-          No data available
+          Basic record created
         </div>
       );
     }
-
+    
     return (
-      <div className={`space-y-2 ${className}`}>
-        {entries.map(([key, value]) => (
-          <div key={key} className="flex items-start space-x-2">
-            <span className="text-slate-400 text-xs font-medium min-w-0 flex-shrink-0">
-              {formatKey(key)}:
-            </span>
-            <span className="text-slate-300 text-xs flex-1 min-w-0">
-              {renderValue(value)}
-            </span>
-          </div>
-        ))}
-
-        {Object.keys(contentFields).length > maxFields && (
-          <div className="text-slate-500 text-xs">
-            +{Object.keys(contentFields).length - maxFields} more fields
-          </div>
-        )}
+      <div className={`text-slate-500 italic ${className}`}>
+        No additional information available
       </div>
     );
   }
 
-  // Last resort: show the raw content
-  return <div className={`text-slate-300 ${className}`}>{content}</div>;
+  const displayData = availableData.slice(0, maxFields);
+
+  return (
+    <div className={`space-y-2 ${className}`}>
+      {displayData.map(({ key, value, label }) => (
+        <div key={key} className="flex items-start space-x-2">
+          <span className="text-slate-400 text-xs font-medium min-w-0 flex-shrink-0">
+            {label}:
+          </span>
+          <span className="text-slate-300 text-xs flex-1 min-w-0">
+            {renderValue(value)}
+          </span>
+        </div>
+      ))}
+
+      {availableData.length > maxFields && (
+        <div className="text-slate-500 text-xs">
+          +{availableData.length - maxFields} more items
+        </div>
+      )}
+    </div>
+  );
 };
 
 const renderFieldValue = (value: any, fieldType: string): React.ReactNode => {
@@ -163,9 +182,23 @@ const renderFieldValue = (value: any, fieldType: string): React.ReactNode => {
     case "checkbox":
       return value === "true" || value === true ? "✓ Yes" : "✗ No";
     case "select":
-      return Array.isArray(value) ? value.join(", ") : value;
+      // Handle select field values - they might be stored as values but we want to show labels
+      if (Array.isArray(value)) {
+        return value.length > 0 ? value.join(", ") : "Not selected";
+      }
+      return value || "Not selected";
     case "textarea":
+      if (!value || value.length === 0) return "No text entered";
       return value.length > 100 ? `${value.substring(0, 100)}...` : value;
+    case "text":
+    case "email":
+    case "url":
+    case "phone":
+      if (!value || value.length === 0) return "Not provided";
+      return value.length > 100 ? `${value.substring(0, 100)}...` : value;
+    case "file":
+      if (!value || value.length === 0) return "No file uploaded";
+      return "File uploaded";
     default:
       return renderValue(value);
   }
@@ -198,6 +231,11 @@ const renderValue = (value: any): React.ReactNode => {
       return value === "true" ? "✓ Yes" : "✗ No";
     }
 
+    // Check if it's the default "No description provided" text
+    if (value === "No description provided") {
+      return <span className="text-slate-500 italic">No description</span>;
+    }
+
     // Truncate long strings
     if (value.length > 100) {
       return `${value.substring(0, 100)}...`;
@@ -217,7 +255,33 @@ const renderValue = (value: any): React.ReactNode => {
   }
 
   if (typeof value === "object") {
-    return <span className="text-slate-500 italic">Complex data</span>;
+    // If it's an empty object, show a clean message
+    if (Object.keys(value).length === 0) {
+      return <span className="text-slate-500 italic">No data</span>;
+    }
+    
+    // If it has meaningful content, try to extract it
+    const entries = Object.entries(value).filter(([k, v]) => 
+      v !== undefined && v !== null && v !== "" && !k.startsWith("_")
+    );
+    
+    if (entries.length === 0) {
+      return <span className="text-slate-500 italic">No data</span>;
+    }
+    
+    // Show first few meaningful entries
+    const displayEntries = entries.slice(0, 2);
+    return (
+      <span className="text-slate-400">
+        {displayEntries.map(([k, v], i) => (
+          <span key={k}>
+            {i > 0 ? ", " : ""}
+            {formatKey(k)}: {renderValue(v)}
+          </span>
+        ))}
+        {entries.length > 2 && ` +${entries.length - 2} more`}
+      </span>
+    );
   }
 
   return String(value);

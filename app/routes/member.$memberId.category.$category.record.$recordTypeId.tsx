@@ -148,6 +148,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     
     const recordType: ParsedRecordType = {
       ...recordTypeResult[0],
+      description: recordTypeResult[0].description || undefined,
       fields: parsedFields,
     };
 
@@ -176,7 +177,7 @@ export async function action({
 }: {
   request: Request;
   context: any;
-  params: Route.Params;
+  params: any;
 }) {
   const formData = await request.formData();
   const action = formData.get("_action");
@@ -215,10 +216,21 @@ export async function action({
           
           const fields = JSON.parse(fieldsJson);
           
+          // Extract the fields array from the parsed object
+          let normalizedFields = [];
+          if (fields && typeof fields === 'object' && Array.isArray(fields.fields)) {
+            normalizedFields = fields.fields;
+          } else if (Array.isArray(fields)) {
+            // Handle case where fields is directly an array
+            normalizedFields = fields;
+          } else {
+            normalizedFields = [];
+          }
+          
           // Convert form data to dynamic fields using the utility function
           const dynamicFields: Record<string, any> = {};
-          if (Array.isArray(fields)) {
-            fields.forEach((field: any) => {
+          if (Array.isArray(normalizedFields)) {
+            normalizedFields.forEach((field: any) => {
               const fieldKey = `field_${field.id}`;
               const fieldValue = formData.get(fieldKey);
 
@@ -239,25 +251,12 @@ export async function action({
 
           // Create the full content object
           const fullContent = {
-            description: content || "No description provided", // Ensure description is never empty
+            description: content || "No description provided",
             fields: dynamicFields,
           };
 
           // Set datetime to current timestamp if not provided
           const recordDatetime = datetime || new Date().toISOString();
-
-          console.log("Creating record with data:", {
-            title,
-            content: fullContent,
-            recordTypeId,
-            familyId,
-            memberId: params.memberId,
-            createdBy: session.userId,
-            createdByType: typeof session.userId,
-            tags,
-            isPrivate: isPrivate ? 1 : 0,
-            datetime: recordDatetime,
-          });
 
           const newRecord = await db
             .insert(records)
@@ -266,7 +265,7 @@ export async function action({
               content: JSON.stringify(fullContent),
               recordTypeId,
               familyId,
-              memberId: parseInt(params.memberId), // Associate record with the specific member
+              memberId: parseInt(params.memberId),
               createdBy: parseInt(session.userId.toString()),
               tags,
               isPrivate: isPrivate ? 1 : 0,
@@ -280,7 +279,6 @@ export async function action({
             message: "Record created successfully",
           };
 
-          console.log("Record action returning:", result);
           return result;
         } catch (error) {
           console.error("Error creating record:", error);
