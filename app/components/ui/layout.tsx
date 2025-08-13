@@ -36,7 +36,7 @@ const PageLayout = React.forwardRef<
       <main className="flex-1 p-3 sm:p-4">
         <div
           className={cn(
-            "mx-auto",
+            "mx-auto gap-4 flex flex-col",
             maxWidth === "2xl" ? "max-w-2xl" : "max-w-4xl"
           )}
         >
