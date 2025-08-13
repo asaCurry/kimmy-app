@@ -21,7 +21,7 @@ import {
   Save,
   X
 } from "lucide-react";
-import type { Record, RecordType, User } from "~/db/schema";
+import type { Record, RecordType } from "~/db/schema";
 
 interface RecordDrawerProps {
   familyId: string;
@@ -55,17 +55,7 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
     }
   }, [isOpen, record?.id]);
 
-  if (!record || !recordType) {
-    return null;
-  }
-
-  // Find the member this record is about
-  const recordMember = familyMembers.find(m => m.id === record.memberId);
-  
-  // Find who created the record
-  const recordCreator = familyMembers.find(m => m.id === record.createdBy);
-  
-  // Parse the fields JSON for the record type
+  // Parse the fields JSON for the record type - moved before conditional return
   const parsedRecordType = React.useMemo(() => {
     if (!recordType?.fields) return null;
     
@@ -84,6 +74,8 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
         normalizedFields = parsed.fields;
       } else if (Array.isArray(parsed)) {
         normalizedFields = parsed;
+      } else {
+        normalizedFields = [];
       }
       
       return {
@@ -97,6 +89,16 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
       };
     }
   }, [recordType]);
+
+  if (!record || !recordType) {
+    return null;
+  }
+
+  // Find the member this record is about
+  const recordMember = familyMembers.find(m => m.id === record.memberId);
+  
+  // Find who created the record
+  const recordCreator = familyMembers.find(m => m.id === record.createdBy);
 
   const handleDelete = async () => {
     if (onDelete && confirm(`Are you sure you want to delete "${record.title}"?`)) {
@@ -146,12 +148,14 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
             {/* Record Content */}
             <div className="space-y-4">
               <h4 className="text-lg font-medium text-slate-200">Record Details</h4>
-              <RecordContentDisplay
-                content={record.content}
-                recordType={parsedRecordType}
-                className="text-sm"
-                maxFields={15} // Show more fields in drawer view
-              />
+              {parsedRecordType && (
+                <RecordContentDisplay
+                  content={record.content}
+                  recordType={parsedRecordType}
+                  className="text-sm"
+                  maxFields={15} // Show more fields in drawer view
+                />
+              )}
             </div>
 
             {/* Metadata Section */}
@@ -265,17 +269,15 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
               </div>
 
               <div className="flex items-center space-x-3">
-                {onDelete && (
-                  <Button
-                    variant="outline"
-                    onClick={handleDelete}
-                    disabled={isDeleting || isDeletingLocal}
-                    className="border-red-600 text-red-400 hover:bg-red-900/20"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    {isDeleting || isDeletingLocal ? "Deleting..." : "Delete"}
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="border-red-600 text-red-400 hover:bg-red-900/20"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </Button>
               </div>
             </div>
           </DrawerFooter>
@@ -284,17 +286,19 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
         // Edit Mode
         <>
           <DrawerContent>
-            <DynamicRecordForm
-              recordType={parsedRecordType}
-              familyId={familyId}
-              memberId={parseInt(memberId)}
-              createdBy={record.createdBy}
-              initialData={record}
-              onSubmit={handleUpdate}
-              onCancel={() => setMode("view")}
-              isSubmitting={isUpdating}
-              mode="edit"
-            />
+                    {parsedRecordType && (
+          <DynamicRecordForm
+            recordType={parsedRecordType}
+            familyId={familyId}
+            memberId={parseInt(memberId)}
+            createdBy={record.createdBy || undefined}
+            initialData={record}
+            onSubmit={handleUpdate}
+            onCancel={() => setMode("view")}
+            isSubmitting={isUpdating}
+            mode="edit"
+          />
+        )}
           </DrawerContent>
         </>
       )}
