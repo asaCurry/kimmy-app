@@ -15,7 +15,7 @@ import { UserPlus, Users, Edit3 } from "lucide-react";
 import { RELATIONSHIP_TYPES } from "~/lib/types";
 
 interface FamilyMemberEditProps {
-  familyId: string;
+  householdId: string;
   member: {
     id: number;
     name: string;
@@ -29,7 +29,7 @@ interface FamilyMemberEditProps {
 }
 
 export const FamilyMemberEdit: React.FC<FamilyMemberEditProps> = ({
-  familyId,
+  householdId,
   member,
   onCancel,
   onSuccess,
@@ -158,7 +158,7 @@ export const FamilyMemberEdit: React.FC<FamilyMemberEditProps> = ({
           <input
             type="hidden"
             name="currentHouseholdId"
-            value={familyId}
+            value={householdId}
           />
 
           {errors.submit && (

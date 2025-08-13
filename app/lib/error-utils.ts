@@ -2,7 +2,7 @@ export interface ErrorContext {
   component?: string;
   action?: string;
   userId?: string;
-  familyId?: string;
+  householdId?: string;
   additionalData?: Record<string, any>;
 }
 

@@ -251,7 +251,7 @@
 - Add proper TypeScript interfaces for record data
 
 #### **Database Considerations**
-- Ensure proper indexing on `records.id` and `records.familyId`
+- Ensure proper indexing on `records.id` and `records.householdId`
 - Implement soft deletes if needed
 - Add audit trail for record modifications
 - Consider record versioning for complex edits

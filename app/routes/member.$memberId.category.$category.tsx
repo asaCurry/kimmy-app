@@ -59,7 +59,7 @@ export async function action({ request, context, params }: Route.ActionArgs) {
         .where(
           and(
             eq(records.id, parseInt(recordId.toString())),
-            eq(records.familyId, familyId)
+            eq(records.householdId, householdId)
           )
         )
         .get();
@@ -137,18 +137,18 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
     console.log("Category route loader - about to load family data...");
     // Load family data from URL params
-    const { familyId, familyMembers, currentMember } =
+    const { householdId, householdMembers, currentMember } =
       await loadHouseholdDataWithMember(request, env, memberId);
-    console.log("Category route loader - family data loaded:", { familyId, currentMember: currentMember?.name });
+    console.log("Category route loader - family data loaded:", { householdId, currentMember: currentMember?.name });
 
     // If no family data found, redirect to welcome
-    if (!familyId) {
+    if (!householdId) {
       console.log("❌ No family data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
     // Verify the user is accessing their own family data
-    if (familyId !== session.currentHouseholdId) {
+    if (householdId !== session.currentHouseholdId) {
       throw redirect("/welcome");
     }
 
@@ -160,7 +160,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       .from(recordTypes)
       .where(
         and(
-          eq(recordTypes.familyId, familyId),
+          eq(recordTypes.householdId, householdId),
           eq(recordTypes.category, category)
         )
       );
@@ -200,7 +200,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       .from(records)
       .where(
         and(
-          eq(records.familyId, familyId),
+          eq(records.householdId, householdId),
           eq(records.memberId, parseInt(memberId))
         )
       );
@@ -232,8 +232,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       category,
       recordTypes: parsedRecordTypes,
       recordsByType,
-      familyId,
-      familyMembers,
+      householdId,
+      householdMembers,
     };
   } catch (error) {
     console.error("Category route loader error:", error);
@@ -258,8 +258,8 @@ const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
     category,
     recordTypes,
     recordsByType,
-    familyId,
-    familyMembers,
+    householdId,
+    householdMembers,
   } = loaderData;
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -315,8 +315,8 @@ const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
         />
 
         <RecordManagementProvider
-          familyMembers={familyMembers}
-          familyId={familyId}
+          householdMembers={householdMembers}
+          householdId={householdId}
           memberId={currentMember.id.toString()}
           category={category}
           onRecordDelete={async (recordId: number) => {
@@ -356,7 +356,7 @@ const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
                     recordType={recordType}
                     memberId={currentMember.id.toString()}
                     category={category}
-                    familyId={familyId}
+                    householdId={householdId}
                   />
                 ))}
               </Accordion>
@@ -373,7 +373,7 @@ const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
           
           {/* Record Drawer - rendered at this level to be accessible to all RecordsList components */}
           <RecordDrawer
-            familyId={familyId}
+            householdId={householdId}
             memberId={currentMember.id.toString()}
             category={category}
           />

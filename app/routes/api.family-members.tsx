@@ -11,7 +11,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
     // Extract family ID from session instead of URL
     const cookieHeader = request.headers.get("cookie");
-    let familyId = null;
+    let householdId = null;
 
     if (cookieHeader) {
       try {
@@ -27,19 +27,19 @@ export async function loader({ request, context }: Route.LoaderArgs) {
         const sessionData = cookies["kimmy_auth_session"];
         if (sessionData) {
           const session = JSON.parse(decodeURIComponent(sessionData));
-          familyId = session.currentHouseholdId || null;
+          householdId = session.currentHouseholdId || null;
         }
       } catch (error) {
         console.error("Failed to parse session cookie:", error);
       }
     }
 
-    if (!familyId) {
+    if (!householdId) {
       throw new Response("Family ID not found in session", { status: 400 });
     }
 
     // Fetch family members from database
-    const dbMembers = await userDb.findByFamilyId(env, familyId);
+    const dbMembers = await userDb.findByhouseholdId(env, householdId);
 
     // Transform database User type to FamilyMember type
     const members = dbMembers.map(member => ({

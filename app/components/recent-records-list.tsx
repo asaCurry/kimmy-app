@@ -30,12 +30,12 @@ interface RecentRecordWithType extends RecentRecord {
 
 interface RecentRecordsListProps {
   records: RecentRecord[];
-  familyMembers: any[];
+  householdMembers: any[];
 }
 
 export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
   records,
-  familyMembers,
+  householdMembers,
 }) => {
   const { openRecord } = useRecordManagement();
 
@@ -170,7 +170,7 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
                     name: record.recordTypeName,
                     description: "",
                     category: record.recordTypeCategory,
-                    familyId: "",
+                    householdId: "",
                     fields: "[]",
                     icon: record.recordTypeIcon,
                     color: record.recordTypeColor,
@@ -185,7 +185,7 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
                     title: record.title,
                     content: record.content,
                     recordTypeId: record.recordTypeId,
-                    familyId: "",
+                    householdId: "",
                     memberId: record.memberId,
                     createdBy: null,
                     tags: record.tags || null,

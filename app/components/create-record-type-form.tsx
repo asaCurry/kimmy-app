@@ -17,7 +17,7 @@ import {
 } from "~/components/ui/select";
 
 interface CreateRecordTypeFormProps {
-  familyId: string;
+  householdId: string;
   createdBy: number;
   category?: string; // Optional - if not provided, user can select
   onSuccess?: () => void;
@@ -27,7 +27,7 @@ interface CreateRecordTypeFormProps {
 }
 
 export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
-  familyId,
+  householdId,
   createdBy,
   category: initialCategory,
   onSuccess,
@@ -72,7 +72,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     formDataToSubmit.append("name", formData.name);
     formDataToSubmit.append("description", formData.description);
     formDataToSubmit.append("category", formData.category);
-    formDataToSubmit.append("familyId", familyId);
+    formDataToSubmit.append("householdId", householdId);
     formDataToSubmit.append("fields", serialize());
     formDataToSubmit.append("icon", formData.icon);
     formDataToSubmit.append("color", formData.color);

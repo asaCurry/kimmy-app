@@ -5,7 +5,7 @@ export interface RecordData {
   title: string;
   content?: string;
   recordTypeId: number;
-  familyId: string;
+  householdId: string;
   tags?: string;
   isPrivate?: boolean;
   fields?: Record<string, any>;
@@ -31,7 +31,7 @@ export function useRecords(): UseRecordsReturn {
       formData.append("content", data.content || "");
       formData.append("tags", data.tags || "");
       formData.append("recordTypeId", data.recordTypeId.toString());
-      formData.append("familyId", data.familyId);
+      formData.append("householdId", data.householdId);
       formData.append("isPrivate", (data.isPrivate || false).toString());
 
       // Add dynamic field values

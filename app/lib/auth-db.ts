@@ -155,7 +155,7 @@ export const authApi = {
         userId: user.id,
         email: user.email,
         name: user.name,
-        currentHouseholdId: user.familyId || undefined, // Only set if user has a family
+        currentHouseholdId: user.householdId || undefined, // Only set if user has a family
         role: user.role as "admin" | "member",
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
@@ -182,7 +182,7 @@ export const authApi = {
     }
 
     try {
-      const { user, familyId } = await authDb.createUserWithFamily(
+      const { user, householdId } = await authDb.createUserWithFamily(
         env,
         userData
       );
@@ -193,7 +193,7 @@ export const authApi = {
         userId: user.id,
         email: user.email,
         name: user.name,
-        currentHouseholdId: familyId,
+        currentHouseholdId: householdId,
         role: "admin",
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
@@ -235,7 +235,7 @@ export const authApi = {
         name: userData.name,
         email: userData.email,
         password: userData.password,
-        familyId: household.id,
+        householdId: household.id,
         role: "member", // New users joining via invite are members, not admins
       });
 
@@ -316,7 +316,7 @@ export const authApi = {
         userId: user.id,
         email: user.email,
         name: user.name,
-        currentHouseholdId: user.familyId,
+        currentHouseholdId: user.householdId,
         role: user.role as "admin" | "member",
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Extend session
       };

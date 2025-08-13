@@ -104,7 +104,7 @@ export async function loader({ context }: Route.LoaderArgs) {
   }
 
   // Use database utilities - each creates its own instance
-  const users = await userDb.findByFamilyId(env, familyId);
+  const users = await userDb.findByhouseholdId(env, householdId);
 
   return { users };
 }
@@ -117,28 +117,28 @@ export async function loader({ context }: Route.LoaderArgs) {
 - `create(env, userData)` - Create new user
 - `findByEmail(env, email)` - Find user by email
 - `findById(env, id)` - Find user by ID
-- `findByFamilyId(env, familyId)` - Find users in family
+- `findByhouseholdId(env, householdId)` - Find users in family
 - `updateRole(env, userId, role)` - Update user role
 - `verifyPassword(password, hashedPassword)` - Verify password
 
 ### Family Operations (`familyDb`)
 
-- `generateFamilyId()` - Generate unique family ID
-- `getMembers(env, familyId)` - Get family members
-- `getAdmins(env, familyId)` - Get family admins
+- `generatehouseholdId()` - Generate unique family ID
+- `getMembers(env, householdId)` - Get family members
+- `getAdmins(env, householdId)` - Get family admins
 - `addMember(env, memberData)` - Add member to family
 
 ### Record Type Operations (`recordTypeDb`)
 
 - `create(env, recordTypeData)` - Create record type
-- `findByFamilyId(env, familyId)` - Find record types in family
+- `findByhouseholdId(env, householdId)` - Find record types in family
 - `findById(env, id)` - Find record type by ID
 
 ### Record Operations (`recordDb`)
 
 - `create(env, recordData)` - Create record
-- `findByFamilyId(env, familyId)` - Find records in family
-- `findByRecordType(env, recordTypeId, familyId)` - Find records by type
+- `findByhouseholdId(env, householdId)` - Find records in family
+- `findByRecordType(env, recordTypeId, householdId)` - Find records by type
 - `findById(env, id)` - Find record by ID
 
 ### Authentication Operations (`authDb`)

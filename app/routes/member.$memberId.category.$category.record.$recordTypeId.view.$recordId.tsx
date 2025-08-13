@@ -69,17 +69,17 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     // Load family data from URL params
-    const { familyId, familyMembers, currentMember } =
+    const { householdId, householdMembers, currentMember } =
       await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no family data found, redirect to welcome
-    if (!familyId) {
+    if (!householdId) {
       console.log("❌ No family data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
     // Verify the user is accessing their own family data
-    if (familyId !== session.currentHouseholdId) {
+    if (householdId !== session.currentHouseholdId) {
       throw redirect("/welcome");
     }
 
@@ -91,7 +91,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       .where(
         and(
           eq(records.id, parseInt(recordId)),
-          eq(records.familyId, familyId),
+          eq(records.householdId, householdId),
           eq(records.recordTypeId, parseInt(recordTypeId))
         )
       )
@@ -110,7 +110,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       .where(
         and(
           eq(recordTypes.id, parseInt(recordTypeId)),
-          eq(recordTypes.familyId, familyId)
+          eq(recordTypes.householdId, householdId)
         )
       )
       .limit(1);
@@ -124,8 +124,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     return {
       record,
       recordType,
-      familyMembers,
-      familyId,
+      householdMembers,
+      householdId,
       currentMember,
       memberId,
       category,
@@ -155,9 +155,9 @@ export async function action({
   switch (action) {
     case "delete": {
       const recordId = parseInt(formData.get("recordId") as string);
-      const familyId = formData.get("familyId") as string;
+      const householdId = formData.get("householdId") as string;
 
-      if (!recordId || !familyId) {
+      if (!recordId || !householdId) {
         throw new Response("Missing required fields", { status: 400 });
       }
 
@@ -174,7 +174,7 @@ export async function action({
         .where(
           and(
             eq(records.id, recordId),
-            eq(records.familyId, familyId)
+            eq(records.householdId, householdId)
           )
         );
 
@@ -194,8 +194,8 @@ const RecordViewPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
   const {
     record,
     recordType,
-    familyMembers,
-    familyId,
+    householdMembers,
+    householdId,
     currentMember,
     memberId,
     category,
@@ -207,7 +207,7 @@ const RecordViewPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
     const formData = new FormData();
     formData.append("_action", "delete");
     formData.append("recordId", recordId.toString());
-    formData.append("familyId", familyId);
+    formData.append("householdId", householdId);
     formData.append("memberId", memberId);
     formData.append("category", category);
 
@@ -242,8 +242,8 @@ const RecordViewPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
           <RecordDetailView
             record={record}
             recordType={recordType}
-            familyMembers={familyMembers}
-            familyId={familyId}
+            householdMembers={householdMembers}
+            householdId={householdId}
             memberId={memberId}
             category={category}
             recordTypeId={recordTypeId}

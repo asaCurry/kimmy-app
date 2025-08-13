@@ -20,7 +20,7 @@ interface ParsedRecordType {
   name: string;
   description: string | null;
   category: string;
-  familyId: string;
+  householdId: string;
   fields: any[]; // Will be parsed from JSON
   icon: string | null;
   color: string | null;
@@ -94,13 +94,13 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no family data found, redirect to welcome
-    if (!familyId) {
+    if (!householdId) {
       console.log("❌ No family data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
     // Verify the user is accessing their own family data
-    if (familyId !== session.currentHouseholdId) {
+    if (householdId !== session.currentHouseholdId) {
       throw redirect("/welcome");
     }
 
@@ -156,8 +156,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       member: currentMember,
       category,
       recordType,
-      familyId,
-      familyMembers,
+      householdId,
+      householdMembers,
     };
   } catch (error) {
     console.error("Record form route loader error:", error);
@@ -187,12 +187,12 @@ export async function action({
       const title = formData.get("title") as string;
       const content = formData.get("content") as string;
       const recordTypeId = parseInt(formData.get("recordTypeId") as string);
-      const familyId = formData.get("familyId") as string;
+      const householdId = formData.get("householdId") as string;
       const tags = formData.get("tags") as string;
       const isPrivate = formData.get("isPrivate") === "true";
       const datetime = formData.get("datetime") as string;
 
-      if (!title || !recordTypeId || !familyId) {
+      if (!title || !recordTypeId || !householdId) {
         throw new Response("Missing required fields", { status: 400 });
       }
 
@@ -264,7 +264,7 @@ export async function action({
               title,
               content: JSON.stringify(fullContent),
               recordTypeId,
-              familyId,
+              householdId,
               memberId: parseInt(params.memberId),
               createdBy: parseInt(session.userId.toString()),
               tags,
@@ -296,7 +296,7 @@ export async function action({
 }
 
 const RecordForm: React.FC<Route.ComponentProps> = ({ loaderData, params }) => {
-  const { member, category, recordType, familyId, familyMembers } = loaderData;
+  const { member, category, recordType, householdId, householdMembers } = loaderData;
   const { session } = useAuth();
   const navigate = useNavigate();
 
@@ -349,7 +349,7 @@ const RecordForm: React.FC<Route.ComponentProps> = ({ loaderData, params }) => {
         <DynamicRecordForm
           member={currentMember}
           recordType={recordType}
-          familyId={familyId}
+          householdId={householdId}
           onBack={handleBack}
         />
       </PageLayout>

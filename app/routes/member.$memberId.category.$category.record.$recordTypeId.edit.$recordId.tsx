@@ -37,7 +37,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         and(
           eq(recordTypes.id, parseInt(recordTypeId)),
           eq(recordTypes.category, category),
-          eq(recordTypes.familyId, family.id)
+          eq(recordTypes.householdId, family.id)
         )
       )
       .get();
@@ -54,7 +54,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         and(
           eq(records.id, parseInt(recordId)),
           eq(records.recordTypeId, parseInt(recordTypeId)),
-          eq(records.familyId, family.id)
+          eq(records.householdId, family.id)
         )
       )
       .get();
@@ -66,7 +66,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     return {
       family,
       member,
-      familyMembers,
+      householdMembers,
       recordType,
       record,
       category,
@@ -102,7 +102,7 @@ export async function action({ request, context, params }: { request: Request; c
         .where(
           and(
             eq(records.id, parseInt(recordId)),
-            eq(records.familyId, family.id)
+            eq(records.householdId, family.id)
           )
         )
         .get();
@@ -126,7 +126,7 @@ export async function action({ request, context, params }: { request: Request; c
         .where(
           and(
             eq(records.id, parseInt(recordId)),
-            eq(records.familyId, family.id)
+            eq(records.householdId, family.id)
           )
         )
         .get();
@@ -168,7 +168,7 @@ export async function action({ request, context, params }: { request: Request; c
 }
 
 const RecordEditPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
-  const { family, member, familyMembers, recordType, record, category } = loaderData;
+  const { family, member, householdMembers, recordType, record, category } = loaderData;
   const { user } = useAuth();
 
   if (!record) {
@@ -196,8 +196,8 @@ const RecordEditPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
       <div className="max-w-4xl mx-auto">
         <DynamicRecordForm
           recordType={recordType}
-          familyMembers={familyMembers}
-          familyId={family.id}
+          householdMembers={householdMembers}
+          householdId={family.id}
           memberId={member.id}
           category={category}
           mode="edit"

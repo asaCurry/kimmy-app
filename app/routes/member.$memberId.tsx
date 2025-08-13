@@ -81,13 +81,13 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no family data found, redirect to welcome
-    if (!familyId) {
+    if (!householdId) {
       console.log("❌ No family data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
     // Verify the user is accessing their own family data
-    if (familyId !== session.currentHouseholdId) {
+    if (householdId !== session.currentHouseholdId) {
       throw redirect("/welcome");
     }
 
@@ -96,14 +96,14 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     const recordTypesResult = await db
       .select()
       .from(recordTypes)
-      .where(eq(recordTypes.familyId, familyId));
+      .where(eq(recordTypes.householdId, householdId));
 
     const recordsResult = await db
       .select()
       .from(records)
       .where(
         and(
-          eq(records.familyId, familyId),
+          eq(records.householdId, householdId),
           eq(records.memberId, parseInt(params.memberId))
         )
       );
@@ -171,8 +171,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
     return {
       member: currentMember,
-      familyMembers,
-      familyId,
+      householdMembers,
+      householdId,
       recordTypesByCategory,
       categories: currentCategories,
       categoryRecordCounts,
@@ -203,14 +203,14 @@ export async function action({
       const name = formData.get("name") as string;
       const description = formData.get("description") as string;
       const category = formData.get("category") as string;
-      const familyId = formData.get("familyId") as string;
+      const householdId = formData.get("householdId") as string;
       const fields = formData.get("fields") as string;
       const icon = formData.get("icon") as string;
       const color = formData.get("color") as string;
       const allowPrivate = formData.get("allowPrivate") === "true";
       const createdBy = parseInt(formData.get("createdBy") as string);
 
-      if (!name || !category || !familyId || !createdBy) {
+      if (!name || !category || !householdId || !createdBy) {
         throw new Response("Missing required fields", { status: 400 });
       }
 
@@ -221,7 +221,7 @@ export async function action({
             name,
             description,
             category,
-            familyId,
+            householdId,
             fields,
             icon,
             color,
@@ -249,7 +249,7 @@ export async function action({
 const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
   const {
     member,
-    familyMembers,
+    householdMembers,
     recordTypesByCategory,
     categories,
     categoryRecordCounts,
@@ -374,7 +374,7 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                 </Button>
               ) : (
                 <CreateRecordTypeForm
-                  familyId={loaderData.familyId}
+                  householdId={loaderData.householdId}
                   createdBy={currentMember.id}
                   onCancel={() => setShowCreateForm(false)}
                   className="space-y-4"

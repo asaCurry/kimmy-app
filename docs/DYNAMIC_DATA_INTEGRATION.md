@@ -102,11 +102,11 @@ interface HouseholdContextType {
 
 ```typescript
 // Before: Static mock data
-const familyMembers = mockFamilyMembers;
+const householdMembers = mockHouseholdMembers;
 
 // After: Live household data
 const householdMembers = useCurrentHouseholdMembers(session?.currentHouseholdId);
-const familyMembers = householdMembers.map(member => ({ ... }));
+const householdMembers = householdMembers.map(member => ({ ... }));
 ```
 
 ### **6. Enhanced Member Management**

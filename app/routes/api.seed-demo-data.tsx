@@ -9,9 +9,9 @@ export async function action({
   context: any;
 }) {
   const formData = await request.formData();
-  const familyId = formData.get("familyId") as string;
+  const householdId = formData.get("householdId") as string;
 
-  if (!familyId) {
+  if (!householdId) {
     throw new Response("Family ID required", { status: 400 });
   }
 
@@ -35,7 +35,7 @@ export async function action({
         .insert(recordTypes)
         .values({
           ...recordType,
-          familyId,
+          householdId,
           createdBy: session.userId,
         })
         .returning();

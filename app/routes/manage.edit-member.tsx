@@ -41,20 +41,20 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     const { householdId, householdMembers } = await loadHouseholdData(request, env);
 
     // If no family data found, redirect to welcome
-    if (!familyId) {
+    if (!householdId) {
       console.log("❌ No family data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
     // Find the specific member
-    const member = familyMembers.find(m => m.id.toString() === memberId);
+    const member = householdMembers.find(m => m.id.toString() === memberId);
     if (!member) {
       throw new Response("Member not found", { status: 404 });
     }
 
     return {
-      familyId,
-      familyMembers,
+      householdId,
+      householdMembers,
       member,
     };
   } catch (error) {
@@ -142,7 +142,7 @@ const EditMember: React.FC<Route.ComponentProps> = () => {
   const { session } = useAuth();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
-  const { familyId, familyMembers, member } = useLoaderData<typeof loader>();
+  const { householdId, householdMembers, member } = useLoaderData<typeof loader>();
   const [isSuccess, setIsSuccess] = useState(false);
 
   // Handle action data changes
@@ -157,8 +157,8 @@ const EditMember: React.FC<Route.ComponentProps> = () => {
   }, [actionData, navigate]);
 
   // If we have a family ID but no loader data, redirect to include the family ID in the URL
-  if (session?.currentHouseholdId && !familyId) {
-    const redirectUrl = `/manage/edit-member?familyId=${encodeURIComponent(session.currentHouseholdId)}`;
+  if (session?.currentHouseholdId && !householdId) {
+    const redirectUrl = `/manage/edit-member?householdId=${encodeURIComponent(session.currentHouseholdId)}`;
     console.log(
       "🔄 Edit member route redirecting to include family ID:",
       redirectUrl
@@ -207,7 +207,7 @@ const EditMember: React.FC<Route.ComponentProps> = () => {
           />
 
           <FamilyMemberEdit
-            familyId={familyId || ""}
+            householdId={householdId || ""}
             member={member}
             onCancel={handleCancel}
             onSuccess={handleSuccess}

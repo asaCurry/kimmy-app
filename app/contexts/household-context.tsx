@@ -15,18 +15,18 @@ interface AddMemberData {
 }
 
 interface HouseholdContextType {
-  familyMembers: User[];
-  addMember: (familyId: string, memberData: AddMemberData) => Promise<User>;
+  householdMembers: User[];
+  addMember: (householdId: string, memberData: AddMemberData) => Promise<User>;
   addAdminMember: (
-    familyId: string,
+    householdId: string,
     userId: number,
     userData: { firstName: string; lastName: string; email: string }
   ) => Promise<User>;
   removeMember: (memberId: number) => Promise<void>;
   updateMember: (memberId: number, updates: Partial<User>) => Promise<void>;
-  getMembersByRole: (familyId: string, role: "admin" | "member") => User[];
-  refreshMembers: (familyId: string) => Promise<void>;
-  setFamilyMembers: (members: User[]) => void;
+  getMembersByRole: (householdId: string, role: "admin" | "member") => User[];
+  refreshMembers: (householdId: string) => Promise<void>;
+  setHouseholdMembers: (members: User[]) => void;
 }
 
 const HouseholdContext = createContext<HouseholdContextType | undefined>(
@@ -48,7 +48,7 @@ interface HouseholdProviderProps {
 export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
   children,
 }) => {
-  const [familyMembers, setFamilyMembers] = useState<User[]>([]);
+  const [householdMembers, setHouseholdMembers] = useState<User[]>([]);
 
   const calculateAge = (dateOfBirth?: Date): number => {
     if (!dateOfBirth) return 0;
@@ -68,7 +68,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
 
   const addAdminMember = useCallback(
     async (
-      familyId: string,
+      householdId: string,
       userId: number,
       userData: { firstName: string; lastName: string; email: string }
     ): Promise<User> => {
@@ -80,14 +80,14 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
           name: `${userData.firstName} ${userData.lastName}`,
           email: userData.email,
           hashedPassword: null,
-          familyId,
+          householdId,
           role: "admin",
           age: null,
           relationshipToAdmin: "self",
           createdAt: new Date().toISOString(),
         };
 
-        setFamilyMembers(prev => {
+        setHouseholdMembers(prev => {
           const existing = prev.find(m => m.id === userId);
           if (existing) {
             return prev.map(m => (m.id === userId ? adminMember : m));
@@ -105,7 +105,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
   );
 
   const addMember = useCallback(
-    async (familyId: string, memberData: AddMemberData): Promise<User> => {
+    async (householdId: string, memberData: AddMemberData): Promise<User> => {
       try {
         // Note: In the new architecture, database operations should happen in route actions
         // This is just for local state management
@@ -114,7 +114,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
           name: `${memberData.firstName} ${memberData.lastName}`,
           email: memberData.email || "",
           hashedPassword: null,
-          familyId,
+          householdId,
           role: "member",
           age: memberData.dateOfBirth
             ? calculateAge(memberData.dateOfBirth)
@@ -123,7 +123,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
           createdAt: new Date().toISOString(),
         };
 
-        setFamilyMembers(prev => [...prev, newMember]);
+        setHouseholdMembers(prev => [...prev, newMember]);
         return newMember;
       } catch (error) {
         console.error("Failed to add member:", error);
@@ -135,13 +135,13 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
 
   const removeMember = useCallback(async (memberId: number): Promise<void> => {
     // TODO: In the new architecture, this should be handled by route actions
-    setFamilyMembers(prev => prev.filter(m => m.id !== memberId));
+    setHouseholdMembers(prev => prev.filter(m => m.id !== memberId));
   }, []);
 
   const updateMember = useCallback(
     async (memberId: number, updates: Partial<User>): Promise<void> => {
       // TODO: In the new architecture, this should be handled by route actions
-      setFamilyMembers(prev =>
+      setHouseholdMembers(prev =>
         prev.map(m => (m.id === memberId ? { ...m, ...updates } : m))
       );
     },
@@ -149,16 +149,16 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
   );
 
   const getMembersByRole = useCallback(
-    (familyId: string, role: "admin" | "member"): User[] => {
-      return familyMembers.filter(
-        m => m.familyId === familyId && m.role === role
+    (householdId: string, role: "admin" | "member"): User[] => {
+      return householdMembers.filter(
+        m => m.householdId === householdId && m.role === role
       );
     },
-    [familyMembers]
+    [householdMembers]
   );
 
   const refreshMembers = useCallback(
-    async (familyId: string): Promise<void> => {
+    async (householdId: string): Promise<void> => {
       // TODO: In the new architecture, this should be handled by route loaders
       // For now, just do nothing - the loader will handle member fetching
     },
@@ -166,14 +166,14 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
   );
 
   const value: HouseholdContextType = {
-    familyMembers,
+    householdMembers,
     addMember,
     addAdminMember,
     removeMember,
     updateMember,
     getMembersByRole,
     refreshMembers,
-    setFamilyMembers,
+    setHouseholdMembers,
   };
 
   return (
@@ -185,12 +185,12 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
 
 // Hook for getting current household members
 // This should be used in components that need to display family members
-export const useCurrentHouseholdMembers = (familyId?: string): User[] => {
-  const { familyMembers } = useHousehold();
+export const useCurrentHouseholdMembers = (householdId?: string): User[] => {
+  const { householdMembers } = useHousehold();
 
-  if (!familyId) {
+  if (!householdId) {
     return [];
   }
 
-  return familyMembers.filter(member => member.familyId === familyId);
+  return householdMembers.filter(member => member.householdId === householdId);
 };

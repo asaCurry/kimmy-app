@@ -149,7 +149,7 @@ const Manage: React.FC = () => {
       )
     ) {
       const formData = new FormData();
-      formData.append("familyId", currentHouseholdId!);
+      formData.append("householdId", currentHouseholdId!);
 
       fetcher.submit(formData, {
         method: "post",
@@ -247,7 +247,7 @@ const Manage: React.FC = () => {
 
         {/* Family Member Management */}
         <FamilyMemberList
-          familyMembers={householdMembers}
+          householdMembers={householdMembers}
           householdId={currentHouseholdId}
           onMemberUpdated={handleMemberUpdated}
           onMemberRemoved={handleMemberRemoved}

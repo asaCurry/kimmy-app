@@ -28,7 +28,7 @@ interface ParsedRecordType extends Omit<DbRecordType, "fields"> {
 interface DynamicRecordFormProps {
   member?: FamilyMember;
   recordType: ParsedRecordType;
-  familyId: string;
+  householdId: string;
   memberId?: number;
   createdBy?: number;
   onBack?: () => void;
@@ -42,7 +42,7 @@ interface DynamicRecordFormProps {
 export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   member,
   recordType,
-  familyId,
+  householdId,
   memberId,
   createdBy,
   onBack,
@@ -151,7 +151,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
     } else {
       formData.append("_action", "create");
       formData.append("recordTypeId", recordType.id.toString());
-      formData.append("familyId", familyId);
+      formData.append("householdId", householdId);
     }
     
     formData.append("title", data.title);

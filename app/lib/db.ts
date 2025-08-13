@@ -230,14 +230,14 @@ export const recordTypeDb = {
     }
   },
 
-  async findByFamilyId(env: any, familyId: string): Promise<RecordType[]> {
+  async findByhouseholdId(env: any, householdId: string): Promise<RecordType[]> {
     const db = ensureDatabase(env);
 
     try {
       return await db
         .select()
         .from(schema.recordTypes)
-        .where(eq(schema.recordTypes.familyId, familyId));
+        .where(eq(schema.recordTypes.householdId, householdId));
     } catch (error) {
       console.error("Failed to find record types by family ID:", error);
       throw new Error("Failed to find record types");
@@ -270,7 +270,7 @@ export const recordDb = {
       title: string;
       content?: string;
       recordTypeId: number;
-      familyId: string;
+      householdId: string;
       createdBy: number;
       tags?: string;
       attachments?: string;
@@ -282,7 +282,7 @@ export const recordDb = {
       title: recordData.title,
       content: recordData.content,
       recordTypeId: recordData.recordTypeId,
-      familyId: recordData.familyId,
+      householdId: recordData.householdId,
       createdBy: recordData.createdBy,
       tags: recordData.tags,
       attachments: recordData.attachments,
@@ -300,14 +300,14 @@ export const recordDb = {
     }
   },
 
-  async findByFamilyId(env: any, familyId: string): Promise<Record[]> {
+  async findByhouseholdId(env: any, householdId: string): Promise<Record[]> {
     const db = ensureDatabase(env);
 
     try {
       return await db
         .select()
         .from(schema.records)
-        .where(eq(schema.records.familyId, familyId));
+        .where(eq(schema.records.householdId, householdId));
     } catch (error) {
       console.error("Failed to find records by family ID:", error);
       throw new Error("Failed to find records");
@@ -317,7 +317,7 @@ export const recordDb = {
   async findByRecordType(
     env: any,
     recordTypeId: number,
-    familyId: string
+    householdId: string
   ): Promise<Record[]> {
     const db = ensureDatabase(env);
 
@@ -328,7 +328,7 @@ export const recordDb = {
         .where(
           and(
             eq(schema.records.recordTypeId, recordTypeId),
-            eq(schema.records.familyId, familyId)
+            eq(schema.records.householdId, householdId)
           )
         );
     } catch (error) {
@@ -582,19 +582,19 @@ export const authDb = {
       password: string;
       familyName?: string;
     }
-  ): Promise<{ user: User; familyId: string }> {
+  ): Promise<{ user: User; householdId: string }> {
     try {
-      const familyId = await familyDb.generateFamilyId();
+      const householdId = await familyDb.generatehouseholdId();
 
       const user = await userDb.create(env, {
         name: userData.name,
         email: userData.email,
         password: userData.password,
-        familyId,
+        householdId,
         role: "admin",
       });
 
-      return { user, familyId };
+      return { user, householdId };
     } catch (error) {
       console.error("Failed to create user with family:", error);
       throw new Error("Failed to create user account");

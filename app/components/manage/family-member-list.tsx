@@ -26,14 +26,14 @@ interface FamilyMember {
 }
 
 interface FamilyMemberListProps {
-  familyMembers: FamilyMember[];
+  householdMembers: FamilyMember[];
   householdId: string;
   onMemberUpdated: () => void;
   onMemberRemoved: () => void;
 }
 
 export const FamilyMemberList: React.FC<FamilyMemberListProps> = ({
-  familyMembers,
+  householdMembers,
   householdId,
   onMemberUpdated,
   onMemberRemoved,
@@ -84,7 +84,7 @@ export const FamilyMemberList: React.FC<FamilyMemberListProps> = ({
     return <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30">Member</Badge>;
   };
 
-  if (familyMembers.length === 0) {
+  if (householdMembers.length === 0) {
     return (
       <Card className="bg-slate-800/50 border-slate-700">
         <CardContent className="text-center py-12">
@@ -113,7 +113,7 @@ export const FamilyMemberList: React.FC<FamilyMemberListProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-slate-200">
-          Family Members ({familyMembers.length})
+          Family Members ({householdMembers.length})
         </h2>
         <Link to="/manage/add-member">
           <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
@@ -125,7 +125,7 @@ export const FamilyMemberList: React.FC<FamilyMemberListProps> = ({
 
       {/* Member Cards */}
       <div className="grid gap-4">
-        {familyMembers.map((member) => (
+        {householdMembers.map((member) => (
           <Card key={member.id} className="bg-slate-800/50 border-slate-700 hover:border-slate-600 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">

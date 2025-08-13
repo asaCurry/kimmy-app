@@ -10,7 +10,7 @@ interface RecordsTableProps {
   recordType: RecordType;
   memberId: string;
   category: string;
-  familyId: string;
+  householdId: string;
   onDelete: (recordId: number) => void;
   isDeleting: boolean;
 }
@@ -20,7 +20,7 @@ export const RecordsTable: React.FC<RecordsTableProps> = ({
   recordType,
   memberId,
   category,
-  familyId,
+  householdId,
   onDelete,
   isDeleting,
 }) => {

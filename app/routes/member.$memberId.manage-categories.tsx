@@ -107,13 +107,13 @@ export async function loader({
         await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no family data found, redirect to welcome
-    if (!familyId) {
+    if (!householdId) {
       console.log("❌ No family data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
     // Verify the user is accessing their own family data
-    if (familyId !== session.currentHouseholdId) {
+    if (householdId !== session.currentHouseholdId) {
       throw redirect("/welcome");
     }
 
@@ -122,14 +122,14 @@ export async function loader({
     const recordTypesResult = await db
       .select()
       .from(recordTypes)
-      .where(eq(recordTypes.familyId, familyId));
+      .where(eq(recordTypes.householdId, householdId));
 
     const recordsResult = await db
       .select()
       .from(records)
       .where(
         and(
-          eq(records.familyId, familyId),
+          eq(records.householdId, householdId),
           eq(records.memberId, parseInt(params.memberId))
         )
       );
@@ -172,8 +172,8 @@ export async function loader({
 
     return {
       member: currentMember,
-      familyId,
-      familyMembers,
+      householdId,
+      householdMembers,
       categoryStats,
       allCategories,
     };
@@ -201,9 +201,9 @@ export async function action({
   switch (action) {
     case "create-category": {
       const categoryName = formData.get("categoryName") as string;
-      const familyId = formData.get("familyId") as string;
+      const householdId = formData.get("householdId") as string;
 
-      if (!categoryName || !familyId) {
+      if (!categoryName || !householdId) {
         throw new Response("Missing required fields", { status: 400 });
       }
 
@@ -221,7 +221,7 @@ const CategoriesManagement: React.FC<{
   loaderData: any;
   params: RouteParams;
 }> = ({ loaderData, params }) => {
-  const { member, familyId, familyMembers, categoryStats, allCategories } =
+  const { member, householdId, householdMembers, categoryStats, allCategories } =
     loaderData;
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -269,7 +269,7 @@ const CategoriesManagement: React.FC<{
     const formData = new FormData();
     formData.append("_action", "create-category");
     formData.append("categoryName", newCategoryName.trim());
-    formData.append("familyId", familyId);
+    formData.append("householdId", householdId);
 
     fetcher.submit(formData, { method: "post" });
     setNewCategoryName("");

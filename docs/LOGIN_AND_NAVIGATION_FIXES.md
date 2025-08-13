@@ -53,7 +53,7 @@ Clicking on household members from the home page did nothing - routes weren't pr
 
 #### **Root Cause:**
 
-- Member detail routes were still using static `mockFamilyMembers` data
+- Member detail routes were still using static `mockHouseholdMembers` data
 - No integration with the dynamic `HouseholdContext`
 - Missing route protection
 

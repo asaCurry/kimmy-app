@@ -35,8 +35,8 @@ import type { Record, RecordType, User } from "~/db/schema";
 interface RecordDetailViewProps {
   record: Record;
   recordType: RecordType;
-  familyMembers: User[];
-  familyId: string;
+  householdMembers: User[];
+  householdId: string;
   memberId: string;
   category: string;
   recordTypeId: string;
@@ -48,8 +48,8 @@ interface RecordDetailViewProps {
 export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
   record,
   recordType,
-  familyMembers,
-  familyId,
+  householdMembers,
+  householdId,
   memberId,
   category,
   recordTypeId,
@@ -58,10 +58,10 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
   className = ""
 }) => {
   // Find the member this record is about
-  const recordMember = familyMembers.find(m => m.id === record.memberId);
+  const recordMember = householdMembers.find(m => m.id === record.memberId);
   
   // Find who created the record
-  const recordCreator = familyMembers.find(m => m.id === record.createdBy);
+  const recordCreator = householdMembers.find(m => m.id === record.createdBy);
   
   // Parse the fields JSON for the record type
   const parsedRecordType = React.useMemo(() => {

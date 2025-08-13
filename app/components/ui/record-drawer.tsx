@@ -24,13 +24,13 @@ import {
 import type { Record, RecordType } from "~/db/schema";
 
 interface RecordDrawerProps {
-  familyId: string;
+  householdId: string;
   memberId: string;
   category: string;
 }
 
 export const RecordDrawer: React.FC<RecordDrawerProps> = ({
-  familyId,
+  householdId,
   memberId,
   category,
 }) => {
@@ -45,7 +45,7 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
     setDrawerMode: setMode,
     deleteRecord: onDelete,
     updateRecord: onUpdate,
-    familyMembers,
+    householdMembers,
   } = useRecordManagement();
 
   // Reset mode when drawer opens/closes or record changes
@@ -95,10 +95,10 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
   }
 
   // Find the member this record is about
-  const recordMember = familyMembers.find(m => m.id === record.memberId);
+  const recordMember = householdMembers.find(m => m.id === record.memberId);
   
   // Find who created the record
-  const recordCreator = familyMembers.find(m => m.id === record.createdBy);
+  const recordCreator = householdMembers.find(m => m.id === record.createdBy);
 
   const handleDelete = async () => {
     if (onDelete && confirm(`Are you sure you want to delete "${record.title}"?`)) {
@@ -289,7 +289,7 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
                     {parsedRecordType && (
           <DynamicRecordForm
             recordType={parsedRecordType}
-            familyId={familyId}
+            householdId={householdId}
             memberId={parseInt(memberId)}
             createdBy={record.createdBy || undefined}
             initialData={record}

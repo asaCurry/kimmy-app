@@ -71,24 +71,24 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     // Load family data from URL params
-    const { familyId, currentMember } =
+    const { householdId, currentMember } =
       await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no family data found, redirect to welcome
-    if (!familyId) {
+    if (!householdId) {
       console.log("❌ No family data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
     // Verify the user is accessing their own family data
-    if (familyId !== session.currentHouseholdId) {
+    if (householdId !== session.currentHouseholdId) {
       throw redirect("/welcome");
     }
 
     return {
       member: currentMember,
       category,
-      familyId,
+      householdId,
     };
   } catch (error) {
     console.error("Create record type route loader error:", error);
@@ -118,14 +118,14 @@ export async function action({
       const name = formData.get("name") as string;
       const description = formData.get("description") as string;
       const category = formData.get("category") as string;
-      const familyId = formData.get("familyId") as string;
+      const householdId = formData.get("householdId") as string;
       const fields = formData.get("fields") as string;
       const icon = formData.get("icon") as string;
       const color = formData.get("color") as string;
       const allowPrivate = formData.get("allowPrivate") === "true";
       const createdBy = parseInt(formData.get("createdBy") as string);
 
-      if (!name || !category || !familyId || !createdBy) {
+      if (!name || !category || !householdId || !createdBy) {
         throw new Response("Missing required fields", { status: 400 });
       }
 
@@ -136,7 +136,7 @@ export async function action({
             name,
             description,
             category,
-            familyId,
+            householdId,
             fields,
             icon,
             color,
@@ -162,7 +162,7 @@ export async function action({
 }
 
 const CreateRecordType: React.FC<Route.ComponentProps> = ({ loaderData, params }) => {
-  const { member, category, familyId } = loaderData;
+  const { member, category, householdId } = loaderData;
   const { session } = useAuth();
 
   // Create a basic member profile from session data if no member data from loader
@@ -214,7 +214,7 @@ const CreateRecordType: React.FC<Route.ComponentProps> = ({ loaderData, params }
         />
 
         <CreateRecordTypeForm
-          familyId={familyId}
+          householdId={householdId}
           createdBy={currentMember.id}
           category={category}
           onSuccess={() => window.location.href = `/member/${currentMember.id}/category/${encodeURIComponent(category)}`}

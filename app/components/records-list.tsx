@@ -24,7 +24,7 @@ interface RecordsListProps {
   recordType: RecordType;
   memberId: string;
   category: string;
-  familyId: string;
+  householdId: string;
 }
 
 export const RecordsList: React.FC<RecordsListProps> = ({
@@ -32,7 +32,7 @@ export const RecordsList: React.FC<RecordsListProps> = ({
   recordType,
   memberId,
   category,
-  familyId,
+  householdId,
 }) => {
   const fetcher = useFetcher();
   const isDeleting = fetcher.state === "submitting";
@@ -156,7 +156,7 @@ export const RecordsList: React.FC<RecordsListProps> = ({
               recordType={recordType}
               memberId={memberId}
               category={category}
-              familyId={familyId}
+              householdId={householdId}
               parsedRecordType={parsedRecordType}
               onDelete={handleDelete}
               isDeleting={isDeleting}
@@ -167,7 +167,7 @@ export const RecordsList: React.FC<RecordsListProps> = ({
             recordType={recordType}
             memberId={memberId}
             category={category}
-            familyId={familyId}
+            householdId={householdId}
             onDelete={handleDelete}
             isDeleting={isDeleting}
           />
@@ -183,7 +183,7 @@ interface RecordsCardsProps {
   recordType: RecordType;
   memberId: string;
   category: string;
-  familyId: string;
+  householdId: string;
   parsedRecordType: any;
   onDelete: (recordId: number) => void;
   isDeleting: boolean;
@@ -194,7 +194,7 @@ const RecordsCards: React.FC<RecordsCardsProps> = ({
   recordType,
   memberId,
   category,
-  familyId,
+  householdId,
   parsedRecordType,
   onDelete,
   isDeleting,
@@ -344,7 +344,7 @@ const RecordsCards: React.FC<RecordsCardsProps> = ({
 
       {/* Record Drawer */}
       <RecordDrawer
-        familyId={familyId}
+        householdId={householdId}
         memberId={memberId}
         category={category}
       />

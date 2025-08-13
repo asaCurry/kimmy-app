@@ -8,7 +8,7 @@ interface RecordManagementState {
   drawerMode: "view" | "edit";
   isDeleting: boolean;
   isUpdating: boolean;
-  familyMembers: Array<{
+  householdMembers: Array<{
     id: number;
     name: string;
     email: string;
@@ -16,7 +16,7 @@ interface RecordManagementState {
     age?: number;
     relationshipToAdmin?: string;
   }>;
-  familyId: string;
+  householdId: string;
   memberId: string;
   category: string;
 }
@@ -37,7 +37,7 @@ const RecordManagementContext = React.createContext<RecordManagementContextValue
 
 interface RecordManagementProviderProps {
   children: React.ReactNode;
-  familyMembers: Array<{
+  householdMembers: Array<{
     id: number;
     name: string;
     email: string;
@@ -45,7 +45,7 @@ interface RecordManagementProviderProps {
     age?: number;
     relationshipToAdmin?: string;
   }>;
-  familyId: string;
+  householdId: string;
   memberId: string;
   category: string;
   onRecordDelete?: (recordId: number) => Promise<void>;
@@ -54,8 +54,8 @@ interface RecordManagementProviderProps {
 
 export const RecordManagementProvider: React.FC<RecordManagementProviderProps> = ({
   children,
-  familyMembers,
-  familyId,
+  householdMembers,
+  householdId,
   memberId,
   category,
   onRecordDelete,
@@ -68,8 +68,8 @@ export const RecordManagementProvider: React.FC<RecordManagementProviderProps> =
     drawerMode: "view",
     isDeleting: false,
     isUpdating: false,
-    familyMembers,
-    familyId,
+    householdMembers,
+    householdId,
     memberId,
     category,
   });
@@ -161,8 +161,8 @@ export const RecordManagementProvider: React.FC<RecordManagementProviderProps> =
     updateRecord,
     setDeleting,
     setUpdating,
-    familyMembers,
-    familyId,
+    householdMembers,
+    householdId,
     memberId,
     category,
   ]);
@@ -188,8 +188,8 @@ export const useRecordManagementState = (): RecordManagementState => {
   if (context === undefined) {
     throw new Error("useRecordManagementState must be used within a RecordManagementProvider");
   }
-  const { selectedRecord, selectedRecordType, isDrawerOpen, drawerMode, isDeleting, isUpdating, familyMembers, familyId, memberId, category } = context;
-  return { selectedRecord, selectedRecordType, isDrawerOpen, drawerMode, isDeleting, isUpdating, familyMembers, familyId, memberId, category };
+  const { selectedRecord, selectedRecordType, isDrawerOpen, drawerMode, isDeleting, isUpdating, householdMembers, householdId, memberId, category } = context;
+  return { selectedRecord, selectedRecordType, isDrawerOpen, drawerMode, isDeleting, isUpdating, householdMembers, householdId, memberId, category };
 };
 
 // Hook for components that only need the actions
