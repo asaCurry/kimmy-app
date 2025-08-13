@@ -1,8 +1,10 @@
 import * as React from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Clock, User, Tag, Lock } from "lucide-react";
+import { Clock, User, Tag, Lock, Eye, Edit } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { useRecordManagement } from "~/contexts/record-management-context";
+import type { RecordType } from "~/db/schema";
 
 interface RecentRecord {
   id: number;
@@ -21,6 +23,11 @@ interface RecentRecord {
   tags?: string | null;
 }
 
+// Extended interface to include the full record type for context
+interface RecentRecordWithType extends RecentRecord {
+  recordType: RecordType;
+}
+
 interface RecentRecordsListProps {
   records: RecentRecord[];
   familyMembers: any[];
@@ -30,6 +37,8 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
   records,
   familyMembers,
 }) => {
+  const { openRecord } = useRecordManagement();
+
   if (records.length === 0) {
     return (
       <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
@@ -151,13 +160,58 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
               </div>
             </div>
 
-            {/* Quick Action */}
-            <Link
-              to={`/member/${record.memberId}/category/${encodeURIComponent(record.recordTypeCategory)}`}
-              className="flex-shrink-0 px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-            >
-              View
-            </Link>
+            {/* Quick Actions */}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  // Create a mock record type object for the context
+                  const mockRecordType: RecordType = {
+                    id: record.recordTypeId || 0,
+                    name: record.recordTypeName,
+                    description: "",
+                    category: record.recordTypeCategory,
+                    familyId: "",
+                    fields: "[]",
+                    icon: record.recordTypeIcon,
+                    color: record.recordTypeColor,
+                    allowPrivate: record.isPrivate ? 1 : 0,
+                    createdBy: null,
+                    createdAt: "",
+                  };
+                  
+                  // Create a mock record object for the context
+                  const mockRecord = {
+                    id: record.id,
+                    title: record.title,
+                    content: record.content,
+                    recordTypeId: record.recordTypeId,
+                    familyId: "",
+                    memberId: record.memberId,
+                    createdBy: null,
+                    tags: record.tags || null,
+                    attachments: null,
+                    isPrivate: record.isPrivate,
+                    datetime: record.datetime || null,
+                    createdAt: record.createdAt || "",
+                    updatedAt: null,
+                  };
+                  
+                  openRecord(mockRecord, mockRecordType);
+                }}
+                className="flex items-center gap-1 px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              >
+                <Eye className="w-3 h-3" />
+                View
+              </button>
+              
+              <Link
+                to={`/member/${record.memberId}/category/${encodeURIComponent(record.recordTypeCategory)}/record/${record.recordTypeId}/edit/${record.id}`}
+                className="flex items-center gap-1 px-3 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
+              >
+                <Edit className="w-3 h-3" />
+                Edit
+              </Link>
+            </div>
           </div>
         ))}
       </CardContent>

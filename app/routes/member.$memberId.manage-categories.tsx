@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { loadFamilyDataWithMember } from "~/lib/loader-helpers";
+import { loadHouseholdDataWithMember } from "~/lib/loader-helpers";
 import { getDatabase } from "~/lib/db-utils";
 import { recordTypes, records } from "~/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -103,8 +103,8 @@ export async function loader({
     }
 
     // Load family data from URL params
-    const { familyId, familyMembers, currentMember } =
-      await loadFamilyDataWithMember(request, env, memberId);
+          const { householdId, householdMembers, currentMember } =
+        await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no family data found, redirect to welcome
     if (!familyId) {

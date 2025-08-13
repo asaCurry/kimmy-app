@@ -36,6 +36,20 @@
       "when": 1754938362536,
       "tag": "0004_add_member_id_to_records",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1755099476607,
+      "tag": "0005_flashy_wallflower",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1755102115945,
+      "tag": "0006_warm_cardiac",
+      "breakpoints": true
     }
   ]
 }

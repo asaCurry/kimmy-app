@@ -5,7 +5,7 @@ import { PageLayout } from "~/components/ui/layout";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
 import { DynamicRecordForm } from "~/components/dynamic-record-form";
-import { loadFamilyDataWithMember } from "~/lib/loader-helpers";
+import { loadHouseholdDataWithMember } from "~/lib/loader-helpers";
 import { withDatabaseAndSession, getDatabase } from "~/lib/db-utils";
 import { recordTypes, records } from "~/db/schema";
 import { eq } from "drizzle-orm";
@@ -90,8 +90,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     // Load family data from URL params
-    const { familyId, familyMembers, currentMember } =
-      await loadFamilyDataWithMember(request, env, memberId);
+          const { householdId, householdMembers, currentMember } =
+        await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no family data found, redirect to welcome
     if (!familyId) {

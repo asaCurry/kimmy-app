@@ -6,11 +6,14 @@ import { PageLoading } from "~/components/ui/loading";
 import { NoHousehold } from "~/components/manage/no-household";
 import { QuickActions } from "~/components/manage/quick-actions";
 import { HouseholdOverview } from "~/components/manage/household-overview";
+import { FamilyMemberList } from "~/components/manage/family-member-list";
+import { InviteCodeManager } from "~/components/manage/invite-code-manager";
 import { NavigationSection } from "~/components/manage/navigation-section";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { LoadingSpinner } from "~/components/ui/loading-spinner";
-import { loadFamilyData } from "~/lib/loader-helpers";
+import { loadHouseholdData } from "~/lib/loader-helpers";
+import { inviteCodeDb } from "~/lib/db";
 
 interface FamilyMember {
   id: number;
@@ -23,7 +26,8 @@ interface FamilyMember {
 
 interface LoaderData {
   members: FamilyMember[];
-  familyId: string | null;
+  householdId: string | null;
+  inviteCode: string | undefined;
 }
 
 export function meta() {
@@ -78,25 +82,38 @@ export async function loader({
   }
 
   try {
-    const { familyId, familyMembers } = await loadFamilyData(
+    const { householdId, householdMembers } = await loadHouseholdData(
       request,
       context.cloudflare?.env
     );
-    console.log("familyId", familyId);
-    console.log("familyMembers", familyMembers);
+    console.log("householdId", householdId);
+    console.log("householdMembers", householdMembers);
 
-    // Verify the user is accessing their own family data
-    if (familyId !== session.currentHouseholdId) {
+    // Verify the user is accessing their own household data
+    if (householdId !== session.currentHouseholdId) {
       throw redirect("/welcome");
     }
 
-    // Return family data if available, otherwise return null
+    // Load the household invite code
+    let inviteCode: string | undefined = undefined;
+    if (householdId) {
+      try {
+        const household = await inviteCodeDb.getHouseholdById(context.cloudflare?.env, householdId);
+        inviteCode = household?.inviteCode;
+      } catch (error) {
+        console.error("Failed to load invite code:", error);
+        // Don't fail the entire request if invite code loading fails
+      }
+    }
+
+    // Return household data if available, otherwise return null
     return {
-      members: familyMembers || [],
-      familyId: familyId || null,
+      members: householdMembers || [],
+      householdId: householdId || null,
+      inviteCode,
     };
   } catch (error) {
-    console.log("❌ Error loading family data:", error);
+    console.log("❌ Error loading household data:", error);
     // If it's a redirect, re-throw it
     if (
       error instanceof Response &&
@@ -108,21 +125,22 @@ export async function loader({
     // For other errors, return empty data
     return {
       members: [],
-      familyId: null,
+      householdId: null,
+      inviteCode: undefined,
     };
   }
 }
 
 const Manage: React.FC = () => {
   const { session, isAuthenticated, isLoading } = useAuth();
-  const { members: loaderMembers, familyId: loaderFamilyId } =
+  const { members: loaderMembers, householdId: loaderHouseholdId, inviteCode } =
     useLoaderData<LoaderData>();
   const fetcher = useFetcher();
   const isSeeding = fetcher.state === "submitting";
 
   // Use data from loader instead of client-side fetching
   const householdMembers = loaderMembers || [];
-  const currentHouseholdId = loaderFamilyId;
+  const currentHouseholdId = loaderHouseholdId;
 
   const handleSeedBasicData = () => {
     if (
@@ -138,6 +156,16 @@ const Manage: React.FC = () => {
         action: "/api/seed-demo-data",
       });
     }
+  };
+
+  const handleMemberUpdated = () => {
+    // TODO: Implement member update refresh
+    console.log("Member updated, should refresh data");
+  };
+
+  const handleMemberRemoved = () => {
+    // TODO: Implement member removal refresh
+    console.log("Member removed, should refresh data");
   };
 
   // Show loading while checking auth
@@ -178,93 +206,70 @@ const Manage: React.FC = () => {
           title="Household Management"
           subtitle="Manage your household members and settings"
         />
-
-        {/* Debug information */}
-        <Card className="mb-4 bg-slate-800 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-sm">Debug Info</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xs space-y-1">
-              <div>
-                <strong>Current Household ID:</strong>{" "}
-                {currentHouseholdId || "null"}
-              </div>
-              <div>
-                <strong>Session:</strong> {session ? "Available" : "None"}
-              </div>
-              <div>
-                <strong>Members Count:</strong> {householdMembers.length}
-              </div>
-              <div>
-                <strong>Loader Family ID:</strong> {loaderFamilyId || "null"}
-              </div>
-              <div>
-                <strong>URL:</strong>{" "}
-                {typeof window !== "undefined"
-                  ? window.location.href
-                  : "Server side"}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Basic Data Seeding */}
-        <Card className="mb-4 bg-gradient-to-br from-blue-900/20 to-purple-900/20 border-blue-700/50">
+        <Card
+          className="mb-6 bg-slate-800 border-slate-700"
+          style={{ display: "none" }}
+        >
           <CardHeader>
-            <CardTitle className="text-blue-200">
-              🎯 Get Started with Records
+            <CardTitle className="text-lg text-slate-200">
+              Quick Setup
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <p className="text-blue-100 text-sm">
-                Create basic record types to get you started with the dynamic
-                record system.
-              </p>
-              <Button
-                onClick={handleSeedBasicData}
-                disabled={isSeeding}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-              >
-                {isSeeding ? (
-                  <>
-                    <LoadingSpinner className="w-4 h-4 mr-2" />
-                    Creating Basic Data...
-                  </>
-                ) : (
-                  "Create Basic Record Types"
-                )}
-              </Button>
-
-              {fetcher.data?.success && (
-                <div className="p-3 bg-green-900/20 border border-green-700 rounded-md">
-                  <p className="text-green-400 text-sm">
-                    {fetcher.data.message}
-                  </p>
-                </div>
+            <p className="text-slate-300 mb-4">
+              Get started quickly by creating some basic record types and
+              templates.
+            </p>
+            <Button
+              onClick={handleSeedBasicData}
+              disabled={isSeeding}
+              className="bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700"
+            >
+              {isSeeding ? (
+                <>
+                  <LoadingSpinner className="mr-2" />
+                  Creating Demo Data...
+                </>
+              ) : (
+                "Seed Basic Data"
               )}
-
-              {fetcher.data?.error && (
-                <div className="p-3 bg-red-900/20 border border-red-700 rounded-md">
-                  <p className="text-red-400 text-sm">{fetcher.data.error}</p>
-                </div>
-              )}
-            </div>
+            </Button>
           </CardContent>
         </Card>
 
-        <div className="space-y-8">
-          <QuickActions
-            currentHouseholdId={currentHouseholdId}
-            isLoadingMembers={false}
-            onRefresh={() => window.location.reload()}
-          />
+        {/* Quick Actions */}
+        <QuickActions
+          currentHouseholdId={currentHouseholdId}
+          isLoadingMembers={false}
+          onRefresh={() => {}}
+        />
 
-          <HouseholdOverview householdMembers={householdMembers} />
+        {/* Family Member Management */}
+        <FamilyMemberList
+          familyMembers={householdMembers}
+          householdId={currentHouseholdId}
+          onMemberUpdated={handleMemberUpdated}
+          onMemberRemoved={handleMemberRemoved}
+        />
 
-          <NavigationSection />
+        {/* Invite Code Management */}
+        <div data-section="invite-code">
+                  <InviteCodeManager
+          householdId={currentHouseholdId}
+          currentInviteCode={inviteCode}
+          onInviteCodeGenerated={(newCode) => {
+            console.log("New invite code generated:", newCode);
+            // TODO: Update the local state or refresh the page to show the new code
+          }}
+        />
         </div>
+
+        {/* Household Overview */}
+        <HouseholdOverview householdMembers={householdMembers} />
+
+        {/* Navigation Section */}
+        <NavigationSection />
       </PageLayout>
     </RequireAuth>
   );

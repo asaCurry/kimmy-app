@@ -1,12 +1,21 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+// Households table
+export const households = sqliteTable("households", {
+  id: text("id").primaryKey(), // UUID string
+  name: text("name").notNull(),
+  inviteCode: text("inviteCode").unique().notNull(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
+});
+
 // Users/Family members table
 export const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   email: text("email").unique().notNull(),
   hashedPassword: text("hashed_password"), // null for children without accounts
-  familyId: text("family_id").notNull(),
+  householdId: text("household_id").notNull().references(() => households.id),
   role: text("role").default("member"), // 'admin', 'member'
   age: integer("age"), // for children
   relationshipToAdmin: text("relationship_to_admin"), // 'self', 'spouse', 'child', etc.
@@ -19,7 +28,7 @@ export const recordTypes = sqliteTable("record_types", {
   name: text("name").notNull(),
   description: text("description"),
   category: text("category").notNull().default("Personal"), // Category this record type belongs to
-  familyId: text("family_id").notNull(),
+  householdId: text("household_id").notNull().references(() => households.id),
   fields: text("fields"), // JSON array of field definitions
   icon: text("icon"), // Icon name or emoji
   color: text("color"), // Color for the record type
@@ -34,7 +43,7 @@ export const records = sqliteTable("records", {
   title: text("title").notNull(),
   content: text("content"), // JSON object with field values
   recordTypeId: integer("record_type_id").references(() => recordTypes.id),
-  familyId: text("family_id").notNull(),
+  householdId: text("household_id").notNull().references(() => households.id),
   memberId: integer("member_id").references(() => users.id), // Which family member this record is about
   createdBy: integer("created_by").references(() => users.id), // Who created the record
   tags: text("tags"), // Comma-separated tags
@@ -49,7 +58,7 @@ export const records = sqliteTable("records", {
 export const quickNotes = sqliteTable("quick_notes", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   content: text("content").notNull(),
-  familyId: text("family_id").notNull(),
+  householdId: text("household_id").notNull().references(() => households.id),
   createdBy: integer("created_by").references(() => users.id),
   tags: text("tags"), // Comma-separated tags
   attachments: text("attachments"), // JSON array of file URLs
@@ -67,6 +76,8 @@ export const contactSubmissions = sqliteTable("contact_submissions", {
 });
 
 // Type exports
+export type Household = typeof households.$inferSelect;
+export type NewHousehold = typeof households.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type RecordType = typeof recordTypes.$inferSelect;

@@ -46,6 +46,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       email: formData.get("email"),
       hasPassword: !!formData.get("password"),
       hasConfirmPassword: !!formData.get("confirmPassword"),
+      inviteCode: formData.get("inviteCode"),
     });
 
     const firstName = formData.get("firstName") as string;
@@ -53,6 +54,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
+    const inviteCode = formData.get("inviteCode") as string;
 
     // Validation
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
@@ -76,11 +78,26 @@ export async function action({ request, context }: Route.ActionArgs) {
     }
 
     console.log("✅ Validation passed, creating account...");
-    const session = await authApi.createAccount(env, {
-      name: `${firstName} ${lastName}`,
-      email,
-      password,
-    });
+    
+    let session;
+    if (inviteCode && inviteCode.trim()) {
+      // Join existing household with invite code
+      console.log("🔑 Joining household with invite code:", inviteCode);
+      session = await authApi.joinHouseholdWithInviteCode(env, {
+        name: `${firstName} ${lastName}`,
+        email,
+        password,
+        inviteCode: inviteCode.trim(),
+      });
+    } else {
+      // Create new account and household
+      console.log("🏠 Creating new account and household");
+      session = await authApi.createAccount(env, {
+        name: `${firstName} ${lastName}`,
+        email,
+        password,
+      });
+    }
 
     if (!session) {
       return { error: "Account creation failed" };
@@ -90,6 +107,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       userId: session.userId,
       email: session.email,
     });
+    
     // Return success with session data
     return { success: true, session };
   } catch (error) {
@@ -284,10 +302,12 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
                   name="password"
                   type="password"
                   defaultValue=""
-                  placeholder="Create a password"
+                  placeholder="Enter your password"
                   required
                 />
-                {errors.password && <FormError>{errors.password}</FormError>}
+                {errors.password && (
+                  <FormError>{errors.password}</FormError>
+                )}
                 <FormDescription>
                   Must be at least 6 characters long
                 </FormDescription>
@@ -310,7 +330,28 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
                 )}
               </FormField>
 
-              <div className="flex flex-col space-y-3 pt-4">
+              {/* Invite Code Section */}
+              <div className="border-t border-slate-700 pt-6">
+                <FormField>
+                  <FormLabel htmlFor="inviteCode">
+                    Invite Code (Optional)
+                  </FormLabel>
+                  <FormInput
+                    id="inviteCode"
+                    name="inviteCode"
+                    type="text"
+                    defaultValue=""
+                    placeholder="Enter household invite code if you have one"
+                    className="font-mono"
+                  />
+                  <FormDescription>
+                    If you have an invite code from a family member, enter it here to join their household automatically.
+                    Leave blank if you want to create your own household.
+                  </FormDescription>
+                </FormField>
+              </div>
+
+              <div className="flex gap-3 pt-6">
                 <Button
                   type="submit"
                   disabled={navigation.state === "submitting"}

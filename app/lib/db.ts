@@ -35,7 +35,7 @@ export const userDb = {
       name: string;
       email: string;
       password?: string;
-      familyId: string;
+      householdId: string;
       role?: string;
       age?: number;
       relationshipToAdmin?: string;
@@ -52,7 +52,7 @@ export const userDb = {
       name: userData.name,
       email: userData.email.toLowerCase().trim(),
       hashedPassword,
-      familyId: userData.familyId,
+      householdId: userData.householdId,
       role: userData.role || "member",
       age: userData.age,
       relationshipToAdmin: userData.relationshipToAdmin,
@@ -101,17 +101,17 @@ export const userDb = {
     }
   },
 
-  async findByFamilyId(env: any, familyId: string): Promise<User[]> {
+  async findByHouseholdId(env: any, householdId: string): Promise<User[]> {
     const db = ensureDatabase(env);
 
     try {
       return await db
         .select()
         .from(schema.users)
-        .where(eq(schema.users.familyId, familyId));
+        .where(eq(schema.users.householdId, householdId));
     } catch (error) {
-      console.error("Failed to find users by family ID:", error);
-      throw new Error("Failed to find family members");
+      console.error("Failed to find users by household ID:", error);
+      throw new Error("Failed to find household members");
     }
   },
 
@@ -141,16 +141,16 @@ export const userDb = {
 
 // Family/Household operations
 export const familyDb = {
-  async generateFamilyId(): Promise<string> {
-    // Generate a unique family ID
-    return `family_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  async generateHouseholdId(): Promise<string> {
+    // Generate a unique household ID
+    return `household_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   },
 
-  async getMembers(env: any, familyId: string): Promise<User[]> {
-    return await userDb.findByFamilyId(env, familyId);
+  async getMembers(env: any, householdId: string): Promise<User[]> {
+    return await userDb.findByHouseholdId(env, householdId);
   },
 
-  async getAdmins(env: any, familyId: string): Promise<User[]> {
+  async getAdmins(env: any, householdId: string): Promise<User[]> {
     const db = ensureDatabase(env);
 
     try {
@@ -159,13 +159,13 @@ export const familyDb = {
         .from(schema.users)
         .where(
           and(
-            eq(schema.users.familyId, familyId),
+            eq(schema.users.householdId, householdId),
             eq(schema.users.role, "admin")
           )
         );
     } catch (error) {
-      console.error("Failed to find family admins:", error);
-      throw new Error("Failed to find family admins");
+      console.error("Failed to find household admins:", error);
+      throw new Error("Failed to find household admins");
     }
   },
 
@@ -174,7 +174,7 @@ export const familyDb = {
     memberData: {
       name: string;
       email?: string;
-      familyId: string;
+      householdId: string;
       role?: string;
       age?: number;
       relationshipToAdmin?: string;
@@ -185,7 +185,7 @@ export const familyDb = {
       email:
         memberData.email ||
         `${memberData.name.toLowerCase().replace(/\s+/g, ".")}@noemail.local`,
-      familyId: memberData.familyId,
+      householdId: memberData.householdId,
       role: memberData.role || "member",
       age: memberData.age,
       relationshipToAdmin: memberData.relationshipToAdmin,
@@ -200,7 +200,7 @@ export const recordTypeDb = {
     recordTypeData: {
       name: string;
       description?: string;
-      familyId: string;
+      householdId: string;
       icon?: string;
       color?: string;
       createdBy: number;
@@ -212,7 +212,7 @@ export const recordTypeDb = {
     const newRecordType: NewRecordType = {
       name: recordTypeData.name,
       description: recordTypeData.description,
-      familyId: recordTypeData.familyId,
+      householdId: recordTypeData.householdId,
       icon: recordTypeData.icon,
       color: recordTypeData.color,
       createdBy: recordTypeData.createdBy,
@@ -351,6 +351,189 @@ export const recordDb = {
     } catch (error) {
       console.error("Failed to find record by ID:", error);
       throw new Error("Failed to find records");
+    }
+  },
+
+  async update(
+    env: any,
+    id: number,
+    updates: Partial<{
+      title: string;
+      content: string;
+      tags: string;
+      isPrivate: number;
+      datetime: string;
+    }>
+  ): Promise<Record> {
+    const db = ensureDatabase(env);
+
+    try {
+      const updateData = {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const result = await db
+        .update(schema.records)
+        .set(updateData)
+        .where(eq(schema.records.id, id))
+        .returning();
+
+      return result[0];
+    } catch (error) {
+      console.error("Failed to update record:", error);
+      throw new Error("Failed to update record");
+    }
+  },
+
+  async delete(env: any, id: number): Promise<void> {
+    const db = ensureDatabase(env);
+
+    try {
+      await db
+        .delete(schema.records)
+        .where(eq(schema.records.id, id));
+    } catch (error) {
+      console.error("Failed to delete record:", error);
+      throw new Error("Failed to delete record");
+    }
+  },
+};
+
+// Invite code operations
+export const inviteCodeDb = {
+  /**
+   * Generate a cryptographically secure invite code
+   */
+  generateSecureInviteCode(): string {
+    // Generate random string using timestamp and random numbers
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
+    
+    // Format: XXXXXXXX-XXXX (8 alphanumeric + hyphen + 4 alphanumeric)
+    return `${randomPart}-${timestamp.substring(timestamp.length - 4)}`;
+  },
+
+  /**
+   * Validate an invite code format
+   */
+  validateInviteCodeFormat(code: string): boolean {
+    // Format: XXXXXXXX-XXXX (8 alphanumeric + hyphen + 4 alphanumeric)
+    const inviteCodeRegex = /^[A-Z0-9]{8}-[A-Z0-9]{4}$/;
+    return inviteCodeRegex.test(code);
+  },
+
+  /**
+   * Create a new household with invite code
+   */
+  async createHousehold(
+    env: any,
+    householdData: {
+      id: string;
+      name: string;
+      createdBy: number;
+    }
+  ) {
+    const db = ensureDatabase(env);
+    
+    const inviteCode = this.generateSecureInviteCode();
+    
+    const newHousehold = {
+      id: householdData.id,
+      name: householdData.name,
+      inviteCode,
+      createdBy: householdData.createdBy,
+    };
+    
+    try {
+      const result = await db.insert(schema.households).values(newHousehold).returning();
+      return { household: result[0], inviteCode };
+    } catch (error) {
+      console.error("Failed to create household:", error);
+      throw new Error("Failed to create household");
+    }
+  },
+
+  /**
+   * Get household by invite code
+   */
+  async getHouseholdByInviteCode(env: any, inviteCode: string) {
+    const db = ensureDatabase(env);
+    
+    try {
+      const result = await db
+        .select()
+        .from(schema.households)
+        .where(eq(schema.households.inviteCode, inviteCode))
+        .limit(1);
+      
+      return result[0] || null;
+    } catch (error) {
+      console.error("Failed to get household by invite code:", error);
+      return null;
+    }
+  },
+
+  /**
+   * Generate a new invite code for an existing household
+   */
+  async regenerateInviteCode(env: any, householdId: string) {
+    const db = ensureDatabase(env);
+    
+    const newInviteCode = this.generateSecureInviteCode();
+    
+    try {
+      const result = await db
+        .update(schema.households)
+        .set({ 
+          inviteCode: newInviteCode,
+          updatedAt: new Date().toISOString()
+        })
+        .where(eq(schema.households.id, householdId))
+        .returning();
+      
+      return result[0]?.inviteCode || null;
+    } catch (error) {
+      console.error("Failed to regenerate invite code:", error);
+      throw new Error("Failed to regenerate invite code");
+    }
+  },
+
+  /**
+   * Get household by ID
+   */
+  async getHouseholdById(env: any, householdId: string) {
+    const db = ensureDatabase(env);
+    
+    try {
+      const result = await db
+        .select()
+        .from(schema.households)
+        .where(eq(schema.households.id, householdId))
+        .limit(1);
+      
+      return result[0] || null;
+    } catch (error) {
+      console.error("Failed to get household by ID:", error);
+      return null;
+    }
+  },
+
+  /**
+   * Delete a household (for cleanup)
+   */
+  async deleteHousehold(env: any, householdId: string) {
+    const db = ensureDatabase(env);
+    
+    try {
+      await db
+        .delete(schema.households)
+        .where(eq(schema.households.id, householdId));
+      
+      return true;
+    } catch (error) {
+      console.error("Failed to delete household:", error);
+      throw new Error("Failed to delete household");
     }
   },
 };

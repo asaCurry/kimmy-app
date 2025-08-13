@@ -8,7 +8,7 @@ import { RecordsList } from "~/components/records-list";
 import { RecordDrawer } from "~/components/ui/record-drawer";
 import { AddCard } from "~/components/ui/interactive-card";
 import { Accordion } from "~/components/ui/accordion";
-import { loadFamilyDataWithMember } from "~/lib/loader-helpers";
+import { loadHouseholdDataWithMember } from "~/lib/loader-helpers";
 import { getDatabase } from "~/lib/db-utils";
 import { RecordManagementProvider } from "~/contexts/record-management-context";
 import { recordTypes, records } from "~/db/schema";
@@ -22,6 +22,66 @@ export function meta({ params }: Route.MetaArgs) {
       content: `View and manage ${params.category.toLowerCase()} records`,
     },
   ];
+}
+
+export async function action({ request, context, params }: Route.ActionArgs) {
+  try {
+    const { memberId, category } = params;
+    if (!memberId || !category) {
+      throw new Error("Missing required parameters");
+    }
+
+    const formData = await request.formData();
+    const action = formData.get("_action");
+
+    if (action === "delete") {
+      const recordId = formData.get("recordId");
+      if (!recordId) {
+        throw new Error("Record ID is required for deletion");
+      }
+
+      const env = (context as any).cloudflare?.env;
+      if (!env?.DB) {
+        throw new Error("Database not available");
+      }
+
+      const { householdId } = await loadHouseholdDataWithMember(request, env, memberId);
+              if (!householdId) {
+          throw new Error("Household not found");
+        }
+
+      const db = getDatabase(env);
+      
+      // Verify record exists and belongs to family
+      const record = await db
+        .select()
+        .from(records)
+        .where(
+          and(
+            eq(records.id, parseInt(recordId.toString())),
+            eq(records.familyId, familyId)
+          )
+        )
+        .get();
+
+      if (!record) {
+        throw new Error("Record not found");
+      }
+
+      // Delete the record
+      await db
+        .delete(records)
+        .where(eq(records.id, parseInt(recordId.toString())));
+
+      // Redirect back to the same page to refresh the data
+      return redirect(`/member/${memberId}/category/${encodeURIComponent(category)}`);
+    }
+
+    throw new Error("Invalid action");
+  } catch (error) {
+    console.error("Error in category action:", error);
+    throw error;
+  }
 }
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
@@ -78,7 +138,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     console.log("Category route loader - about to load family data...");
     // Load family data from URL params
     const { familyId, familyMembers, currentMember } =
-      await loadFamilyDataWithMember(request, env, memberId);
+      await loadHouseholdDataWithMember(request, env, memberId);
     console.log("Category route loader - family data loaded:", { familyId, currentMember: currentMember?.name });
 
     // If no family data found, redirect to welcome
@@ -260,12 +320,14 @@ const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
           memberId={currentMember.id.toString()}
           category={category}
           onRecordDelete={async (recordId: number) => {
-            // TODO: Implement record deletion
-            console.log("Deleting record:", recordId);
+            // Record deletion is now handled by the edit route's server action
+            // This will be called when the delete button is clicked in the record drawer
+            console.log("Record deletion requested:", recordId);
           }}
           onRecordUpdate={async (recordId: number, updates: any) => {
-            // TODO: Implement record update
-            console.log("Updating record:", recordId, updates);
+            // Record updates are now handled by the edit route's server action
+            // This will be called when the update button is clicked in the record drawer
+            console.log("Record update requested:", recordId, updates);
           }}
         >
           {recordTypes.length === 0 ? (

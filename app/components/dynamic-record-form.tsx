@@ -68,7 +68,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
     register,
     handleSubmit,
     control,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isDirty },
     setValue,
     watch,
     reset,
@@ -143,42 +143,20 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   }, [recordType.name, setValue, reset, normalizedFields]);
 
   const onSubmit = async (data: FormData) => {
-    if (customOnSubmit) {
-      // Custom submit handler for edit mode
-      const fieldValues: Record<string, any> = {};
-      normalizedFields.forEach(field => {
-        const fieldKey = `field_${field.id}` as keyof FormData;
-        const value = data[fieldKey];
-        if (value !== undefined && value !== null && value !== "") {
-          fieldValues[fieldKey] = value;
-        }
-      });
-
-      const content = {
-        description: data.content || "No description provided",
-        fields: fieldValues,
-      };
-
-      const recordData = {
-        title: data.title,
-        content: JSON.stringify(content),
-        tags: data.tags || "",
-        isPrivate: data.isPrivate,
-        datetime: data.datetime ? new Date(data.datetime).toISOString() : undefined,
-      };
-
-      await customOnSubmit(recordData);
-      return;
-    }
-
-    // Default submit handler for create mode
+    // Prepare form data for submission
     const formData = new FormData();
-    formData.append("_action", "create");
+    
+    if (mode === "edit") {
+      formData.append("_action", "update");
+    } else {
+      formData.append("_action", "create");
+      formData.append("recordTypeId", recordType.id.toString());
+      formData.append("familyId", familyId);
+    }
+    
     formData.append("title", data.title);
     formData.append("content", data.content || "");
     formData.append("tags", data.tags || "");
-    formData.append("recordTypeId", recordType.id.toString());
-    formData.append("familyId", familyId);
     formData.append("isPrivate", data.isPrivate.toString());
 
     // Handle datetime field - convert to ISO string if provided
@@ -203,6 +181,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
       }
     });
 
+    // Submit the form
     fetcher.submit(formData, {
       method: "post",
     });
@@ -447,7 +426,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
               <Button
                 type="submit"
                 className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 w-full sm:w-auto"
-                disabled={!isValid || isSubmitting}
+                disabled={isSubmitting || (mode === "edit" ? !isDirty : !isValid)}
               >
                 {isSubmitting ? (
                   <>

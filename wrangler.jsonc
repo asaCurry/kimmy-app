@@ -20,6 +20,7 @@
       "binding": "DB",
       "database_name": "kimmy-app-db",
       "database_id": "6d9a4a6c-81c4-4338-9c5d-4c688f57091a",
+      "migrations_dir": "./migrations",
     },
   ],
   "r2_buckets": [

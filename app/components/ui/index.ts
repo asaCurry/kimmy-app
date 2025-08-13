@@ -28,6 +28,7 @@ export { Accordion, AccordionItem } from "./accordion";
 
 // Interactive Components
 export { Button } from "./button";
+export { Badge } from "./badge";
 export { Drawer, DrawerContent, DrawerFooter } from "./drawer";
 export { QuickActionButton } from "./quick-action-button";
 

@@ -5,9 +5,9 @@
 import { userDb, familyDb } from "./db";
 import { parseCookies, extractSessionFromCookies } from "./utils";
 
-export interface FamilyData {
-  familyId: string | null;
-  familyMembers: Array<{
+export interface HouseholdData {
+  householdId: string | null;
+  householdMembers: Array<{
     id: number;
     name: string;
     email: string;
@@ -17,29 +17,29 @@ export interface FamilyData {
   }>;
 }
 
-export async function loadFamilyData(
+export async function loadHouseholdData(
   request: Request,
   env: any
-): Promise<FamilyData> {
+): Promise<HouseholdData> {
   try {
     // Extract session from cookies using utility function
     const session = extractSessionFromCookies(request.headers.get("cookie"));
 
     if (!session) {
-      return { familyId: null, familyMembers: [] };
+      return { householdId: null, householdMembers: [] };
     }
 
-    const familyId = session.currentHouseholdId;
-    if (!familyId) {
-      return { familyId: null, familyMembers: [] };
+    const householdId = session.currentHouseholdId;
+    if (!householdId) {
+      return { householdId: null, householdMembers: [] };
     }
 
-    // Load family members from database
-    const members = await userDb.findByFamilyId(env, familyId);
+    // Load household members from database
+    const members = await userDb.findByHouseholdId(env, householdId);
 
     return {
-      familyId,
-      familyMembers: members.map(member => ({
+      householdId,
+      householdMembers: members.map(member => ({
         id: member.id,
         name: member.name,
         email: member.email,
@@ -49,8 +49,8 @@ export async function loadFamilyData(
       })),
     };
   } catch (error) {
-    console.error("Failed to load family data:", error);
-    return { familyId: null, familyMembers: [] };
+    console.error("Failed to load household data:", error);
+    return { householdId: null, householdMembers: [] };
   }
 }
 
@@ -83,33 +83,33 @@ export async function loadUserSession(
 }
 
 /**
- * Load family data with additional member information
+ * Load household data with additional member information
  */
-export async function loadFamilyDataWithMember(
+export async function loadHouseholdDataWithMember(
   request: Request,
   env: any,
   memberId?: string
-): Promise<FamilyData & { currentMember: any | null }> {
-  const { familyId, familyMembers } = await loadFamilyData(request, env);
+): Promise<HouseholdData & { currentMember: any | null }> {
+  const { householdId, householdMembers } = await loadHouseholdData(request, env);
 
   let currentMember = null;
-  if (familyId && memberId) {
+  if (householdId && memberId) {
     currentMember =
-      familyMembers.find(member => member.id.toString() === memberId) || null;
+      householdMembers.find(member => member.id.toString() === memberId) || null;
   }
 
-  return { familyId, familyMembers, currentMember };
+  return { householdId, householdMembers, currentMember };
 }
 
 /**
- * Load family data with category information
+ * Load household data with category information
  * Useful for routes that need category-based data
  */
-export async function loadFamilyDataWithCategories(
+export async function loadHouseholdDataWithCategories(
   request: Request,
   env: any
-): Promise<FamilyData & { categories: string[] }> {
-  const { familyId, familyMembers } = await loadFamilyData(request, env);
+): Promise<HouseholdData & { categories: string[] }> {
+  const { householdId, householdMembers } = await loadHouseholdData(request, env);
 
   // Default categories - in a real app, these might come from the database
   const defaultCategories = [
@@ -130,8 +130,8 @@ export async function loadFamilyDataWithCategories(
   ];
 
   return {
-    familyId,
-    familyMembers,
+    householdId,
+    householdMembers,
     categories: defaultCategories,
   };
 }

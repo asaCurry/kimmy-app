@@ -5,6 +5,7 @@
 
 import { authDb, userDb, familyDb } from "./db";
 import { isDatabaseAvailable } from "./utils";
+import { inviteCodeDb } from "./db";
 
 // Session management (unchanged for session storage)
 export interface SessionToken {
@@ -200,6 +201,58 @@ export const authApi = {
       return session;
     } catch (error) {
       console.error("Account creation failed:", error);
+      return null;
+    }
+  },
+
+  async joinHouseholdWithInviteCode(
+    env: any,
+    userData: {
+      name: string;
+      email: string;
+      password: string;
+      inviteCode: string;
+    }
+  ): Promise<AuthSession | null> {
+    if (!isDatabaseAvailable(env)) {
+      throw new Error("Database not available");
+    }
+
+    try {
+      // Validate invite code format
+      if (!inviteCodeDb.validateInviteCodeFormat(userData.inviteCode)) {
+        throw new Error("Invalid invite code format");
+      }
+
+      // Find household by invite code
+      const household = await inviteCodeDb.getHouseholdByInviteCode(env, userData.inviteCode);
+      if (!household) {
+        throw new Error("Invalid or expired invite code");
+      }
+
+      // Create the user account
+      const user = await userDb.create(env, {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        familyId: household.id,
+        role: "member", // New users joining via invite are members, not admins
+      });
+
+      // Create session
+      const session: AuthSession = {
+        token: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        currentHouseholdId: household.id,
+        role: "member",
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      };
+
+      return session;
+    } catch (error) {
+      console.error("Failed to join household with invite code:", error);
       return null;
     }
   },

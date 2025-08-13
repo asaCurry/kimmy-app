@@ -5,7 +5,7 @@ import { PageLayout, PageHeader } from "~/components/ui";
 import { RequireAuth, useAuth } from "~/contexts";
 import { Navigation } from "~/components";
 import { DynamicRecordForm } from "~/components";
-import { loadFamilyDataWithMember, getDatabase } from "~/lib";
+import { loadHouseholdDataWithMember, getDatabase } from "~/lib";
 import { recordTypes, records } from "~/db/schema";
 import { eq, and } from "drizzle-orm";
 import { ErrorBoundary } from "~/components/ui/error-boundary";
@@ -18,7 +18,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
   }
 
   try {
-    const { family, member, familyMembers } = await loadFamilyDataWithMember(
+    const { household, member, householdMembers } = await loadHouseholdDataWithMember(
       request,
       context,
       memberId
@@ -77,32 +77,94 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
   }
 }
 
-export async function action({ request, context }: { request: Request; context: any; }) {
+export async function action({ request, context, params }: { request: Request; context: any; params: any; }) {
   const formData = await request.formData();
   const action = formData.get("_action");
+  const { memberId, category, recordTypeId, recordId } = params;
 
-  if (action === "delete") {
-    const recordId = formData.get("recordId");
-    if (!recordId) {
-      throw new Error("Record ID is required for deletion");
+  if (!memberId || !category || !recordTypeId || !recordId) {
+    throw new Error("Missing required parameters");
+  }
+
+  try {
+    const { household } = await loadHouseholdDataWithMember(request, context, memberId);
+    if (!family) {
+      throw new Error("Family not found");
     }
 
     const db = getDatabase(context);
-    await db
-      .delete(records)
-      .where(eq(records.id, parseInt(recordId.toString())));
 
-    // Redirect back to the records list
-    const url = new URL(request.url);
-    const pathParts = url.pathname.split("/");
-    const memberId = pathParts[2];
-    const category = pathParts[4];
-    const recordTypeId = pathParts[6];
-    
-    return redirect(`/member/${memberId}/category/${encodeURIComponent(category)}/record/${recordTypeId}`);
+    if (action === "delete") {
+      // Handle record deletion
+      const record = await db
+        .select()
+        .from(records)
+        .where(
+          and(
+            eq(records.id, parseInt(recordId)),
+            eq(records.familyId, family.id)
+          )
+        )
+        .get();
+
+      if (!record) {
+        throw new Error("Record not found");
+      }
+
+      await db
+        .delete(records)
+        .where(eq(records.id, parseInt(recordId)));
+
+      // Redirect back to the records list
+      return redirect(`/member/${memberId}/category/${encodeURIComponent(category)}/record/${recordTypeId}`);
+
+    } else if (action === "update") {
+      // Handle record update
+      const record = await db
+        .select()
+        .from(records)
+        .where(
+          and(
+            eq(records.id, parseInt(recordId)),
+            eq(records.familyId, family.id)
+          )
+        )
+        .get();
+
+      if (!record) {
+        throw new Error("Record not found");
+      }
+
+      // Extract update data from form
+      const updates = {
+        title: formData.get("title") as string,
+        content: formData.get("content") as string,
+        tags: formData.get("tags") as string,
+        isPrivate: formData.get("isPrivate") === "true" ? 1 : 0,
+        datetime: formData.get("datetime") as string,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Validate required fields
+      if (!updates.title?.trim()) {
+        throw new Error("Title is required");
+      }
+
+      // Update the record
+      await db
+        .update(records)
+        .set(updates)
+        .where(eq(records.id, parseInt(recordId)));
+
+      // Redirect to the record detail view
+      return redirect(`/member/${memberId}/category/${encodeURIComponent(category)}/record/${recordTypeId}/view/${recordId}`);
+    }
+
+    throw new Error("Invalid action");
+  } catch (error) {
+    console.error("Error in record action:", error);
+    throw error;
   }
-
-  throw new Error("Invalid action");
 }
 
 const RecordEditPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
@@ -140,11 +202,9 @@ const RecordEditPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
           category={category}
           mode="edit"
           initialData={record}
-          customOnSubmit={async (data) => {
-            // TODO: Implement record update functionality
-            console.log("Updating record with data:", data);
-            // For now, just log the data
-            return { success: true };
+          onBack={() => {
+            // Navigate back to the record detail view
+            window.location.href = `/member/${member.id}/category/${encodeURIComponent(category)}/record/${recordType.id}/view/${record.id}`;
           }}
         />
       </div>

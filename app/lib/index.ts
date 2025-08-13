@@ -4,7 +4,7 @@ export { db } from "./db";
 export { authDb } from "./auth-db";
 
 // Loaders and Helpers
-export { loadFamilyDataWithMember } from "./loader-helpers";
+export { loadHouseholdDataWithMember } from "./loader-helpers";
 
 // Validation
 export { validateRecordType, validateRecord } from "./validation";

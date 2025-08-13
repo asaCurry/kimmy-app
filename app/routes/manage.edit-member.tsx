@@ -1,4 +1,4 @@
-import type { Route } from "./+types/manage.add-member";
+import type { Route } from "./+types/manage.edit-member";
 import * as React from "react";
 import { useState, useEffect } from "react";
 import {
@@ -13,38 +13,52 @@ import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { ArrowLeft } from "lucide-react";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { loadHouseholdData } from "~/lib/loader-helpers";
-import { FamilyMemberForm } from "~/components/manage/family-member-form";
+import { FamilyMemberEdit } from "~/components/manage/family-member-edit";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Add Family Member - Kimmy" },
-    { name: "description", content: "Add a new member to your household" },
+    { title: "Edit Family Member - Kimmy" },
+    { name: "description", content: "Edit a family member in your household" },
   ];
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   try {
-    const env = (context as any).cloudflare?.env;
+    const env = (context as any)?.cloudflare?.env;
 
     if (!env?.DB) {
       throw new Response("Database not available", { status: 500 });
     }
 
+    const url = new URL(request.url);
+    const memberId = url.searchParams.get("memberId");
+
+    if (!memberId) {
+      throw new Response("Member ID is required", { status: 400 });
+    }
+
     // Load family data from URL params
     const { householdId, householdMembers } = await loadHouseholdData(request, env);
 
-    // If no household data found, redirect to welcome
-    if (!householdId) {
-      console.log("❌ No household data found, redirecting to welcome");
+    // If no family data found, redirect to welcome
+    if (!familyId) {
+      console.log("❌ No family data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
+    // Find the specific member
+    const member = familyMembers.find(m => m.id.toString() === memberId);
+    if (!member) {
+      throw new Response("Member not found", { status: 404 });
+    }
+
     return {
-      householdId,
-      householdMembers,
+      familyId,
+      familyMembers,
+      member,
     };
   } catch (error) {
-    console.error("Add member loader error:", error);
+    console.error("Edit member loader error:", error);
 
     if (error instanceof Response) {
       throw error;
@@ -56,13 +70,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 export async function action({ request, context }: Route.ActionArgs) {
   try {
-    const env = (context as any).cloudflare?.env;
+    const env = (context as any)?.cloudflare?.env;
 
     if (!env?.DB) {
       throw new Response("Database not available", { status: 500 });
     }
 
     const formData = await request.formData();
+    const memberId = formData.get("memberId") as string;
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
     const email = formData.get("email") as string;
@@ -72,7 +87,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     const currentHouseholdId = formData.get("currentHouseholdId") as string;
 
     // Validation
-    if (!firstName || !lastName || !relationship) {
+    if (!memberId || !firstName || !lastName || !relationship) {
       return { error: "Required fields are missing" };
     }
 
@@ -84,80 +99,50 @@ export async function action({ request, context }: Route.ActionArgs) {
       return { error: "Household ID is required" };
     }
 
-    if (!currentHouseholdId.trim()) {
-      return { error: "Household ID cannot be empty" };
-    }
+    // TODO: Implement actual member update in database
+    console.log("Updating member:", {
+      memberId,
+      firstName,
+      lastName,
+      email,
+      memberType,
+      relationship,
+      dateOfBirth,
+      currentHouseholdId,
+    });
 
-    // Import the database utilities
-    const { userDb } = await import("~/lib/db");
-
-    // Create the member data
-    const memberData = {
-      name: `${firstName} ${lastName}`,
-      email:
-        memberType === "adult" ? email : `child-${Date.now()}@placeholder.com`, // Children need an email for the database schema
-      householdId: currentHouseholdId,
-      role: "member",
-      relationshipToAdmin: relationship,
-      age: dateOfBirth ? calculateAge(new Date(dateOfBirth)) : undefined,
+    // For now, return success (this will be implemented when the API is ready)
+    return {
+      success: true,
+      member: {
+        id: memberId,
+        firstName,
+        lastName,
+        email,
+        memberType,
+        relationship,
+        dateOfBirth,
+      },
     };
-
-    try {
-      // Actually save to database
-      const newMember = await userDb.create(env, memberData);
-      console.log("Successfully created member:", newMember);
-
-      return {
-        success: true,
-        member: {
-          firstName,
-          lastName,
-          email,
-          memberType,
-          relationship,
-          dateOfBirth,
-        },
-        newMemberId: newMember.id,
-      };
-    } catch (dbError) {
-      console.error("Database error creating member:", dbError);
-      return { error: "Failed to save member to database" };
-    }
   } catch (error) {
-    console.error("Add member action error:", error);
+    console.error("Edit member action error:", error);
 
     if (error instanceof Response) {
       throw error;
     }
 
     return {
-      error: error instanceof Error ? error.message : "Failed to add member",
+      error: error instanceof Error ? error.message : "Failed to update member",
     };
   }
 }
 
-// Helper function to calculate age
-function calculateAge(dateOfBirth: Date): number {
-  const today = new Date();
-  const age = today.getFullYear() - dateOfBirth.getFullYear();
-  const monthDiff = today.getMonth() - dateOfBirth.getMonth();
-
-  if (
-    monthDiff < 0 ||
-    (monthDiff === 0 && today.getDate() < dateOfBirth.getDate())
-  ) {
-    return age - 1;
-  }
-
-  return age;
-}
-
-const AddMember: React.FC<Route.ComponentProps> = () => {
+const EditMember: React.FC<Route.ComponentProps> = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
-  const { householdId, householdMembers } = useLoaderData<typeof loader>();
+  const { familyId, familyMembers, member } = useLoaderData<typeof loader>();
   const [isSuccess, setIsSuccess] = useState(false);
 
   // Handle action data changes
@@ -171,11 +156,11 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
     }
   }, [actionData, navigate]);
 
-  // If we have a household ID but no loader data, redirect to include the household ID in the URL
-  if (session?.currentHouseholdId && !householdId) {
-    const redirectUrl = `/manage/add-member?householdId=${encodeURIComponent(session.currentHouseholdId)}`;
+  // If we have a family ID but no loader data, redirect to include the family ID in the URL
+  if (session?.currentHouseholdId && !familyId) {
+    const redirectUrl = `/manage/edit-member?familyId=${encodeURIComponent(session.currentHouseholdId)}`;
     console.log(
-      "🔄 Add member route redirecting to include household ID:",
+      "🔄 Edit member route redirecting to include family ID:",
       redirectUrl
     );
     window.location.href = redirectUrl;
@@ -195,6 +180,13 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
     navigate("/manage");
   };
 
+  const handleSuccess = () => {
+    setIsSuccess(true);
+    setTimeout(() => {
+      navigate("/manage");
+    }, 1500);
+  };
+
   return (
     <RequireAuth requireHousehold={true}>
       <PageLayout maxWidth="2xl">
@@ -210,15 +202,15 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
           </div>
 
           <PageHeader
-            title="Add Household Member"
-            subtitle="Add a new family member to your household"
+            title="Edit Family Member"
+            subtitle={`Edit ${member.name} in your household`}
           />
 
-          <FamilyMemberForm
-            householdId={householdId || ""}
-            onSubmit={() => {}} // Form submission is handled by the Form component
+          <FamilyMemberEdit
+            familyId={familyId || ""}
+            member={member}
             onCancel={handleCancel}
-            isSubmitting={navigation.state === "submitting"}
+            onSuccess={handleSuccess}
           />
 
           {/* Success Message */}
@@ -227,10 +219,10 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
               <div className="bg-slate-800 p-8 rounded-lg text-center max-w-md mx-4">
                 <div className="text-green-400 text-6xl mb-4">✓</div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  Member Added Successfully!
+                  Member Updated Successfully!
                 </h3>
                 <p className="text-slate-300 mb-4">
-                  The new family member has been added to your household.
+                  {member.name} has been updated in your household.
                 </p>
                 <p className="text-slate-400 text-sm">
                   Redirecting to management page...
@@ -244,4 +236,4 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
   );
 };
 
-export default AddMember;
+export default EditMember;

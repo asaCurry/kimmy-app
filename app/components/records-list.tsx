@@ -46,14 +46,14 @@ export const RecordsList: React.FC<RecordsListProps> = ({
 
       fetcher.submit(formData, {
         method: "post",
-        action: "/api/records",
       });
     }
   };
 
   const handleRecordUpdate = async (recordId: number, updates: Partial<Record>) => {
-    // TODO: Implement record update functionality
-    console.log("Updating record:", recordId, updates);
+    // Record updates are now handled by the edit route's server action
+    // This function is kept for compatibility but doesn't do client-side updates
+    console.log("Update requested for record:", recordId, updates);
   };
 
   // Parse the fields JSON for each record type

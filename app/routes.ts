@@ -21,6 +21,10 @@ export default [
   // Management routes
   route("manage", "routes/manage.tsx"),
   route("manage/add-member", "routes/manage.add-member.tsx"),
+  route("manage/edit-member", "routes/manage.edit-member.tsx"),
+
+  // API routes
+  route("api/invite-codes/regenerate", "routes/api.invite-codes.regenerate.tsx"),
 
   // Member record routes
   route("member/:memberId", "routes/member.$memberId.tsx"),
