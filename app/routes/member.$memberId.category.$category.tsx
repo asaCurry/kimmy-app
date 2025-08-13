@@ -5,6 +5,7 @@ import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
 import { RecordsList } from "~/components/records-list";
+import { RecordDrawer } from "~/components/ui/record-drawer";
 import { AddCard } from "~/components/ui/interactive-card";
 import { Accordion } from "~/components/ui/accordion";
 import { loadFamilyDataWithMember } from "~/lib/loader-helpers";
@@ -307,6 +308,13 @@ const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
               </div>
             </div>
           )}
+          
+          {/* Record Drawer - rendered at this level to be accessible to all RecordsList components */}
+          <RecordDrawer
+            familyId={familyId}
+            memberId={currentMember.id.toString()}
+            category={category}
+          />
         </RecordManagementProvider>
       </PageLayout>
     </RequireAuth>
