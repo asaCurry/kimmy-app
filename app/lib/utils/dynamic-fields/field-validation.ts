@@ -1,4 +1,4 @@
-import type { DynamicField } from "../../../types/dynamic-fields";
+import type { DynamicField } from "../../types/dynamic-fields";
 
 export const validateFieldValue = (field: DynamicField, value: any): { isValid: boolean; error?: string } => {
   if (field.required && (value === null || value === undefined || value === "")) {

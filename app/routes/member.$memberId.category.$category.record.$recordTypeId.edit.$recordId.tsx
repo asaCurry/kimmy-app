@@ -1,6 +1,6 @@
 import type { Route } from "./+types/member.$memberId.category.$category.record.$recordTypeId.edit.$recordId";
 import * as React from "react";
-import { redirect } from "react-router";
+import { redirect, useLoaderData } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui";
 import { RequireAuth, useAuth } from "~/contexts";
 import { Navigation } from "~/components";
@@ -18,45 +18,63 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
   }
 
   try {
-    const { household, member, householdMembers } = await loadHouseholdDataWithMember(
+    const { householdId, householdMembers, currentMember } = await loadHouseholdDataWithMember(
       request,
       context,
       memberId
     );
 
-    if (!household || !member) {
+    if (!householdId || !currentMember) {
       throw new Error("Household or member not found");
     }
 
-    // Load the record type
+        // Load the record type
     const db = getDatabase(context);
-    const recordType = await db
+    const recordTypeResult = await db
       .select()
       .from(recordTypes)
       .where(
         and(
           eq(recordTypes.id, parseInt(recordTypeId)),
           eq(recordTypes.category, category),
-          eq(recordTypes.householdId, household.id)
+          eq(recordTypes.householdId, householdId)
         )
       )
       .get();
 
-    if (!recordType) {
+    if (!recordTypeResult) {
       throw new Error("Record type not found");
     }
+
+    // Parse the fields JSON
+    let parsedFields = [];
+    try {
+      if (recordTypeResult.fields && typeof recordTypeResult.fields === 'string') {
+        parsedFields = JSON.parse(recordTypeResult.fields);
+      } else if (Array.isArray(recordTypeResult.fields)) {
+        parsedFields = recordTypeResult.fields;
+      }
+    } catch (error) {
+      console.error("Failed to parse record type fields:", error);
+      parsedFields = [];
+    }
+
+    const recordType = {
+      ...recordTypeResult,
+      fields: parsedFields
+    };
 
     // Load the specific record
     const record = await db
       .select()
       .from(records)
-      .where(
-        and(
-          eq(records.id, parseInt(recordId)),
-          eq(records.recordTypeId, parseInt(recordTypeId)),
-          eq(records.householdId, household.id)
+              .where(
+          and(
+            eq(records.id, parseInt(recordId)),
+            eq(records.recordTypeId, parseInt(recordTypeId)),
+            eq(records.householdId, householdId)
+          )
         )
-      )
       .get();
 
     if (!record) {
@@ -64,8 +82,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     return {
-      household,
-      member,
+      householdId,
+      member: currentMember,
       householdMembers,
       recordType,
       record,
@@ -87,8 +105,8 @@ export async function action({ request, context, params }: { request: Request; c
   }
 
   try {
-    const { household } = await loadHouseholdDataWithMember(request, context, memberId);
-    if (!household) {
+    const { householdId } = await loadHouseholdDataWithMember(request, context, memberId);
+    if (!householdId) {
       throw new Error("Household not found");
     }
 
@@ -102,7 +120,7 @@ export async function action({ request, context, params }: { request: Request; c
         .where(
           and(
             eq(records.id, parseInt(recordId)),
-            eq(records.householdId, household.id)
+            eq(records.householdId, householdId)
           )
         )
         .get();
@@ -126,7 +144,7 @@ export async function action({ request, context, params }: { request: Request; c
         .where(
           and(
             eq(records.id, parseInt(recordId)),
-            eq(records.householdId, household.id)
+            eq(records.householdId, householdId)
           )
         )
         .get();
@@ -167,9 +185,8 @@ export async function action({ request, context, params }: { request: Request; c
   }
 }
 
-const RecordEditPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
-  const { household, member, householdMembers, recordType, record, category } = loaderData;
-  const { user } = useAuth();
+const RecordEditPage: React.FC<{ loaderData: any }> = ({ loaderData }) => {
+  const { householdId, member, householdMembers, recordType, record, category } = loaderData;
 
   if (!record) {
     return (
@@ -187,7 +204,7 @@ const RecordEditPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
 
   return (
     <PageLayout>
-      <Navigation household={household} member={member} />
+      <Navigation currentView="form" member={member} />
       <PageHeader
         title={`Edit ${recordType.name}`}
         subtitle={`Editing record: ${record.title}`}
@@ -196,10 +213,8 @@ const RecordEditPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
       <div className="max-w-4xl mx-auto">
         <DynamicRecordForm
           recordType={recordType}
-          householdMembers={householdMembers}
-          householdId={household.id}
+          householdId={householdId}
           memberId={member.id}
-          category={category}
           mode="edit"
           initialData={record}
           onBack={() => {
@@ -216,7 +231,7 @@ export default function RecordEditPageWrapper() {
   return (
     <RequireAuth>
       <ErrorBoundary>
-        <RecordEditPage />
+        <RecordEditPage loaderData={useLoaderData()} />
       </ErrorBoundary>
     </RequireAuth>
   );

@@ -46,50 +46,24 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   }
 }
 
-// Component that loads data after authentication is confirmed
-function AuthenticatedHouseholdHub() {
-  const { session, logout } = useAuth();
+// Simple dashboard component for authenticated users
+function AuthenticatedDashboard() {
+  const { session } = useAuth();
   const navigate = useNavigate();
-  const [householdData, setHouseholdData] = React.useState<any>(null);
-  const [recentRecords, setRecentRecords] = React.useState<any[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
 
-  // Load household data after authentication is confirmed
   React.useEffect(() => {
-    async function loadData() {
-      try {
-        // Get the session data to access household ID
-        const cookieHeader = document.cookie;
-        const cookies = parseCookies(cookieHeader);
-        const sessionData = cookies["kimmy_auth_session"];
-        
-        if (sessionData) {
-          const session = JSON.parse(decodeURIComponent(sessionData));
-          if (session.currentHouseholdId) {
-            // For now, we'll redirect to a route that can properly load the data
-            // This ensures no data is loaded before authentication
-            window.location.href = `/member/${session.currentHouseholdId}`;
-            return;
-          }
-        }
-        
-        // If we get here, redirect to welcome
-        window.location.href = "/welcome";
-      } catch (error) {
-        console.error("Failed to load household data:", error);
-        window.location.href = "/welcome";
-      }
+    // If user has a household, redirect to the member dashboard
+    if (session?.currentHouseholdId) {
+      navigate(`/member/${session.currentHouseholdId}`, { replace: true });
     }
-
-    loadData();
-  }, []);
+  }, [session, navigate]);
 
   return (
     <PageLayout>
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Redirecting to household dashboard...</p>
+          <p className="text-slate-400">Loading your dashboard...</p>
         </div>
       </div>
     </PageLayout>
@@ -106,7 +80,7 @@ export default function Index() {
 
   return (
     <RequireAuth requireHousehold={true}>
-      <AuthenticatedHouseholdHub />
+      <AuthenticatedDashboard />
     </RequireAuth>
   );
 }

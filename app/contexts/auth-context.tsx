@@ -36,7 +36,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const storedSession = sessionStorage.getSessionData();
+        // First try to get session from sessionStorage
+        let storedSession = sessionStorage.getSessionData();
+
+        // If no session in storage, try to get from cookies
+        if (!storedSession) {
+          const cookies = document.cookie.split(";").reduce(
+            (acc, cookie) => {
+              const [key, value] = cookie.trim().split("=");
+              if (key && value) {
+                acc[key] = value;
+              }
+              return acc;
+            },
+            {} as Record<string, string>
+          );
+
+          const sessionData = cookies["kimmy_auth_session"];
+          if (sessionData) {
+            try {
+              storedSession = JSON.parse(decodeURIComponent(sessionData));
+              // Also save to sessionStorage for consistency
+              if (storedSession) {
+                sessionStorage.setSessionData(storedSession);
+              }
+            } catch (error) {
+              console.error("Failed to parse session from cookie:", error);
+            }
+          }
+        }
 
         if (storedSession) {
           // Check if session is expired
@@ -45,6 +73,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             new Date(storedSession.expiresAt) <= new Date()
           ) {
             sessionStorage.clearSession();
+            // Clear cookie as well
+            document.cookie =
+              "kimmy_auth_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             setSession(null);
             setIsAuthenticated(false);
           } else {
@@ -55,6 +86,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } catch (error) {
         // Clear invalid session data
         sessionStorage.clearSession();
+        document.cookie =
+          "kimmy_auth_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         setSession(null);
         setIsAuthenticated(false);
       } finally {
@@ -91,6 +124,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setSession(null);
     setIsAuthenticated(false);
     sessionStorage.clearSession();
+
+    // Clear cookie as well
+    document.cookie =
+      "kimmy_auth_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
     // Navigate to login page if callback provided
     if (navigate) {

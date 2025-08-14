@@ -13,6 +13,13 @@ import { getDatabase } from "~/lib/db-utils";
 import { RecordManagementProvider } from "~/contexts/record-management-context";
 import { recordTypes, records } from "~/db/schema";
 import { eq, and } from "drizzle-orm";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -45,13 +52,17 @@ export async function action({ request, context, params }: Route.ActionArgs) {
         throw new Error("Database not available");
       }
 
-      const { householdId } = await loadHouseholdDataWithMember(request, env, memberId);
-              if (!householdId) {
-          throw new Error("Household not found");
-        }
+      const { householdId } = await loadHouseholdDataWithMember(
+        request,
+        env,
+        memberId
+      );
+      if (!householdId) {
+        throw new Error("Household not found");
+      }
 
       const db = getDatabase(env);
-      
+
       // Verify record exists and belongs to household
       const record = await db
         .select()
@@ -74,7 +85,9 @@ export async function action({ request, context, params }: Route.ActionArgs) {
         .where(eq(records.id, parseInt(recordId.toString())));
 
       // Redirect back to the same page to refresh the data
-      return redirect(`/member/${memberId}/category/${encodeURIComponent(category)}`);
+      return redirect(
+        `/member/${memberId}/category/${encodeURIComponent(category)}`
+      );
     }
 
     throw new Error("Invalid action");
@@ -139,7 +152,10 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     // Load household data from URL params
     const { householdId, householdMembers, currentMember } =
       await loadHouseholdDataWithMember(request, env, memberId);
-    console.log("Category route loader - household data loaded:", { householdId, currentMember: currentMember?.name });
+    console.log("Category route loader - household data loaded:", {
+      householdId,
+      currentMember: currentMember?.name,
+    });
 
     // If no household data found, redirect to welcome
     if (!householdId) {
@@ -164,7 +180,10 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
           eq(recordTypes.category, category)
         )
       );
-    console.log("Category route loader - record types fetched:", recordTypesResult.length);
+    console.log(
+      "Category route loader - record types fetched:",
+      recordTypesResult.length
+    );
 
     // Parse the fields JSON for each record type
     const parsedRecordTypes = recordTypesResult.map(rt => {
@@ -172,9 +191,13 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       if (rt.fields) {
         try {
           const parsed = JSON.parse(rt.fields);
-          
+
           // Extract the fields array from the parsed object
-          if (parsed && typeof parsed === 'object' && Array.isArray(parsed.fields)) {
+          if (
+            parsed &&
+            typeof parsed === "object" &&
+            Array.isArray(parsed.fields)
+          ) {
             parsedFields = parsed.fields;
           } else if (Array.isArray(parsed)) {
             // Handle case where fields is directly an array
@@ -186,7 +209,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
           parsedFields = [];
         }
       }
-      
+
       return {
         ...rt,
         fields: parsedFields,
@@ -224,9 +247,9 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       member: currentMember?.name,
       category,
       recordTypesCount: parsedRecordTypes.length,
-      recordsCount: Object.keys(recordsByType).length
+      recordsCount: Object.keys(recordsByType).length,
     });
-    
+
     return {
       member: currentMember,
       category,
@@ -252,7 +275,7 @@ const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
 }) => {
   console.log("CategoryRecordTypes component - loaderData:", loaderData);
   console.log("CategoryRecordTypes component - params:", params);
-  
+
   const {
     member,
     category,
@@ -348,18 +371,82 @@ const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
             </div>
           ) : (
             <div className="space-y-8">
-              <Accordion>
-                {recordTypes.map(recordType => (
-                  <RecordsList
-                    key={recordType.id}
-                    records={recordsByType[recordType.id] || []}
-                    recordType={recordType}
-                    memberId={currentMember.id.toString()}
-                    category={category}
-                    householdId={householdId}
-                  />
-                ))}
-              </Accordion>
+              {/* Quick Create Records Section */}
+              <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-slate-100">
+                    Quick Create Records
+                  </CardTitle>
+                  <CardDescription className="text-slate-400">
+                    Choose a record type to quickly create a new record
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {recordTypes.map(recordType => {
+                      const recordCount =
+                        recordsByType[recordType.id]?.length || 0;
+                      return (
+                        <div
+                          key={recordType.id}
+                          className="p-4 border border-slate-600 rounded-lg hover:border-slate-500 hover:bg-slate-700/50 transition-colors cursor-pointer"
+                          onClick={() => {
+                            navigate(
+                              `/member/${currentMember.id}/category/${encodeURIComponent(category)}/record/${recordType.id}`
+                            );
+                          }}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-2xl">
+                              {recordType.icon || "📝"}
+                            </div>
+                            <span className="text-xs text-slate-400 bg-slate-700 px-2 py-1 rounded">
+                              {recordCount} record{recordCount !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                          <h4 className="font-medium text-slate-200 mb-1">
+                            {recordType.name}
+                          </h4>
+                          {recordType.description && (
+                            <p className="text-sm text-slate-400 mb-3 line-clamp-2">
+                              {recordType.description}
+                            </p>
+                          )}
+                          <div className="text-blue-400 hover:text-blue-300 text-sm font-medium">
+                            Create Record →
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Existing Records Section */}
+              <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-slate-100">
+                    Existing Records
+                  </CardTitle>
+                  <CardDescription className="text-slate-400">
+                    View and manage your existing records
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Accordion>
+                    {recordTypes.map(recordType => (
+                      <RecordsList
+                        key={recordType.id}
+                        records={recordsByType[recordType.id] || []}
+                        recordType={recordType}
+                        memberId={currentMember.id.toString()}
+                        category={category}
+                        householdId={householdId}
+                      />
+                    ))}
+                  </Accordion>
+                </CardContent>
+              </Card>
 
               <div className="pt-4">
                 <AddCard
@@ -370,7 +457,7 @@ const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
               </div>
             </div>
           )}
-          
+
           {/* Record Drawer - rendered at this level to be accessible to all RecordsList components */}
           <RecordDrawer
             householdId={householdId}

@@ -1,4 +1,4 @@
-import type { DynamicField, DynamicFieldConfig } from "../../../types/dynamic-fields";
+import type { DynamicField, DynamicFieldConfig } from "../../types/dynamic-fields";
 
 export const serializeFields = (fields: DynamicField[]): string => {
   return JSON.stringify({

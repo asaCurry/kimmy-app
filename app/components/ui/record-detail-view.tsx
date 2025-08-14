@@ -24,7 +24,7 @@ import {
   Trash2, 
   Lock, 
   Calendar, 
-  User, 
+  User as UserIcon, 
   Tag, 
   ArrowLeft,
   Eye,
@@ -172,12 +172,14 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
           {/* Record Content */}
           <div className="space-y-4">
             <h4 className="text-lg font-medium text-slate-200">Record Details</h4>
-            <RecordContentDisplay
-              content={record.content}
-              recordType={parsedRecordType}
-              className="text-sm"
-              maxFields={10} // Show more fields in detail view
-            />
+            {parsedRecordType && (
+              <RecordContentDisplay
+                content={record.content}
+                recordType={parsedRecordType}
+                className="text-sm"
+                maxFields={10} // Show more fields in detail view
+              />
+            )}
           </div>
 
           {/* Metadata Section */}
@@ -227,7 +229,7 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
               {/* People */}
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <User className="w-4 h-4 text-slate-400" />
+                  <UserIcon className="w-4 h-4 text-slate-400" />
                   <div>
                     <div className="text-sm text-slate-400">About</div>
                     <div className="text-slate-200">
@@ -236,8 +238,8 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-3">
-                  <User className="w-4 h-4 text-slate-400" />
+                <div className="flex items-center space-x-4">
+                  <UserIcon className="w-4 h-4 text-slate-400" />
                   <div>
                     <div className="text-sm text-slate-400">Created by</div>
                     <div className="text-slate-200">

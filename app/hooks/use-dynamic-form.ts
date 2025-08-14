@@ -25,7 +25,7 @@ export const useDynamicForm = (options: UseDynamicFormOptions) => {
 
   // Create default values for dynamic fields
   const formDefaultValues = useMemo(() => {
-    const baseDefaults = {
+    const baseDefaults: Record<string, any> = {
       title: "",
       content: "",
       tags: "",

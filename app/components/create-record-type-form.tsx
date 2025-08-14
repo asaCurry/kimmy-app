@@ -8,6 +8,7 @@ import { Switch } from "~/components/ui/switch";
 import { Plus, ArrowLeft } from "lucide-react";
 import { useDynamicFields } from "~/hooks/use-dynamic-fields";
 import { DynamicFieldEditor } from "~/components/ui/dynamic-field-editor";
+import { CategoryTypeahead } from "~/components/ui/category-typeahead";
 import {
   Select,
   SelectContent,
@@ -20,6 +21,7 @@ interface CreateRecordTypeFormProps {
   householdId: string;
   createdBy: number;
   category?: string; // Optional - if not provided, user can select
+  existingCategories?: string[]; // Optional - existing categories to show as suggestions
   onSuccess?: () => void;
   onCancel?: () => void;
   showBackButton?: boolean;
@@ -33,7 +35,8 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
   onSuccess,
   onCancel,
   showBackButton = false,
-  className = ""
+  className = "",
+  existingCategories,
 }) => {
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === "submitting";
@@ -56,12 +59,12 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     reorderField,
     toggleField,
     duplicateField,
-    serialize
+    serialize,
   } = useDynamicFields();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim() || !formData.category.trim()) {
       alert("Please enter a name and select a category for the record type");
       return;
@@ -114,39 +117,28 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={e => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g., Meal, Exercise, Medication"
               className="bg-slate-700 border-slate-600 text-slate-200"
               required
             />
           </div>
 
-          {!initialCategory && (
-            <div className="space-y-2">
-              <Label htmlFor="category" className="text-slate-200">
-                Category *
-              </Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
-                required
-              >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100">
-                  <SelectValue placeholder="Choose a category" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-700 border-slate-600">
-                  <SelectItem value="Health">🏥 Health</SelectItem>
-                  <SelectItem value="Activities">🏃 Activities</SelectItem>
-                  <SelectItem value="Personal">📝 Personal</SelectItem>
-                  <SelectItem value="Education">🎓 Education</SelectItem>
-                  <SelectItem value="Finance">💰 Finance</SelectItem>
-                  <SelectItem value="Travel">✈️ Travel</SelectItem>
-                  <SelectItem value="Food">🍽️ Food</SelectItem>
-                  <SelectItem value="Home">🏠 Home</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="category" className="text-slate-200">
+              Category *
+            </Label>
+            <CategoryTypeahead
+              value={formData.category}
+              onChange={value => setFormData({ ...formData, category: value })}
+              placeholder="Select or type a category..."
+              className="bg-slate-700 border-slate-600 text-slate-200"
+              required
+              householdId={householdId}
+              allowCreate={true}
+              maxSuggestions={8}
+            />
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="icon" className="text-slate-200">
@@ -154,7 +146,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
             </Label>
             <Select
               value={formData.icon}
-              onValueChange={(value) => setFormData({ ...formData, icon: value })}
+              onValueChange={value => setFormData({ ...formData, icon: value })}
             >
               <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100">
                 <SelectValue placeholder="Choose an icon" />
@@ -180,7 +172,9 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
             </Label>
             <Select
               value={formData.color}
-              onValueChange={(value) => setFormData({ ...formData, color: value })}
+              onValueChange={value =>
+                setFormData({ ...formData, color: value })
+              }
             >
               <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100">
                 <SelectValue placeholder="Choose a color" />
@@ -206,7 +200,9 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
           <Textarea
             id="description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={e =>
+              setFormData({ ...formData, description: e.target.value })
+            }
             placeholder="Describe what this record type is for..."
             rows={3}
             className="bg-slate-700 border-slate-600 text-slate-200"
@@ -217,7 +213,9 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
           <Switch
             id="allowPrivate"
             checked={formData.allowPrivate}
-            onCheckedChange={(checked) => setFormData({ ...formData, allowPrivate: checked })}
+            onCheckedChange={checked =>
+              setFormData({ ...formData, allowPrivate: checked })
+            }
           />
           <Label htmlFor="allowPrivate" className="text-slate-200">
             Allow private records
@@ -266,7 +264,8 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                 No fields added yet
               </h4>
               <p className="text-slate-400 mb-4">
-                Add fields to define what information will be collected for this record type.
+                Add fields to define what information will be collected for this
+                record type.
               </p>
               <Button
                 type="button"
@@ -285,9 +284,9 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                   key={field.id}
                   field={field}
                   onUpdate={(fieldId, updates) => updateField(fieldId, updates)}
-                  onDelete={(fieldId) => removeField(fieldId)}
-                  onDuplicate={(fieldId) => duplicateField(fieldId)}
-                  onToggleActive={(fieldId) => toggleField(fieldId)}
+                  onDelete={fieldId => removeField(fieldId)}
+                  onDuplicate={fieldId => duplicateField(fieldId)}
+                  onToggleActive={fieldId => toggleField(fieldId)}
                   onReorder={reorderField}
                   index={index}
                   totalFields={fields.length}
@@ -310,10 +309,12 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
               Back
             </Button>
           )}
-          
+
           <Button
             type="submit"
-            disabled={isSubmitting || !formData.name.trim() || !formData.category.trim()}
+            disabled={
+              isSubmitting || !formData.name.trim() || !formData.category.trim()
+            }
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
           >
             {isSubmitting ? "Creating..." : "Create Record Type"}

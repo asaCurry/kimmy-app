@@ -1,4 +1,4 @@
-import type { DynamicField } from "../../../types/dynamic-fields";
+import type { DynamicField } from "../../types/dynamic-fields";
 
 export const reorderFields = (fields: DynamicField[], fromIndex: number, toIndex: number): DynamicField[] => {
   const result = [...fields];

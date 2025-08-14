@@ -59,7 +59,7 @@ export const legacyFormFieldToDynamicField = (field: LegacyFormField, order: num
 
   return {
     id: field.id,
-    name: field.name || field.id,
+    name: field.id,
     label: field.label,
     type: typeMap[field.type] || "text",
     required: field.required,

@@ -1,7 +1,7 @@
-import type { Route } from "./+types/logout";
+import type { ActionFunctionArgs } from "react-router";
 import { redirect } from "react-router";
 
-export async function action({ request, context }: Route.ActionArgs) {
+export async function action({ request, context }: ActionFunctionArgs) {
   // Clear the session cookie by setting it to expire immediately
   // Use multiple Set-Cookie headers to ensure all variations are cleared
   const response = new Response(null, {

@@ -126,7 +126,7 @@ const Login: React.FC<Route.ComponentProps> = () => {
     } else if (actionData?.error) {
       setLoginError(actionData.error);
     }
-  }, [actionData, isAuthenticated, isLoading, navigate]); // Removed updateSession from dependencies
+  }, [actionData, isAuthenticated, isLoading, navigate, updateSession]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -260,8 +260,8 @@ const Login: React.FC<Route.ComponentProps> = () => {
             New to Hey, Kimmy?
           </h4>
           <p className="text-xs text-slate-400 mb-3">
-            Create an account to get started with managing your household's records
-            records.
+            Create an account to get started with managing your household's
+            records records.
           </p>
           <Link
             to="/onboarding"

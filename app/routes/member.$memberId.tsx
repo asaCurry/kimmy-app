@@ -24,7 +24,10 @@ export function meta({ params }: Route.MetaArgs) {
     {
       title: `${params.memberId ? params.memberId + "'s" : "Member"} Records - Kimmy`,
     },
-    { name: "description", content: "View and manage household member records" },
+    {
+      name: "description",
+      content: "View and manage household member records",
+    },
   ];
 }
 
@@ -77,8 +80,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     // Load household data from URL params
-          const { householdId, householdMembers, currentMember } =
-        await loadHouseholdDataWithMember(request, env, memberId);
+    const { householdId, householdMembers, currentMember } =
+      await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no household data found, redirect to welcome
     if (!householdId) {
@@ -113,19 +116,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       new Set(recordTypesResult.map(rt => rt.category))
     ).sort();
 
-    // If no categories exist, use default ones
-    const defaultCategories = [
-      "Health",
-      "Activities",
-      "Personal",
-      "Education",
-      "Finance",
-      "Food",
-      "Travel",
-      "Home",
-    ];
-    const currentCategories =
-      categories.length > 0 ? categories : defaultCategories;
+    // Only show categories that have record types (no default fallback)
+    const currentCategories = categories;
 
     // Categorize record types and count records
     const recordTypesByCategory: Record<string, any[]> = {};
@@ -257,7 +249,6 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
   const { session } = useAuth();
   const [showCreateForm, setShowCreateForm] = React.useState(false);
 
-
   // Create a basic member profile from session data if no member data from loader
   const currentMember =
     member ||
@@ -288,23 +279,8 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
     );
   }
 
-  // Use default categories if none provided from loader
-  const defaultCategories = [
-    "Health",
-    "Activities",
-    "Personal",
-    "Education",
-    "Finance",
-    "Food",
-    "Travel",
-    "Home",
-  ];
-  const currentCategories =
-    categories.length > 0 ? categories : defaultCategories;
-
-
-
-
+  // Use categories from loader (only those with record types)
+  const currentCategories = categories;
 
   return (
     <RequireAuth requireHousehold={true}>
@@ -317,71 +293,142 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
         />
 
         <div className="space-y-6">
-          {/* Categories Grid */}
-          <div className="grid gap-3 sm:gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {currentCategories.map(category => {
-              const categoryRecordTypes =
-                (recordTypesByCategory as any)[category] || [];
-              const recordCount = (categoryRecordCounts as any)[category] || 0;
-              return (
-                <div
-                  key={category}
-                  className="block cursor-pointer"
-                  onClick={() => {
-                    console.log(`Navigating to category: ${category}`);
-                    window.location.href = `/member/${currentMember.id}/category/${encodeURIComponent(category)}`;
-                  }}
-                >
-                  <CategoryCard
-                    category={category}
-                    recordCount={recordCount}
-                  />
-                </div>
-              );
-            })}
-          </div>
-          {/* Create Record Type Section */}
-          <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-slate-100">
-                    Create New Record Type
-                  </CardTitle>
-                  <CardDescription className="text-slate-400">
-                    Add a new type of record to track for {currentMember.name}
-                  </CardDescription>
-                </div>
+          {currentCategories.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📝</div>
+              <h3 className="text-xl font-semibold text-slate-200 mb-2">
+                No record types configured yet
+              </h3>
+              <p className="text-slate-400 mb-6">
+                You'll need to create record types before you can start logging
+                records.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
                   to={`/member/${currentMember.id}/manage-categories`}
-                  className="py-2 px-4 border-2 border-dashed border-slate-600 rounded-lg hover:border-slate-500 hover:bg-slate-800 transition-colors group"
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-colors"
                 >
-                  <div className="text-center">
-                    <div className="text-slate-400 group-hover:text-slate-300">
-                      ➕ Manage Categories
-                    </div>
-                  </div>
+                  ➕ Create Your First Record Type
                 </Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {!showCreateForm ? (
                 <Button
                   onClick={() => setShowCreateForm(true)}
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                  className="inline-flex items-center px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium rounded-lg transition-colors"
                 >
-                  + Create Record Type
+                  + Quick Create
                 </Button>
-              ) : (
-                <CreateRecordTypeForm
-                  householdId={loaderData.householdId}
-                  createdBy={currentMember.id}
-                  onCancel={() => setShowCreateForm(false)}
-                  className="space-y-4"
-                />
+              </div>
+
+              {showCreateForm && (
+                <div className="mt-8 pt-8 border-t border-slate-600">
+                  <CreateRecordTypeForm
+                    householdId={loaderData.householdId}
+                    createdBy={currentMember.id}
+                    existingCategories={currentCategories}
+                    onCancel={() => setShowCreateForm(false)}
+                    className="space-y-4"
+                  />
+                </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          ) : (
+            <>
+              {/* Categories Grid */}
+              <div className="grid gap-3 sm:gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {currentCategories.map(category => {
+                  const categoryRecordTypes =
+                    (recordTypesByCategory as any)[category] || [];
+                  const recordCount =
+                    (categoryRecordCounts as any)[category] || 0;
+                  return (
+                    <div
+                      key={category}
+                      className="block cursor-pointer"
+                      onClick={() => {
+                        console.log(`Navigating to category: ${category}`);
+                        window.location.href = `/member/${currentMember.id}/category/${encodeURIComponent(category)}`;
+                      }}
+                    >
+                      <CategoryCard
+                        category={category}
+                        recordCount={recordCount}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Quick Actions Section */}
+              <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle className="text-slate-100">
+                        Quick Actions
+                      </CardTitle>
+                      <CardDescription className="text-slate-400">
+                        Manage record types and categories for{" "}
+                        {currentMember.name}
+                      </CardDescription>
+                    </div>
+                    <Link
+                      to={`/member/${currentMember.id}/manage-categories`}
+                      className="py-2 px-4 border-2 border-dashed border-slate-600 rounded-lg hover:border-slate-500 hover:bg-slate-800 transition-colors group"
+                    >
+                      <div className="text-center">
+                        <div className="text-slate-400 group-hover:text-slate-300">
+                          ➕ Manage Categories
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-4 border border-slate-600 rounded-lg">
+                      <h4 className="font-medium text-slate-200 mb-2">
+                        Create Record Type
+                      </h4>
+                      <p className="text-sm text-slate-400 mb-3">
+                        Add a new type of record to track
+                      </p>
+                      <Button
+                        onClick={() => setShowCreateForm(true)}
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                      >
+                        + Create Record Type
+                      </Button>
+                    </div>
+                    <div className="p-4 border border-slate-600 rounded-lg">
+                      <h4 className="font-medium text-slate-200 mb-2">
+                        Manage Categories
+                      </h4>
+                      <p className="text-sm text-slate-400 mb-3">
+                        Organize and manage your record categories
+                      </p>
+                      <Link
+                        to={`/member/${currentMember.id}/manage-categories`}
+                        className="inline-flex items-center px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors"
+                      >
+                        Manage →
+                      </Link>
+                    </div>
+                  </div>
+
+                  {showCreateForm && (
+                    <div className="mt-6 pt-6 border-t border-slate-600">
+                      <CreateRecordTypeForm
+                        householdId={loaderData.householdId}
+                        createdBy={currentMember.id}
+                        existingCategories={currentCategories}
+                        onCancel={() => setShowCreateForm(false)}
+                        className="space-y-4"
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
       </PageLayout>
     </RequireAuth>

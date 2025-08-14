@@ -1,7 +1,7 @@
-import type { Route } from "./+types/api.household-members";
+import type { LoaderFunctionArgs } from "react-router";
 import { userDb } from "~/lib/db";
 
-export async function loader({ request, context }: Route.LoaderArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   try {
     const env = (context.cloudflare as any)?.env;
 
@@ -16,9 +16,11 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     if (cookieHeader) {
       try {
         const cookies = cookieHeader.split(";").reduce(
-          (acc, cookie) => {
+          (acc: Record<string, string>, cookie: string) => {
             const [key, value] = cookie.trim().split("=");
-            acc[key] = value;
+            if (key && value) {
+              acc[key] = value;
+            }
             return acc;
           },
           {} as Record<string, string>
@@ -39,10 +41,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     }
 
     // Fetch household members from database
-    const dbMembers = await userDb.findByhouseholdId(env, householdId);
+    const dbMembers = await userDb.findByHouseholdId(env, householdId);
 
     // Transform database User type to Householdmember type
-    const members = dbMembers.map(member => ({
+    const members = dbMembers.map((member: any) => ({
       id: member.id,
       name: member.name,
       email: member.email,

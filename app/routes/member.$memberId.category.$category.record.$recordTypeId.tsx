@@ -148,7 +148,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     
     const recordType: ParsedRecordType = {
       ...recordTypeResult[0],
-      description: recordTypeResult[0].description || undefined,
+      description: recordTypeResult[0].description || null,
       fields: parsedFields,
     };
 
@@ -343,7 +343,12 @@ const RecordForm: React.FC<Route.ComponentProps> = ({ loaderData, params }) => {
           currentView="form"
           member={currentMember}
           category={category}
-          recordType={recordType}
+          recordType={{
+            ...recordType,
+            description: recordType.description || undefined,
+            icon: recordType.icon || undefined,
+            color: recordType.color || undefined
+          }}
         />
 
         <DynamicRecordForm

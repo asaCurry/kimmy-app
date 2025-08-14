@@ -1,39 +1,68 @@
 // Database
 export { getDatabase } from "./db-utils";
-export { db } from "./db";
-export { authDb } from "./auth-db";
+export { userDb, householdDb, inviteCodeDb } from "./db";
+export { authApi } from "./auth-db";
 
 // Loaders and Helpers
 export { loadHouseholdDataWithMember } from "./loader-helpers";
 
 // Validation
-export { validateRecordType, validateRecord } from "./validation";
+export { validateField, validateForm, VALIDATION_PATTERNS, COMMON_RULES } from "./validation";
 
 // Utilities
-export { cn, formatDate, formatRelativeTime } from "./utils";
-export { generateSlug, sanitizeInput } from "./utils";
+export { cn, parseCookies, extractEnv, isDatabaseAvailable, extractSessionFromCookies } from "./utils";
 
 // Error Handling
-export { handleError, createErrorResponse } from "./error-utils";
+export { logError, logApiError, logComponentError, logActionError, safeAsync } from "./error-utils";
 
 // Permissions
-export { checkPermission, Permission } from "./permissions";
+export { getHouseholdPermissions, canUserPerformAction, canAccessMemberRecords } from "./permissions";
 
 // Types
 export type { 
-  DynamicField, 
-  DynamicFieldType, 
-  DynamicFieldValidation,
-  DynamicFieldOption 
+  User,
+  UserProfile,
+  Household,
+  HouseholdMember,
+  HouseholdMemberWithDetails,
+  HouseholdRole,
+  RelationshipType,
+  Invitation,
+  FormField,
+  Record,
+  RecordType
 } from "./types";
+
 export type { 
+  DynamicField,
   DynamicFieldConfig,
-  DynamicFieldValue 
+  FieldType,
+  FieldValidation,
+  SelectOption,
+  FieldValue,
+  RecordData
 } from "./types/dynamic-fields";
 
 // Dynamic Fields
 export { 
-  getFieldValue, 
-  setFieldValue, 
-  validateFieldValue 
+  createFieldId,
+  createDefaultField,
+  getFieldTypeConfig,
+  getDefaultValueForType,
+  getDefaultValidationForType,
+  reorderFields,
+  sortFieldsByOrder,
+  getActiveFields,
+  getFieldsByType,
+  duplicateField,
+  toggleFieldActive,
+  validateFieldValue,
+  validateMultipleFields,
+  serializeFields,
+  deserializeFields,
+  serializeFieldConfig,
+  deserializeFieldConfig,
+  createRecordSchema,
+  createFieldValidationSchema,
+  validateFieldAgainstSchema
 } from "./utils/dynamic-fields";

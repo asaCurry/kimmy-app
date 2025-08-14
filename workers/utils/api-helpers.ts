@@ -41,7 +41,7 @@ export const createSuccessResponse = <T>(
     timestamp: new Date().toISOString(),
   };
 
-  return c.json(response, statusCode);
+  return c.json(response, statusCode as any);
 };
 
 export const createErrorResponse = (
@@ -60,7 +60,7 @@ export const createErrorResponse = (
     response.data = details;
   }
 
-  return c.json(response, statusCode);
+  return c.json(response, statusCode as any);
 };
 
 export const validateDatabase = (env: any): void => {

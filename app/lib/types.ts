@@ -132,7 +132,7 @@ export interface Record {
   householdMemberId: string;
   recordTypeId: string;
   title: string;
-  data: Record<string, any>; // Form field values
+  data: { [key: string]: any }; // Form field values
   createdByUserId: string;
   createdAt: Date;
   updatedAt: Date;

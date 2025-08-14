@@ -6,8 +6,9 @@ import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
 import { PageHeader } from "~/components/ui/layout";
 import { loadHouseholdDataWithMember } from "~/lib/loader-helpers";
-import { withDatabase } from "~/lib/db-utils";
+import { withDatabase, getDatabase } from "~/lib/db-utils";
 import { recordTypes } from "~/db/schema";
+import { eq } from "drizzle-orm";
 import { CreateRecordTypeForm } from "~/components/create-record-type-form";
 
 export function meta({ params }: Route.MetaArgs) {
@@ -71,8 +72,11 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     // Load household data from URL params
-    const { householdId, currentMember } =
-      await loadHouseholdDataWithMember(request, env, memberId);
+    const { householdId, currentMember } = await loadHouseholdDataWithMember(
+      request,
+      env,
+      memberId
+    );
 
     // If no household data found, redirect to welcome
     if (!householdId) {
@@ -85,10 +89,22 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       throw redirect("/welcome");
     }
 
+    // Fetch existing categories from record types
+    const db = getDatabase(env);
+    const recordTypesResult = await db
+      .select({ category: recordTypes.category })
+      .from(recordTypes)
+      .where(eq(recordTypes.householdId, householdId));
+
+    const existingCategories = Array.from(
+      new Set(recordTypesResult.map(rt => rt.category))
+    ).sort();
+
     return {
       member: currentMember,
       category,
       householdId,
+      existingCategories,
     };
   } catch (error) {
     console.error("Create record type route loader error:", error);
@@ -97,7 +113,9 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       throw error;
     }
 
-    throw new Response("Failed to load create record type data", { status: 500 });
+    throw new Response("Failed to load create record type data", {
+      status: 500,
+    });
   }
 }
 
@@ -108,7 +126,7 @@ export async function action({
 }: {
   request: Request;
   context: any;
-  params: Route.Params;
+  params: { memberId: string; category: string };
 }) {
   const formData = await request.formData();
   const action = formData.get("_action");
@@ -161,7 +179,10 @@ export async function action({
   }
 }
 
-const CreateRecordType: React.FC<Route.ComponentProps> = ({ loaderData, params }) => {
+const CreateRecordType: React.FC<Route.ComponentProps> = ({
+  loaderData,
+  params,
+}) => {
   const { member, category, householdId } = loaderData;
   const { session } = useAuth();
 
@@ -195,15 +216,11 @@ const CreateRecordType: React.FC<Route.ComponentProps> = ({ loaderData, params }
     );
   }
 
-
-
-
-
   return (
     <RequireAuth requireHousehold={true}>
       <PageLayout maxWidth="4xl">
         <Navigation
-          currentView="create-record-type"
+          currentView="form"
           member={currentMember}
           category={category}
         />
@@ -217,17 +234,13 @@ const CreateRecordType: React.FC<Route.ComponentProps> = ({ loaderData, params }
           householdId={householdId}
           createdBy={currentMember.id}
           category={category}
-          onSuccess={() => window.location.href = `/member/${currentMember.id}/category/${encodeURIComponent(category)}`}
+          existingCategories={loaderData.existingCategories}
+          onSuccess={() =>
+            (window.location.href = `/member/${currentMember.id}/category/${encodeURIComponent(category)}`)
+          }
           showBackButton={true}
           className="space-y-8"
         />
-
-
-
-
-
-
-
       </PageLayout>
     </RequireAuth>
   );

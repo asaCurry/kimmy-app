@@ -11,21 +11,10 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { loadHouseholdDataWithMember } from "~/lib/loader-helpers";
 import { getDatabase } from "~/lib/db-utils";
 import { recordTypes, records } from "~/db/schema";
 import { eq, and } from "drizzle-orm";
-import { useFetcher } from "react-router";
-import { useState } from "react";
 import { Link } from "react-router";
 
 // Temporary interface until types are generated
@@ -103,8 +92,8 @@ export async function loader({
     }
 
     // Load household data from URL params
-          const { householdId, householdMembers, currentMember } =
-        await loadHouseholdDataWithMember(request, env, memberId);
+    const { householdId, householdMembers, currentMember } =
+      await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no household data found, redirect to welcome
     if (!householdId) {
@@ -156,19 +145,8 @@ export async function loader({
 
     // Get all categories (existing + defaults)
     const existingCategories = Object.keys(categoryStats);
-    const defaultCategories = [
-      "Health",
-      "Activities",
-      "Personal",
-      "Education",
-      "Finance",
-      "Travel",
-      "Food",
-      "Home",
-    ];
-    const allCategories = Array.from(
-      new Set([...existingCategories, ...defaultCategories])
-    ).sort();
+    // Only show categories that have record types
+    const allCategories = existingCategories.sort();
 
     return {
       member: currentMember,
@@ -195,38 +173,23 @@ export async function action({
   request: Request;
   context: any;
 }) {
-  const formData = await request.formData();
-  const action = formData.get("_action");
-
-  switch (action) {
-    case "create-category": {
-      const categoryName = formData.get("categoryName") as string;
-      const householdId = formData.get("householdId") as string;
-
-      if (!categoryName || !householdId) {
-        throw new Response("Missing required fields", { status: 400 });
-      }
-
-      // For now, we'll create a default record type for the new category
-      // In a full implementation, you might want a separate categories table
-      return { success: true, message: "Category created successfully" };
-    }
-
-    default:
-      throw new Response("Invalid action", { status: 400 });
-  }
+  // No actions needed - categories are created automatically with record types
+  throw new Response("No actions available", { status: 400 });
 }
 
 const CategoriesManagement: React.FC<{
   loaderData: any;
   params: RouteParams;
 }> = ({ loaderData, params }) => {
-  const { member, householdId, householdMembers, categoryStats, allCategories } =
-    loaderData;
+  const {
+    member,
+    householdId,
+    householdMembers,
+    categoryStats,
+    allCategories,
+  } = loaderData;
   const { session } = useAuth();
   const navigate = useNavigate();
-  const fetcher = useFetcher();
-  const [newCategoryName, setNewCategoryName] = useState("");
 
   // Create a basic member profile from session data if no member data from loader
   const currentMember =
@@ -262,19 +225,6 @@ const CategoriesManagement: React.FC<{
     navigate(`/member/${currentMember.id}`);
   };
 
-  const handleCreateCategory = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCategoryName.trim()) return;
-
-    const formData = new FormData();
-    formData.append("_action", "create-category");
-    formData.append("categoryName", newCategoryName.trim());
-    formData.append("householdId", householdId);
-
-    fetcher.submit(formData, { method: "post" });
-    setNewCategoryName("");
-  };
-
   return (
     <RequireAuth requireHousehold={true}>
       <PageLayout>
@@ -282,48 +232,10 @@ const CategoriesManagement: React.FC<{
 
         <PageHeader
           title="Manage Categories"
-          subtitle="Create and organize your record categories"
+          subtitle="View and organize your record categories"
         />
 
         <div className="space-y-6">
-          {/* Create New Category */}
-          <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-slate-100">
-                Create New Category
-              </CardTitle>
-              <CardDescription className="text-slate-400">
-                Add a new category to organize your records
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <fetcher.Form
-                onSubmit={handleCreateCategory}
-                className="flex gap-3"
-              >
-                <div className="flex-1">
-                  <Label htmlFor="categoryName" className="sr-only">
-                    Category Name
-                  </Label>
-                  <Input
-                    id="categoryName"
-                    value={newCategoryName}
-                    onChange={e => setNewCategoryName(e.target.value)}
-                    placeholder="Enter category name..."
-                    className="bg-slate-700 border-slate-600 text-slate-100 placeholder:text-slate-400"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  disabled={!newCategoryName.trim()}
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                >
-                  Create
-                </Button>
-              </fetcher.Form>
-            </CardContent>
-          </Card>
-
           {/* Existing Categories */}
           <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
             <CardHeader>
@@ -335,75 +247,180 @@ const CategoriesManagement: React.FC<{
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {allCategories.map((category: string) => {
-                  const stats = categoryStats[category] || {
-                    recordTypeCount: 0,
-                    recordCount: 0,
-                  };
-                  const isActive = stats.recordTypeCount > 0;
+              {allCategories.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4">📁</div>
+                  <p className="text-slate-400 mb-4">
+                    No categories have been created yet. Categories are
+                    automatically created when you add record types.
+                  </p>
+                  <Link
+                    to={`/member/${currentMember.id}/category/Personal/create-record-type`}
+                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    + Create Your First Record Type
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {allCategories.map((category: string) => {
+                    const stats = categoryStats[category] || {
+                      recordTypeCount: 0,
+                      recordCount: 0,
+                    };
+                    const isActive = stats.recordTypeCount > 0;
 
-                  return (
-                    <div
-                      key={category}
-                      className={`p-4 rounded-lg border ${
-                        isActive
-                          ? "bg-slate-700/50 border-slate-600"
-                          : "bg-slate-800/30 border-slate-700/50"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h3
-                          className={`font-medium ${isActive ? "text-slate-100" : "text-slate-400"}`}
-                        >
-                          {category}
-                        </h3>
-                        {!isActive && (
-                          <span className="text-xs text-slate-500">
-                            Available
-                          </span>
+                    return (
+                      <div
+                        key={category}
+                        className={`p-4 rounded-lg border ${
+                          isActive
+                            ? "bg-slate-700/50 border-slate-600"
+                            : "bg-slate-800/30 border-slate-700/50"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h3
+                            className={`font-medium ${isActive ? "text-slate-100" : "text-slate-400"}`}
+                          >
+                            {category}
+                          </h3>
+                          {!isActive && (
+                            <span className="text-xs text-slate-500">
+                              Available
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">
+                              Record Types:
+                            </span>
+                            <span
+                              className={
+                                isActive ? "text-slate-200" : "text-slate-500"
+                              }
+                            >
+                              {stats.recordTypeCount}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Records:</span>
+                            <span
+                              className={
+                                isActive ? "text-slate-200" : "text-slate-500"
+                              }
+                            >
+                              {stats.recordCount}
+                            </span>
+                          </div>
+                        </div>
+
+                        {isActive ? (
+                          <div className="mt-3 pt-3 border-t border-slate-600">
+                            <Link
+                              to={`/member/${currentMember.id}/category/${encodeURIComponent(category)}`}
+                              className="text-blue-400 hover:text-blue-300 text-sm"
+                            >
+                              View Records →
+                            </Link>
+                          </div>
+                        ) : (
+                          <div className="mt-3 pt-3 border-t border-slate-600">
+                            <Link
+                              to={`/member/${currentMember.id}/category/${encodeURIComponent(category)}/create-record-type`}
+                              className="text-green-400 hover:text-green-300 text-sm"
+                            >
+                              Create Record Type →
+                            </Link>
+                          </div>
                         )}
                       </div>
-
-                      <div className="space-y-1 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Record Types:</span>
-                          <span
-                            className={
-                              isActive ? "text-slate-200" : "text-slate-500"
-                            }
-                          >
-                            {stats.recordTypeCount}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Records:</span>
-                          <span
-                            className={
-                              isActive ? "text-slate-200" : "text-slate-500"
-                            }
-                          >
-                            {stats.recordCount}
-                          </span>
-                        </div>
-                      </div>
-
-                      {isActive && (
-                        <div className="mt-3 pt-3 border-t border-slate-600">
-                          <Link
-                            to={`/member/${currentMember.id}/category/${encodeURIComponent(category)}`}
-                            className="text-blue-400 hover:text-blue-300 text-sm"
-                          >
-                            View Records →
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
+
+          {/* Quick Create Records Section */}
+          {Object.keys(categoryStats).some(
+            cat => (categoryStats[cat] as any).recordTypeCount > 0
+          ) ? (
+            <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-slate-100">
+                  Quick Create Records
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Quickly create new records using existing record types
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {Object.entries(categoryStats)
+                    .filter(([_, stats]) => (stats as any).recordTypeCount > 0)
+                    .map(([category, stats]) => (
+                      <div
+                        key={category}
+                        className="p-4 border border-slate-600 rounded-lg"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-medium text-slate-200">
+                            {category}
+                          </h4>
+                          <span className="text-sm text-slate-400">
+                            {(stats as any).recordTypeCount} record type
+                            {(stats as any).recordTypeCount !== 1 ? "s" : ""}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Link
+                            to={`/member/${currentMember.id}/category/${encodeURIComponent(category)}`}
+                            className="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
+                          >
+                            View All →
+                          </Link>
+                          <Link
+                            to={`/member/${currentMember.id}/category/${encodeURIComponent(category)}/create-record-type`}
+                            className="inline-flex items-center px-3 py-2 bg-slate-600 hover:bg-slate-500 text-slate-200 text-sm rounded-lg transition-colors"
+                          >
+                            + Add Record Type
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-slate-100">
+                  No Record Types Yet
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Create your first record type to get started
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4">📝</div>
+                  <p className="text-slate-400 mb-4">
+                    You haven't created any record types yet. Record types
+                    define the structure and fields for your records.
+                  </p>
+                  <Link
+                    to={`/member/${currentMember.id}/category/Personal/create-record-type`}
+                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    + Create Your First Record Type
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Back Button */}
           <div className="flex justify-center">

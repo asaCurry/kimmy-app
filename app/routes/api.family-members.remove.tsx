@@ -1,7 +1,7 @@
-import type { Route } from "./+types/api.household-members.remove";
+import type { ActionFunctionArgs } from "react-router";
 import { userDb } from "~/lib/db";
 
-export async function action({ request, context }: Route.ActionArgs) {
+export async function action({ request, context }: ActionFunctionArgs) {
   try {
     const env = (context.cloudflare as any)?.env;
 

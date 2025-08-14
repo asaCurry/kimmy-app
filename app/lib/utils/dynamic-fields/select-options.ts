@@ -79,5 +79,5 @@ export const hasValidSelectOptions = (field: DynamicField): boolean => {
          field.options.length > 0 &&
          field.options.every(opt => 
            typeof opt === 'object' && opt.value && opt.label
-         );
+         ) || false;
 };

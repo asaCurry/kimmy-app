@@ -121,10 +121,23 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
     const recordType = recordTypeResult[0];
 
+    // Transform householdMembers to match the User type expected by RecordDetailView
+    const transformedHouseholdMembers = householdMembers.map(member => ({
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      hashedPassword: null,
+      householdId: householdId,
+      role: member.role,
+      age: member.age || null,
+      relationshipToAdmin: member.relationshipToAdmin || null,
+      createdAt: null,
+    }));
+
     return {
       record,
       recordType,
-      householdMembers,
+      householdMembers: transformedHouseholdMembers,
       householdId,
       currentMember,
       memberId,
