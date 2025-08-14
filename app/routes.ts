@@ -13,10 +13,6 @@ export default [
   // Onboarding routes
   route("onboarding", "routes/onboarding.tsx"),
   route("onboarding/create-account", "routes/onboarding.create-account.tsx"),
-  route(
-    "onboarding/create-household",
-    "routes/onboarding.create-household.tsx"
-  ),
 
   // Management routes
   route("manage", "routes/manage.tsx"),
@@ -24,7 +20,10 @@ export default [
   route("manage/edit-member", "routes/manage.edit-member.tsx"),
 
   // API routes
-  route("api/invite-codes/regenerate", "routes/api.invite-codes.regenerate.tsx"),
+  route(
+    "api/invite-codes/regenerate",
+    "routes/api.invite-codes.regenerate.tsx"
+  ),
 
   // Member record routes
   route("member/:memberId", "routes/member.$memberId.tsx"),

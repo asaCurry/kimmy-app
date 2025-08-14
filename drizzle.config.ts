@@ -6,7 +6,7 @@ export default defineConfig({
   dialect: "sqlite",
   driver: "d1",
   dbCredentials: {
-    wranglerConfigPath: "wrangler.jsonc",
+    wranglerConfigPath: "wrangler.toml",
     dbName: "kimmy-app-db",
   },
 });

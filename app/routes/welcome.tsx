@@ -11,7 +11,10 @@ import { useAuth } from "~/contexts/auth-context";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Welcome to Hey, Kimmy" },
-    { name: "description", content: "Manage your household's records records and notes" },
+    {
+      name: "description",
+      content: "Manage your household's records records and notes",
+    },
   ];
 }
 
@@ -25,7 +28,7 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
       if (session.currentHouseholdId) {
         navigate("/");
       } else {
-        navigate("/onboarding/create-household");
+        navigate("/onboarding/create-account");
       }
     }
   }, [isAuthenticated, session, navigate]);

@@ -150,10 +150,10 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
               You need to be part of a household to access this page.
             </p>
             <a
-              href="/onboarding/create-household"
+              href="/onboarding/create-account"
               className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-md hover:from-emerald-600 hover:to-blue-600 transition-colors"
             >
-              Create Household
+              Create Account & Household
             </a>
           </div>
         </div>

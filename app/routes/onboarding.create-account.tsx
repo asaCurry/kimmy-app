@@ -19,10 +19,10 @@ import { useAuth } from "~/contexts/auth-context";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Create Account - Hey, Kimmy" },
+    { title: "Create Account & Household - Hey, Kimmy" },
     {
       name: "description",
-      content: "Create your personal account to get started",
+      content: "Create your personal account and household to get started",
     },
   ];
 }
@@ -54,6 +54,8 @@ export async function action({ request, context }: Route.ActionArgs) {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
+    const householdType = formData.get("householdType") as string;
+    const householdName = formData.get("householdName") as string;
     const inviteCode = formData.get("inviteCode") as string;
 
     // Validation
@@ -77,10 +79,24 @@ export async function action({ request, context }: Route.ActionArgs) {
       return { error: "Please enter a valid email address" };
     }
 
+    // If no household type is selected, default to "custom" since it's the default option
+    const selectedHouseholdType = householdType || "custom";
+
+    // Validate household-specific fields
+    if (selectedHouseholdType === "custom" && !householdName?.trim()) {
+      console.log("❌ Validation failed: custom household name required");
+      return { error: "Household name is required for custom household" };
+    }
+
+    if (selectedHouseholdType === "join" && !inviteCode?.trim()) {
+      console.log("❌ Validation failed: invite code required");
+      return { error: "Invite code is required to join existing household" };
+    }
+
     console.log("✅ Validation passed, creating account...");
-    
+
     let session;
-    if (inviteCode && inviteCode.trim()) {
+    if (selectedHouseholdType === "join" && inviteCode && inviteCode.trim()) {
       // Join existing household with invite code
       console.log("🔑 Joining household with invite code:", inviteCode);
       session = await authApi.joinHouseholdWithInviteCode(env, {
@@ -92,10 +108,16 @@ export async function action({ request, context }: Route.ActionArgs) {
     } else {
       // Create new account and household
       console.log("🏠 Creating new account and household");
+      const householdNameToUse =
+        selectedHouseholdType === "custom" && householdName?.trim()
+          ? householdName.trim()
+          : undefined; // undefined will use the default "Just me" naming
+
       session = await authApi.createAccount(env, {
         name: `${firstName} ${lastName}`,
         email,
         password,
+        householdName: householdNameToUse,
       });
     }
 
@@ -107,7 +129,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       userId: session.userId,
       email: session.email,
     });
-    
+
     // Return success with session data
     return { success: true, session };
   } catch (error) {
@@ -153,6 +175,9 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
+    const householdType = formData.get("householdType") as string;
+    const householdName = formData.get("householdName") as string;
+    const inviteCode = formData.get("inviteCode") as string;
 
     console.log("📝 Client-side form data:", {
       firstName,
@@ -160,6 +185,9 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
       email,
       hasPassword: !!password,
       hasConfirmPassword: !!confirmPassword,
+      householdType,
+      householdName,
+      inviteCode,
     });
 
     // Client-side validation
@@ -191,6 +219,17 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
+    // Household-specific validation
+    const selectedHouseholdType = householdType || "custom";
+
+    if (selectedHouseholdType === "custom" && !householdName?.trim()) {
+      newErrors.householdName = "Household name is required";
+    }
+
+    if (selectedHouseholdType === "join" && !inviteCode?.trim()) {
+      newErrors.inviteCode = "Invite code is required";
+    }
+
     if (Object.keys(newErrors).length > 0) {
       console.log("❌ Client-side validation failed:", newErrors);
       e.preventDefault();
@@ -201,6 +240,35 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
     console.log("✅ Client-side validation passed, allowing form submission");
     // If validation passes, let the form submit naturally
   };
+
+  // Handle household type selection
+  const handleHouseholdTypeChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const householdType = e.target.value;
+    const customHouseholdName = document.getElementById("customHouseholdName");
+    const inviteCodeSection = document.getElementById("inviteCodeSection");
+
+    if (customHouseholdName) {
+      customHouseholdName.classList.toggle(
+        "hidden",
+        householdType !== "custom"
+      );
+    }
+
+    if (inviteCodeSection) {
+      inviteCodeSection.classList.toggle("hidden", householdType !== "join");
+    }
+  };
+
+  // Initialize the form state on component mount
+  useEffect(() => {
+    // Since "custom" is the default, ensure the custom household name field is visible
+    const customHouseholdName = document.getElementById("customHouseholdName");
+    if (customHouseholdName) {
+      customHouseholdName.classList.remove("hidden");
+    }
+  }, []);
 
   return (
     <PageLayout maxWidth="2xl">
@@ -216,8 +284,8 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
         </div>
 
         <PageHeader
-          title="Create Your Account"
-          subtitle="Enter your details to get started"
+          title="Create Your Account & Household"
+          subtitle="Enter your details and set up your household"
         />
 
         <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
@@ -226,7 +294,7 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
               <UserPlus className="h-8 w-8 text-white" />
             </div>
             <CardTitle className="text-xl text-slate-100">
-              Personal Information
+              Account & Household Setup
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -305,9 +373,7 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
                   placeholder="Enter your password"
                   required
                 />
-                {errors.password && (
-                  <FormError>{errors.password}</FormError>
-                )}
+                {errors.password && <FormError>{errors.password}</FormError>}
                 <FormDescription>
                   Must be at least 6 characters long
                 </FormDescription>
@@ -330,25 +396,126 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
                 )}
               </FormField>
 
-              {/* Invite Code Section */}
+              {/* Household Setup Section */}
               <div className="border-t border-slate-700 pt-6">
-                <FormField>
-                  <FormLabel htmlFor="inviteCode">
-                    Invite Code (Optional)
-                  </FormLabel>
-                  <FormInput
-                    id="inviteCode"
-                    name="inviteCode"
-                    type="text"
-                    defaultValue=""
-                    placeholder="Enter household invite code if you have one"
-                    className="font-mono"
-                  />
-                  <FormDescription>
-                    If you have an invite code from a household member, enter it here to join their household automatically.
-                    Leave blank if you want to create your own household.
-                  </FormDescription>
-                </FormField>
+                <div className="mb-4">
+                  <h3 className="text-lg font-medium text-slate-100 mb-2">
+                    Household Setup
+                  </h3>
+                  <p className="text-sm text-slate-400">
+                    Choose how you'd like to set up your household (this will be
+                    created automatically with your account)
+                  </p>
+                </div>
+
+                {/* Household Type Selection */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      id="householdOnlyMe"
+                      name="householdType"
+                      value="onlyMe"
+                      onChange={handleHouseholdTypeChange}
+                      className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 focus:ring-blue-500 focus:ring-2"
+                    />
+                    <label
+                      htmlFor="householdOnlyMe"
+                      className="text-slate-200 cursor-pointer"
+                    >
+                      <div className="font-medium">Just me</div>
+                      <div className="text-sm text-slate-400">
+                        Create a personal household with an auto-generated name
+                      </div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      id="householdCustom"
+                      name="householdType"
+                      value="custom"
+                      defaultChecked
+                      onChange={handleHouseholdTypeChange}
+                      className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 focus:ring-blue-500 focus:ring-2"
+                    />
+                    <label
+                      htmlFor="householdCustom"
+                      className="text-slate-200 cursor-pointer"
+                    >
+                      <div className="font-medium">Custom household</div>
+                      <div className="text-sm text-slate-400">
+                        Create a household with your chosen name
+                      </div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      id="householdJoin"
+                      name="householdType"
+                      value="join"
+                      onChange={handleHouseholdTypeChange}
+                      className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 focus:ring-blue-500 focus:ring-2"
+                    />
+                    <label
+                      htmlFor="householdJoin"
+                      className="text-slate-200 cursor-pointer"
+                    >
+                      <div className="font-medium">Join existing household</div>
+                      <div className="text-sm text-slate-400">
+                        Use an invite code to join someone else's household
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Custom Household Name */}
+                <div id="customHouseholdName" className="mt-4">
+                  <FormField>
+                    <FormLabel htmlFor="householdName" required>
+                      Household Name
+                    </FormLabel>
+                    <FormInput
+                      id="householdName"
+                      name="householdName"
+                      type="text"
+                      defaultValue=""
+                      placeholder="Enter your household name"
+                      required
+                    />
+                    {errors.householdName && (
+                      <FormError>{errors.householdName}</FormError>
+                    )}
+                    <FormDescription>
+                      Give your household a memorable name (required for custom
+                      household)
+                    </FormDescription>
+                  </FormField>
+                </div>
+
+                {/* Invite Code Section */}
+                <div id="inviteCodeSection" className="hidden mt-4">
+                  <FormField>
+                    <FormLabel htmlFor="inviteCode">Invite Code</FormLabel>
+                    <FormInput
+                      id="inviteCode"
+                      name="inviteCode"
+                      type="text"
+                      defaultValue=""
+                      placeholder="Enter household invite code"
+                      className="font-mono"
+                    />
+                    {errors.inviteCode && (
+                      <FormError>{errors.inviteCode}</FormError>
+                    )}
+                    <FormDescription>
+                      Enter the invite code provided by a household member
+                    </FormDescription>
+                  </FormField>
+                </div>
               </div>
 
               <div className="flex gap-3 pt-6">
@@ -358,8 +525,8 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                 >
                   {navigation.state === "submitting"
-                    ? "Creating Account..."
-                    : "Create Account"}
+                    ? "Creating Account & Household..."
+                    : "Create Account & Household"}
                 </Button>
 
                 <Button

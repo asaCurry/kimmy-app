@@ -98,7 +98,10 @@ export async function loader({
     let inviteCode: string | undefined = undefined;
     if (householdId) {
       try {
-        const household = await inviteCodeDb.getHouseholdById(context.cloudflare?.env, householdId);
+        const household = await inviteCodeDb.getHouseholdById(
+          context.cloudflare?.env,
+          householdId
+        );
         console.log("household", household);
         inviteCode = household?.inviteCode;
       } catch (error) {
@@ -134,9 +137,12 @@ export async function loader({
 
 const Manage: React.FC = () => {
   const { session, isAuthenticated, isLoading } = useAuth();
-  const { members: loaderMembers, householdId: loaderHouseholdId, inviteCode } =
-    useLoaderData<LoaderData>();
-    console.log("inviteCode", inviteCode, loaderHouseholdId);
+  const {
+    members: loaderMembers,
+    householdId: loaderHouseholdId,
+    inviteCode,
+  } = useLoaderData<LoaderData>();
+  console.log("inviteCode", inviteCode, loaderHouseholdId);
   const fetcher = useFetcher();
   const isSeeding = fetcher.state === "submitting";
 
@@ -191,10 +197,10 @@ const Manage: React.FC = () => {
             You need to be part of a household to access this page.
           </p>
           <a
-            href="/onboarding/create-household"
+            href="/onboarding/create-account"
             className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-md hover:from-emerald-600 hover:to-blue-600 transition-colors"
           >
-            Create Household
+            Create Account & Household
           </a>
         </div>
       </div>
@@ -257,14 +263,14 @@ const Manage: React.FC = () => {
 
         {/* Invite Code Management */}
         <div data-section="invite-code">
-                  <InviteCodeManager
-          householdId={currentHouseholdId}
-          currentInviteCode={inviteCode}
-          onInviteCodeGenerated={(newCode) => {
-            console.log("New invite code generated:", newCode);
-            // TODO: Update the local state or refresh the page to show the new code
-          }}
-        />
+          <InviteCodeManager
+            householdId={currentHouseholdId}
+            currentInviteCode={inviteCode}
+            onInviteCodeGenerated={newCode => {
+              console.log("New invite code generated:", newCode);
+              // TODO: Update the local state or refresh the page to show the new code
+            }}
+          />
         </div>
 
         {/* Household Overview */}

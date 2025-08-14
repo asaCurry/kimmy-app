@@ -21,10 +21,21 @@ import { isDatabaseAvailable } from "./utils";
  * Helper function to ensure database is available and create database instance
  */
 function ensureDatabase(env: any): Database {
+  console.log("🔍 ensureDatabase called with env:", {
+    hasEnv: !!env,
+    hasDB: !!env?.DB,
+    dbType: typeof env?.DB,
+  });
+
   if (!isDatabaseAvailable(env)) {
+    console.error("❌ Database not available");
     throw new Error("Database not available");
   }
-  return createDatabase(env.DB);
+
+  console.log("✅ Database is available, creating database instance");
+  const db = createDatabase(env.DB);
+  console.log("✅ Database instance created successfully");
+  return db;
 }
 
 // User operations
@@ -41,7 +52,16 @@ export const userDb = {
       relationshipToAdmin?: string;
     }
   ): Promise<User> {
+    console.log("👤 Starting userDb.create with data:", {
+      name: userData.name,
+      email: userData.email,
+      hasPassword: !!userData.password,
+      householdId: userData.householdId,
+      role: userData.role,
+    });
+
     const db = ensureDatabase(env);
+    console.log("✅ Database connection established for user creation");
 
     // Simple password hashing - in production, use proper bcrypt
     const hashedPassword = userData.password
@@ -57,12 +77,15 @@ export const userDb = {
       age: userData.age,
       relationshipToAdmin: userData.relationshipToAdmin,
     };
+    console.log("📋 Prepared user data:", newUser);
 
     try {
+      console.log("💾 Inserting user into database...");
       const result = await db.insert(schema.users).values(newUser).returning();
+      console.log("✅ User inserted successfully:", result[0]);
       return result[0];
     } catch (error) {
-      console.error("Failed to create user:", error);
+      console.error("❌ Failed to create user:", error);
       throw new Error("Failed to create user account");
     }
   },
@@ -230,7 +253,10 @@ export const recordTypeDb = {
     }
   },
 
-  async findByhouseholdId(env: any, householdId: string): Promise<RecordType[]> {
+  async findByhouseholdId(
+    env: any,
+    householdId: string
+  ): Promise<RecordType[]> {
     const db = ensureDatabase(env);
 
     try {
@@ -390,9 +416,7 @@ export const recordDb = {
     const db = ensureDatabase(env);
 
     try {
-      await db
-        .delete(schema.records)
-        .where(eq(schema.records.id, id));
+      await db.delete(schema.records).where(eq(schema.records.id, id));
     } catch (error) {
       console.error("Failed to delete record:", error);
       throw new Error("Failed to delete record");
@@ -408,8 +432,11 @@ export const inviteCodeDb = {
   generateSecureInviteCode(): string {
     // Generate random string using timestamp and random numbers
     const timestamp = Date.now().toString(36).toUpperCase();
-    const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
-    
+    const randomPart = Math.random()
+      .toString(36)
+      .substring(2, 10)
+      .toUpperCase();
+
     // Format: XXXXXXXX-XXXX (8 alphanumeric + hyphen + 4 alphanumeric)
     return `${randomPart}-${timestamp.substring(timestamp.length - 4)}`;
   },
@@ -431,25 +458,33 @@ export const inviteCodeDb = {
     householdData: {
       id: string;
       name: string;
-      createdBy: number;
     }
   ) {
+    console.log("🏗️ Starting createHousehold with data:", householdData);
+
     const db = ensureDatabase(env);
-    
+    console.log("✅ Database connection established");
+
     const inviteCode = this.generateSecureInviteCode();
-    
+    console.log("🔑 Generated invite code:", inviteCode);
+
     const newHousehold = {
       id: householdData.id,
       name: householdData.name,
       inviteCode,
-      createdBy: householdData.createdBy,
     };
-    
+    console.log("📋 Prepared household data:", newHousehold);
+
     try {
-      const result = await db.insert(schema.households).values(newHousehold).returning();
+      console.log("💾 Inserting household into database...");
+      const result = await db
+        .insert(schema.households)
+        .values(newHousehold)
+        .returning();
+      console.log("✅ Household inserted successfully:", result[0]);
       return { household: result[0], inviteCode };
     } catch (error) {
-      console.error("Failed to create household:", error);
+      console.error("❌ Failed to create household:", error);
       throw new Error("Failed to create household");
     }
   },
@@ -459,14 +494,14 @@ export const inviteCodeDb = {
    */
   async getHouseholdByInviteCode(env: any, inviteCode: string) {
     const db = ensureDatabase(env);
-    
+
     try {
       const result = await db
         .select()
         .from(schema.households)
         .where(eq(schema.households.inviteCode, inviteCode))
         .limit(1);
-      
+
       return result[0] || null;
     } catch (error) {
       console.error("Failed to get household by invite code:", error);
@@ -479,19 +514,19 @@ export const inviteCodeDb = {
    */
   async regenerateInviteCode(env: any, householdId: string) {
     const db = ensureDatabase(env);
-    
+
     const newInviteCode = this.generateSecureInviteCode();
-    
+
     try {
       const result = await db
         .update(schema.households)
-        .set({ 
+        .set({
           inviteCode: newInviteCode,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         })
         .where(eq(schema.households.id, householdId))
         .returning();
-      
+
       return result[0]?.inviteCode || null;
     } catch (error) {
       console.error("Failed to regenerate invite code:", error);
@@ -504,14 +539,14 @@ export const inviteCodeDb = {
    */
   async getHouseholdById(env: any, householdId: string) {
     const db = ensureDatabase(env);
-    
+
     try {
       const result = await db
         .select()
         .from(schema.households)
         .where(eq(schema.households.id, householdId))
         .limit(1);
-      
+
       return result[0] || null;
     } catch (error) {
       console.error("Failed to get household by ID:", error);
@@ -524,12 +559,12 @@ export const inviteCodeDb = {
    */
   async deleteHousehold(env: any, householdId: string) {
     const db = ensureDatabase(env);
-    
+
     try {
       await db
         .delete(schema.households)
         .where(eq(schema.households.id, householdId));
-      
+
       return true;
     } catch (error) {
       console.error("Failed to delete household:", error);
@@ -584,8 +619,33 @@ export const authDb = {
     }
   ): Promise<{ user: User; householdId: string }> {
     try {
-      const householdId = await householdDb.generateHouseholdId();
+      console.log("🚀 Starting createUserWithHousehold with data:", {
+        name: userData.name,
+        email: userData.email,
+        hasPassword: !!userData.password,
+        householdName: userData.householdName,
+      });
 
+      const householdId = await householdDb.generateHouseholdId();
+      console.log("📝 Generated household ID:", householdId);
+
+      // Create the household first
+      let householdName = userData.householdName;
+      if (!householdName) {
+        // For "only me" option, create a personal household name
+        const firstName = userData.name.split(" ")[0];
+        householdName = `${firstName}'s Personal Space`;
+      }
+      console.log("🏠 Creating household with name:", householdName);
+
+      const { household } = await inviteCodeDb.createHousehold(env, {
+        id: householdId,
+        name: householdName,
+      });
+      console.log("✅ Household created successfully:", household);
+
+      // Create the user
+      console.log("👤 Creating user with household ID:", householdId);
       const user = await userDb.create(env, {
         name: userData.name,
         email: userData.email,
@@ -593,10 +653,11 @@ export const authDb = {
         householdId,
         role: "admin",
       });
+      console.log("✅ User created successfully:", user);
 
       return { user, householdId };
     } catch (error) {
-      console.error("Failed to create user with household:", error);
+      console.error("❌ Failed to create user with household:", error);
       throw new Error("Failed to create user account");
     }
   },

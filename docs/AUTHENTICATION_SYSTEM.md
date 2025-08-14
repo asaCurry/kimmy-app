@@ -95,7 +95,7 @@ The Hey, Kimmy now includes a complete authentication system with session manage
 1. Visit `/welcome` → Choose "Get Started"
 2. `/onboarding` → Choose "Create Account"
 3. `/onboarding/create-account` → Register
-4. `/onboarding/create-household` → Setup household
+4. `/onboarding/create-account` → Setup account and household
 5. `/` → Access main application
 
 ### Returning User Journey

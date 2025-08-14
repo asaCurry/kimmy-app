@@ -28,9 +28,9 @@ export const NoHousehold: React.FC = () => {
         <p className="text-slate-400 mb-6">
           You need to create or join a household to manage members.
         </p>
-        <Link to="/onboarding/create-household">
+        <Link to="/onboarding/create-account">
           <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-            Create Household
+            Create Account & Household
           </Button>
         </Link>
       </div>

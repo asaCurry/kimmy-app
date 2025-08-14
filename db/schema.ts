@@ -15,7 +15,9 @@ export const users = sqliteTable("users", {
   name: text("name").notNull(),
   email: text("email").unique().notNull(),
   hashedPassword: text("hashed_password"), // null for children without accounts
-  householdId: text("household_id").notNull().references(() => households.id),
+  householdId: text("household_id")
+    .notNull()
+    .references(() => households.id),
   role: text("role").default("member"), // 'admin', 'member'
   age: integer("age"), // for children
   relationshipToAdmin: text("relationship_to_admin"), // 'self', 'spouse', 'child', etc.
@@ -28,7 +30,9 @@ export const recordTypes = sqliteTable("record_types", {
   name: text("name").notNull(),
   description: text("description"),
   category: text("category").notNull().default("Personal"), // Category this record type belongs to
-  householdId: text("household_id").notNull().references(() => households.id),
+  householdId: text("household_id")
+    .notNull()
+    .references(() => households.id),
   fields: text("fields"), // JSON array of field definitions
   icon: text("icon"), // Icon name or emoji
   color: text("color"), // Color for the record type
@@ -43,7 +47,9 @@ export const records = sqliteTable("records", {
   title: text("title").notNull(),
   content: text("content"), // JSON object with field values
   recordTypeId: integer("record_type_id").references(() => recordTypes.id),
-  householdId: text("household_id").notNull().references(() => households.id),
+  householdId: text("household_id")
+    .notNull()
+    .references(() => households.id),
   memberId: integer("member_id").references(() => users.id), // Which household member this record is about
   createdBy: integer("created_by").references(() => users.id), // Who created the record
   tags: text("tags"), // Comma-separated tags
@@ -58,7 +64,9 @@ export const records = sqliteTable("records", {
 export const quickNotes = sqliteTable("quick_notes", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   content: text("content").notNull(),
-  householdId: text("household_id").notNull().references(() => households.id),
+  householdId: text("household_id")
+    .notNull()
+    .references(() => households.id),
   createdBy: integer("created_by").references(() => users.id),
   tags: text("tags"), // Comma-separated tags
   attachments: text("attachments"), // JSON array of file URLs
