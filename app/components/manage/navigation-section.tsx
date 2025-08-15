@@ -1,7 +1,7 @@
-import * as React from "react";
 import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
+import { ArrowLeft, Home, Users, Settings, Plus } from "lucide-react";
 
 export const NavigationSection: React.FC = () => {
   return (

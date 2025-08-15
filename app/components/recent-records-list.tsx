@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Clock, User, Tag, Lock, Eye, Edit } from "lucide-react";

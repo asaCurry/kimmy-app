@@ -1,6 +1,21 @@
-import * as React from "react";
-import { Link } from "react-router";
-import { Home, User, FolderOpen, FileText } from "lucide-react";
+import { Link, useLocation } from "react-router";
+import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
+import {
+  Home,
+  User,
+  Settings,
+  Plus,
+  FolderOpen,
+  Users,
+  FileText,
+  Calendar,
+  BarChart3,
+  Shield,
+  LogOut
+} from "lucide-react";
+import { useAuth } from "~/contexts/auth-context";
+import { cn } from "~/lib/utils";
 import {
   Breadcrumb,
   BreadcrumbItem,

@@ -1,4 +1,5 @@
-import * as React from "react";
+import { useState } from "react";
+import { Link } from "react-router";
 import {
   Card,
   CardContent,
@@ -6,7 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Users } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
+import { Edit, Trash2, Crown, User, Eye } from "lucide-react";
 import type { Householdmember } from "~/lib/utils";
 
 interface MemberCardProps {

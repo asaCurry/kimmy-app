@@ -1,8 +1,15 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Form, useActionData, useNavigation } from "react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Form, useActionData, useNavigation, useNavigate, useLoaderData } from "react-router";
+import { PageLayout, PageHeader } from "~/components/ui/layout";
+import { RequireAuth } from "~/contexts/auth-context";
+import { Navigation } from "~/components/navigation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import {
   FormField,
   FormLabel,

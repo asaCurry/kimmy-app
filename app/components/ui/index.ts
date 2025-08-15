@@ -1,73 +1,29 @@
-// Layout Components
-export { PageLayout, PageHeader } from "./layout";
-export { AppHeader } from "./app-header";
-export { AppFooter } from "./app-footer";
-
-// Form Components
-export {
-  Form,
-  FormField,
-  FormLabel,
-  FormInput,
-  FormTextarea,
-  FormSelect,
-  FormError,
-  FormDescription,
-} from "./form";
-export { Input } from "./input";
-export { Textarea } from "./textarea";
-export {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./select";
-export { Switch } from "./switch";
-export { Label } from "./label";
-export { DynamicFieldEditor } from "./dynamic-field-editor";
-export { DynamicField } from "./form-field";
-export { CategoryTypeahead } from "./category-typeahead";
-
-// Data Display Components
-export {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "./card";
-export { InteractiveCard } from "./interactive-card";
-export { RecordContentDisplay } from "./record-content-display";
-export { RecordDetailView } from "./record-detail-view";
-export { DateDisplay, RelativeDate } from "./date-display";
-export { RecordsTable } from "./records-table";
-export { RecordDrawer } from "./record-drawer";
-
-// Navigation Components
-export {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "./breadcrumb";
-export { Accordion, AccordionItem } from "./accordion";
-
-// Interactive Components
-export { Button } from "./button";
-export { Badge } from "./badge";
-export { Drawer, DrawerContent, DrawerFooter } from "./drawer";
-export { QuickActionButton } from "./quick-action-button";
-
-// Utility Components
-export {
-  LoadingState,
-  ButtonLoading,
-  PageLoading,
-  InlineLoading,
-} from "./loading";
-export { LoadingSpinner } from "./loading-spinner";
-export { ErrorBoundary } from "./error-boundary";
+export * from "./accordion";
+export * from "./app-footer";
+export * from "./app-header";
+export * from "./badge";
+export * from "./breadcrumb";
+export * from "./button";
+export * from "./card";
+export * from "./category-typeahead";
+export * from "./date-display";
+export * from "./drawer";
+export * from "./dynamic-field-editor";
+export * from "./error-boundary";
+export * from "./form";
+export * from "./form-field";
+export * from "./input";
+export * from "./interactive-card";
+export * from "./label";
+export * from "./layout";
+export * from "./loading";
+export * from "./quick-action-button";
+export * from "../quick-notes";
+export * from "./record-content-display";
+export * from "./record-detail-view";
+export * from "./record-drawer";
+export * from "./records-table";
+export * from "./select";
+export * from "./switch";
+export * from "./textarea";
+export * from "./form-validation";

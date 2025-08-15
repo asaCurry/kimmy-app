@@ -11,8 +11,8 @@ import { Accordion } from "~/components/ui/accordion";
 import { loadHouseholdDataWithMember } from "~/lib/loader-helpers";
 import { getDatabase } from "~/lib/db-utils";
 import { RecordManagementProvider } from "~/contexts/record-management-context";
-import { recordTypes, records } from "~/db/schema";
-import { eq, and } from "drizzle-orm";
+import { recordTypes, records, quickNotes } from "~/db/schema";
+import { eq, and, desc } from "drizzle-orm";
 import {
   Card,
   CardContent,
@@ -20,6 +20,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { QuickNotes } from "~/components/ui";
+import { useLoaderData, useActionData } from "react-router";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -41,7 +43,14 @@ export async function action({ request, context, params }: Route.ActionArgs) {
     const formData = await request.formData();
     const action = formData.get("_action");
 
-    if (action === "delete") {
+    console.log("Category action - received action:", action);
+    console.log(
+      "Category action - form data keys:",
+      Array.from(formData.keys())
+    );
+
+    // Handle record deletion
+    if (action === "delete" && formData.has("recordId")) {
       const recordId = formData.get("recordId");
       if (!recordId) {
         throw new Error("Record ID is required for deletion");
@@ -90,7 +99,72 @@ export async function action({ request, context, params }: Route.ActionArgs) {
       );
     }
 
-    throw new Error("Invalid action");
+    // Handle quick note creation
+    if (action === "create" && formData.has("content")) {
+      const content = formData.get("content");
+      const tags = formData.get("tags");
+      const householdId = formData.get("householdId");
+      const noteMemberId = formData.get("memberId");
+
+      if (!content || !householdId || !noteMemberId) {
+        return { error: "Missing required fields for quick note creation" };
+      }
+
+      const env = (context as any).cloudflare?.env;
+      if (!env?.DB) {
+        return { error: "Database not available" };
+      }
+
+      const db = getDatabase(env);
+
+      // Create the quick note
+      const newNote = await db
+        .insert(quickNotes)
+        .values({
+          content: content.toString(),
+          tags: tags?.toString() || null,
+          householdId: householdId.toString(),
+          createdBy: parseInt(noteMemberId.toString()),
+          createdAt: new Date().toISOString(),
+        })
+        .returning()
+        .get();
+
+      console.log("Quick note created:", newNote);
+      return { success: true, note: newNote };
+    }
+
+    // Handle quick note deletion
+    if (action === "delete" && formData.has("noteId")) {
+      const noteId = formData.get("noteId");
+      if (!noteId) {
+        return { error: "Note ID is required for deletion" };
+      }
+
+      const env = (context as any).cloudflare?.env;
+      if (!env?.DB) {
+        return { error: "Database not available" };
+      }
+
+      const db = getDatabase(env);
+
+      // Delete the quick note
+      await db
+        .delete(quickNotes)
+        .where(eq(quickNotes.id, parseInt(noteId.toString())));
+
+      console.log("Quick note deleted:", noteId);
+      return { success: true, deletedNoteId: parseInt(noteId.toString()) };
+    }
+
+    // For unknown actions, log and return null instead of throwing an error
+    console.log("Category action - unknown action received:", action);
+    console.log(
+      "Category action - this might be from a different form or component"
+    );
+
+    // Return null to indicate no action was taken, but don't crash
+    return null;
   } catch (error) {
     console.error("Error in category action:", error);
     throw error;
@@ -187,12 +261,16 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
     // Parse the fields JSON for each record type
     const parsedRecordTypes = recordTypesResult.map(rt => {
-      let parsedFields = [];
+      let parsedFields: any[] = [];
       if (rt.fields) {
         try {
-          const parsed = JSON.parse(rt.fields);
+          let parsed;
+          if (typeof rt.fields === "string") {
+            parsed = JSON.parse(rt.fields);
+          } else {
+            parsed = rt.fields;
+          }
 
-          // Extract the fields array from the parsed object
           if (
             parsed &&
             typeof parsed === "object" &&
@@ -212,7 +290,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
       return {
         ...rt,
-        fields: parsedFields,
+        parsedFields, // Keep original fields as string, add parsedFields separately
       };
     });
 
@@ -243,11 +321,37 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       {} as Record<number, any[]>
     );
 
+    // Load quick notes for the current member (filtered by createdBy)
+    let memberQuickNotes: any[] = [];
+    try {
+      const quickNotesResult = await db
+        .select()
+        .from(quickNotes)
+        .where(
+          and(
+            eq(quickNotes.householdId, householdId),
+            eq(quickNotes.createdBy, parseInt(memberId))
+          )
+        )
+        .orderBy(desc(quickNotes.createdAt))
+        .limit(20);
+
+      memberQuickNotes = quickNotesResult;
+      console.log(
+        "Category route loader - quick notes loaded:",
+        memberQuickNotes.length
+      );
+    } catch (error) {
+      console.error("Failed to load quick notes:", error);
+      memberQuickNotes = [];
+    }
+
     console.log("Category route loader - returning data:", {
       member: currentMember?.name,
       category,
       recordTypesCount: parsedRecordTypes.length,
       recordsCount: Object.keys(recordsByType).length,
+      quickNotesCount: memberQuickNotes.length,
     });
 
     return {
@@ -257,6 +361,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       recordsByType,
       householdId,
       householdMembers,
+      quickNotes: memberQuickNotes,
     };
   } catch (error) {
     console.error("Category route loader error:", error);
@@ -269,205 +374,169 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
   }
 }
 
-const CategoryRecordTypes: React.FC<Route.ComponentProps> = ({
-  loaderData,
-  params,
-}) => {
-  console.log("CategoryRecordTypes component - loaderData:", loaderData);
-  console.log("CategoryRecordTypes component - params:", params);
-
+export default function CategoryRecordTypes() {
   const {
     member,
-    category,
+    householdId,
     recordTypes,
     recordsByType,
-    householdId,
     householdMembers,
-  } = loaderData;
-  const { session } = useAuth();
+    category,
+    quickNotes,
+  } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
-
-  // Create a basic member profile from session data if no member data from loader
-  const currentMember =
-    member ||
-    (session
-      ? {
-          id: session.userId,
-          name: session.name,
-          email: session.email,
-          role: session.role,
-        }
-      : null);
-
-  // If no session and no member, show error
-  if (!currentMember) {
-    return (
-      <RequireAuth requireHousehold={true}>
-        <PageLayout>
-          <div className="text-center py-12">
-            <h2 className="text-xl font-semibold text-slate-200 mb-4">
-              No Member Found
-            </h2>
-            <p className="text-slate-400 mb-6">
-              Unable to load member information.
-            </p>
-          </div>
-        </PageLayout>
-      </RequireAuth>
-    );
-  }
+  const { session } = useAuth();
 
   const handleAddRecordType = () => {
     navigate(
-      `/member/${currentMember.id}/category/${encodeURIComponent(category)}/create-record-type`
+      `/member/${member.id}/category/${encodeURIComponent(category)}/create-record-type`
     );
   };
+
+  const handleNoteCreated = (note: any) => {
+    // This function is called when a quick note is created
+    // The page will automatically refresh due to the action redirect
+    console.log("Quick note created:", note);
+  };
+
+  const handleNoteDeleted = (noteId: number) => {
+    // This function is called when a quick note is deleted
+    // The page will automatically refresh due to the action redirect
+    console.log("Quick note deleted:", noteId);
+  };
+
+  if (!member) {
+    return (
+      <PageLayout>
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-slate-200 mb-4">
+            Member not found
+          </h1>
+          <p className="text-slate-400">
+            The requested household member could not be found.
+          </p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <RequireAuth requireHousehold={true}>
       <PageLayout>
-        <Navigation
-          currentView="record-types"
-          member={currentMember}
-          category={category}
-        />
-
         <PageHeader
-          title={`${currentMember.name} - ${category}`}
-          subtitle="Choose a record type to create a new record"
+          title={`${category} Records`}
+          subtitle={`Manage ${category.toLowerCase()} records for ${member.name}`}
         />
 
         <RecordManagementProvider
           householdMembers={householdMembers}
           householdId={householdId}
-          memberId={currentMember.id.toString()}
+          memberId={member.id.toString()}
           category={category}
-          onRecordDelete={async (recordId: number) => {
-            // Record deletion is now handled by the edit route's server action
-            // This will be called when the delete button is clicked in the record drawer
-            console.log("Record deletion requested:", recordId);
-          }}
-          onRecordUpdate={async (recordId: number, updates: any) => {
-            // Record updates are now handled by the edit route's server action
-            // This will be called when the update button is clicked in the record drawer
-            console.log("Record update requested:", recordId, updates);
-          }}
         >
-          {recordTypes.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📝</div>
-              <h3 className="text-xl font-semibold text-slate-200 mb-2">
-                No record types configured yet
-              </h3>
-              <p className="text-slate-400 mb-6">
-                You'll need to create record types before you can start logging
-                records.
-              </p>
+          <div className="space-y-6">
+            {/* Quick Create Records Section */}
+            <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-slate-100">
+                  Quick Create Records
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Choose a record type to quickly create a new record
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {recordTypes.map(recordType => {
+                    const recordCount =
+                      recordsByType[recordType.id]?.length || 0;
+                    return (
+                      <div
+                        key={recordType.id}
+                        className="p-4 border border-slate-600 rounded-lg hover:border-slate-500 hover:bg-slate-700/50 transition-colors cursor-pointer"
+                        onClick={() => {
+                          navigate(
+                            `/member/${member.id}/category/${encodeURIComponent(category)}/record/${recordType.id}`
+                          );
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-2xl">
+                            {recordType.icon || "📝"}
+                          </div>
+                          <span className="text-xs text-slate-400 bg-slate-700 px-2 py-1 rounded">
+                            {recordCount} record{recordCount !== 1 ? "s" : ""}
+                          </span>
+                        </div>
+                        <h4 className="font-medium text-slate-200 mb-1">
+                          {recordType.name}
+                        </h4>
+                        {recordType.description && (
+                          <p className="text-sm text-slate-400 mb-3 line-clamp-2">
+                            {recordType.description}
+                          </p>
+                        )}
+                        <div className="text-blue-400 hover:text-blue-300 text-sm font-medium">
+                          Create Record →
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Notes Section */}
+            <QuickNotes
+              householdId={householdId}
+              memberId={member.id.toString()}
+              member={member}
+              notes={quickNotes}
+              onNoteCreated={handleNoteCreated}
+              onNoteDeleted={handleNoteDeleted}
+            />
+
+            {/* Existing Records Section */}
+            <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-slate-100">View Records</CardTitle>
+                <CardDescription className="text-slate-400">
+                  View and manage your existing records
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion>
+                  {recordTypes.map(recordType => (
+                    <RecordsList
+                      key={recordType.id}
+                      records={recordsByType[recordType.id] || []}
+                      recordType={recordType}
+                      memberId={member.id.toString()}
+                      category={category}
+                      householdId={householdId}
+                    />
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
+
+            <div className="pt-4">
               <AddCard
                 title="Add Record Type"
                 description={`Create a new ${category.toLowerCase()} record type`}
                 onClick={handleAddRecordType}
               />
             </div>
-          ) : (
-            <div className="space-y-8">
-              {/* Quick Create Records Section */}
-              <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-slate-100">
-                    Quick Create Records
-                  </CardTitle>
-                  <CardDescription className="text-slate-400">
-                    Choose a record type to quickly create a new record
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {recordTypes.map(recordType => {
-                      const recordCount =
-                        recordsByType[recordType.id]?.length || 0;
-                      return (
-                        <div
-                          key={recordType.id}
-                          className="p-4 border border-slate-600 rounded-lg hover:border-slate-500 hover:bg-slate-700/50 transition-colors cursor-pointer"
-                          onClick={() => {
-                            navigate(
-                              `/member/${currentMember.id}/category/${encodeURIComponent(category)}/record/${recordType.id}`
-                            );
-                          }}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="text-2xl">
-                              {recordType.icon || "📝"}
-                            </div>
-                            <span className="text-xs text-slate-400 bg-slate-700 px-2 py-1 rounded">
-                              {recordCount} record{recordCount !== 1 ? "s" : ""}
-                            </span>
-                          </div>
-                          <h4 className="font-medium text-slate-200 mb-1">
-                            {recordType.name}
-                          </h4>
-                          {recordType.description && (
-                            <p className="text-sm text-slate-400 mb-3 line-clamp-2">
-                              {recordType.description}
-                            </p>
-                          )}
-                          <div className="text-blue-400 hover:text-blue-300 text-sm font-medium">
-                            Create Record →
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Existing Records Section */}
-              <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-slate-100">
-                    Existing Records
-                  </CardTitle>
-                  <CardDescription className="text-slate-400">
-                    View and manage your existing records
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Accordion>
-                    {recordTypes.map(recordType => (
-                      <RecordsList
-                        key={recordType.id}
-                        records={recordsByType[recordType.id] || []}
-                        recordType={recordType}
-                        memberId={currentMember.id.toString()}
-                        category={category}
-                        householdId={householdId}
-                      />
-                    ))}
-                  </Accordion>
-                </CardContent>
-              </Card>
-
-              <div className="pt-4">
-                <AddCard
-                  title="Add Record Type"
-                  description={`Create a new ${category.toLowerCase()} record type`}
-                  onClick={handleAddRecordType}
-                />
-              </div>
-            </div>
-          )}
+          </div>
 
           {/* Record Drawer - rendered at this level to be accessible to all RecordsList components */}
           <RecordDrawer
             householdId={householdId}
-            memberId={currentMember.id.toString()}
+            memberId={member.id.toString()}
             category={category}
           />
         </RecordManagementProvider>
       </PageLayout>
     </RequireAuth>
   );
-};
-
-export default CategoryRecordTypes;
+}

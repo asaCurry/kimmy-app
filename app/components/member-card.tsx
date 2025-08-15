@@ -1,4 +1,3 @@
-import * as React from "react";
 import { UserCircle } from "lucide-react";
 import { IconCard } from "~/components/ui/interactive-card";
 import type { Householdmember } from "~/lib/utils";

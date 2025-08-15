@@ -1,4 +1,3 @@
-import * as React from "react";
 import { IconCard } from "~/components/ui/interactive-card";
 import { CardContent } from "~/components/ui/card";
 import { INTERACTIVE_CARD_STYLES } from "~/components/ui/interactive-card";

@@ -13,7 +13,7 @@ import {
   Accordion,
   AccordionItem,
   RecordsTable,
-  RecordDrawer
+  RecordDrawer,
 } from "~/components/ui";
 import { useRecordManagement } from "~/contexts";
 import { Plus, Eye, Edit, Trash2, Lock, Grid3X3, Table } from "lucide-react";
@@ -50,7 +50,10 @@ export const RecordsList: React.FC<RecordsListProps> = ({
     }
   };
 
-  const handleRecordUpdate = async (recordId: number, updates: Partial<Record>) => {
+  const handleRecordUpdate = async (
+    recordId: number,
+    updates: Partial<Record>
+  ) => {
     // Record updates are now handled by the edit route's server action
     // This function is kept for compatibility but doesn't do client-side updates
     console.log("Update requested for record:", recordId, updates);
@@ -59,11 +62,11 @@ export const RecordsList: React.FC<RecordsListProps> = ({
   // Parse the fields JSON for each record type
   const parsedRecordType = React.useMemo(() => {
     if (!recordType?.fields) return null;
-    
+
     try {
       // Check if fields is already parsed (object) or still a JSON string
       let parsed;
-      if (typeof recordType.fields === 'string') {
+      if (typeof recordType.fields === "string") {
         // Fields is still a JSON string, parse it
         parsed = JSON.parse(recordType.fields);
       } else if (Array.isArray(recordType.fields)) {
@@ -73,10 +76,14 @@ export const RecordsList: React.FC<RecordsListProps> = ({
         // Fields is already parsed as an object with nested fields
         parsed = recordType.fields;
       }
-      
+
       // Extract the actual fields array
       let normalizedFields = [];
-      if (parsed && typeof parsed === 'object' && Array.isArray(parsed.fields)) {
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        Array.isArray(parsed.fields)
+      ) {
         // Structure: { fields: [...], version: "1.0", lastModified: "..." }
         normalizedFields = parsed.fields;
       } else if (Array.isArray(parsed)) {
@@ -85,7 +92,7 @@ export const RecordsList: React.FC<RecordsListProps> = ({
       } else {
         normalizedFields = [];
       }
-      
+
       return {
         ...recordType,
         fields: normalizedFields,
@@ -151,16 +158,16 @@ export const RecordsList: React.FC<RecordsListProps> = ({
 
         {/* Records Display */}
         {viewMode === "cards" ? (
-                      <RecordsCards
-              records={records}
-              recordType={recordType}
-              memberId={memberId}
-              category={category}
-              householdId={householdId}
-              parsedRecordType={parsedRecordType}
-              onDelete={handleDelete}
-              isDeleting={isDeleting}
-            />
+          <RecordsCards
+            records={records}
+            recordType={recordType}
+            memberId={memberId}
+            category={category}
+            householdId={householdId}
+            parsedRecordType={parsedRecordType}
+            onDelete={handleDelete}
+            isDeleting={isDeleting}
+          />
         ) : (
           <RecordsTable
             records={records}
@@ -279,11 +286,17 @@ const RecordsCards: React.FC<RecordsCardsProps> = ({
             <div className="mb-4">
               {/* Debug logging for record content */}
               {(() => {
-                console.log(`RecordsList - Record ${record.id} content:`, record.content);
-                console.log(`RecordsList - Record ${record.id} parsedRecordType:`, parsedRecordType);
+                console.log(
+                  `RecordsList - Record ${record.id} content:`,
+                  record.content
+                );
+                console.log(
+                  `RecordsList - Record ${record.id} parsedRecordType:`,
+                  parsedRecordType
+                );
                 return null;
               })()}
-              
+
               <RecordContentDisplay
                 content={record.content}
                 recordType={parsedRecordType}

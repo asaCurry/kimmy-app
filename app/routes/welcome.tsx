@@ -26,7 +26,7 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
   useEffect(() => {
     if (isAuthenticated && session) {
       if (session.currentHouseholdId) {
-        navigate("/");
+        navigate(`/member/${session.currentHouseholdId}`);
       } else {
         navigate("/onboarding/create-account");
       }
