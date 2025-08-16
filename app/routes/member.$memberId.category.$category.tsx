@@ -11,7 +11,13 @@ import { Accordion } from "~/components/ui/accordion";
 import { loadHouseholdDataWithMember } from "~/lib/loader-helpers";
 import { getDatabase } from "~/lib/db-utils";
 import { RecordManagementProvider } from "~/contexts/record-management-context";
-import { recordTypes, records, quickNotes } from "~/db/schema";
+import {
+  recordTypes,
+  records,
+  quickNotes,
+  households,
+  users,
+} from "~/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import {
   Card,
@@ -185,6 +191,9 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     // Check authentication first
     const cookieHeader = request.headers.get("cookie");
     if (!cookieHeader) {
+      console.log(
+        "Category route loader - no cookies found, redirecting to welcome"
+      );
       throw redirect("/welcome");
     }
 
@@ -201,6 +210,9 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
     const sessionData = cookies["kimmy_auth_session"];
     if (!sessionData) {
+      console.log(
+        "Category route loader - no session cookie found, redirecting to welcome"
+      );
       throw redirect("/welcome");
     }
 
@@ -208,11 +220,17 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     try {
       session = JSON.parse(decodeURIComponent(sessionData));
     } catch (error) {
+      console.log(
+        "Category route loader - invalid session data, redirecting to welcome"
+      );
       throw redirect("/welcome");
     }
 
     // Check if user has a valid session with a household
     if (!session.currentHouseholdId) {
+      console.log(
+        "Category route loader - no household ID in session, redirecting to welcome"
+      );
       throw redirect("/welcome");
     }
 
@@ -223,28 +241,61 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     console.log("Category route loader - about to load household data...");
-    // Load household data from URL params
-    const { householdId, householdMembers, currentMember } =
-      await loadHouseholdDataWithMember(request, env, memberId);
+
+    // Load household data directly from database instead of using the helper
+    const db = getDatabase(env);
+
+    // First, verify the household exists and user has access
+    const household = await db
+      .select()
+      .from(households)
+      .where(eq(households.id, session.currentHouseholdId))
+      .get();
+
+    if (!household) {
+      console.log(
+        "Category route loader - household not found, redirecting to welcome"
+      );
+      throw redirect("/welcome");
+    }
+
+    // Load household members
+    const householdMembers = await db
+      .select()
+      .from(users)
+      .where(eq(users.householdId, session.currentHouseholdId));
+
+    // Map to expected interface format
+    const mappedHouseholdMembers = householdMembers.map(member => ({
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      role: member.role || "member",
+      age: member.age || undefined,
+      relationshipToAdmin: member.relationshipToAdmin || undefined,
+    }));
+
+    // Find the current member (use original database result for type compatibility)
+    const currentMember = householdMembers.find(
+      member => member.id.toString() === memberId
+    );
+
+    if (!currentMember) {
+      console.log(
+        "Category route loader - member not found, redirecting to welcome"
+      );
+      throw redirect("/welcome");
+    }
+
+    const householdId = session.currentHouseholdId;
+
     console.log("Category route loader - household data loaded:", {
       householdId,
       currentMember: currentMember?.name,
     });
 
-    // If no household data found, redirect to welcome
-    if (!householdId) {
-      console.log("❌ No household data found, redirecting to welcome");
-      throw redirect("/welcome");
-    }
-
-    // Verify the user is accessing their own household data
-    if (householdId !== session.currentHouseholdId) {
-      throw redirect("/welcome");
-    }
-
     console.log("Category route loader - about to fetch record types...");
     // Fetch record types for this household and category
-    const db = getDatabase(env);
     const recordTypesResult = await db
       .select()
       .from(recordTypes)
@@ -360,7 +411,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       recordTypes: parsedRecordTypes,
       recordsByType,
       householdId,
-      householdMembers,
+      householdMembers: mappedHouseholdMembers,
       quickNotes: memberQuickNotes,
     };
   } catch (error) {

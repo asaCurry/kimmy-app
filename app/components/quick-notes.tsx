@@ -103,7 +103,7 @@ export const QuickNotes: React.FC<QuickNotesProps> = ({
           <div>
             <CardTitle className="text-slate-100 flex items-center gap-2">
               <MessageSquare className="w-5 h-5" />
-              Quick Notes
+              Notes
             </CardTitle>
             <CardDescription className="text-slate-400">
               Rapid notes for {member.name} - {noteCount} note

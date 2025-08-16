@@ -3,7 +3,13 @@
  */
 
 import * as React from "react";
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import { PageLoading } from "~/components/ui/loading";
 import { authApi, type AuthSession, sessionStorage } from "~/lib/auth-db";
 
@@ -98,28 +104,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     initializeAuth();
   }, []);
 
-  const updateSession = (newSession: AuthSession) => {
+  const updateSession = useCallback((newSession: AuthSession) => {
     setSession(newSession);
     setIsAuthenticated(true);
     sessionStorage.setSessionData(newSession);
-  };
+  }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      // Use the new authApi pattern
-      const session = await authApi.login({}, email, password);
-      if (session) {
-        updateSession(session);
-        return true;
+  const login = useCallback(
+    async (email: string, password: string): Promise<boolean> => {
+      try {
+        // Use the new authApi pattern
+        const session = await authApi.login({}, email, password);
+        if (session) {
+          updateSession(session);
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error("Login failed:", error);
+        return false;
       }
-      return false;
-    } catch (error) {
-      console.error("Login failed:", error);
-      return false;
-    }
-  };
+    },
+    [updateSession]
+  );
 
-  const logout = (navigate?: () => void) => {
+  const logout = useCallback((navigate?: () => void) => {
     // Clear all session data
     setSession(null);
     setIsAuthenticated(false);
@@ -133,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (navigate) {
       navigate();
     }
-  };
+  }, []);
 
   const value: AuthContextType = {
     session,
