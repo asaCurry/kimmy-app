@@ -83,6 +83,12 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
                     Manage Household
                   </Link>
                   <Link
+                    to="/trackers"
+                    className="block text-sm text-slate-400 hover:text-slate-300 transition-colors"
+                  >
+                    Trackers
+                  </Link>
+                  <Link
                     to="/manage/add-member"
                     className="block text-sm text-slate-400 hover:text-slate-300 transition-colors"
                   >

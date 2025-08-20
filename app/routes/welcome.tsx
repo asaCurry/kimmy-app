@@ -170,6 +170,18 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
               needed.
             </p>
           </div>
+
+          <div className="p-6 bg-slate-800/50 rounded-lg border border-slate-700">
+            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center mb-4">
+              <span className="text-2xl">⏱️</span>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-200 mb-2">
+              Activity Trackers
+            </h3>
+            <p className="text-slate-400">
+              Monitor time, track progress, and log activities across your household.
+            </p>
+          </div>
         </div>
       </div>
     </PageLayout>

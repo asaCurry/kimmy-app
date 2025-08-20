@@ -19,11 +19,15 @@ export default [
   route("manage/add-member", "routes/manage.add-member.tsx"),
   route("manage/edit-member", "routes/manage.edit-member.tsx"),
 
+  // Trackers route (general household view)
+  route("trackers", "routes/trackers.tsx"),
+
   // API routes
   route(
     "api/invite-codes/regenerate",
     "routes/api.invite-codes.regenerate.tsx"
   ),
+  route("api/tracker-entries", "routes/api.tracker-entries.tsx"),
 
   // Member record routes
   route("member/:memberId", "routes/member.$memberId.tsx"),
@@ -34,6 +38,14 @@ export default [
   route(
     "member/:memberId/manage-categories",
     "routes/member.$memberId.manage-categories.tsx"
+  ),
+  route(
+    "member/:memberId/trackers",
+    "routes/member.$memberId.trackers.tsx"
+  ),
+  route(
+    "member/:memberId/tracker/:trackerId",
+    "routes/member.$memberId.tracker.$trackerId.tsx"
   ),
 
   route(

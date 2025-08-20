@@ -442,13 +442,13 @@ export default function CategoryRecordTypes() {
 
   // Refresh data when component mounts to ensure we have the latest record types
   useEffect(() => {
-    // Small delay to ensure navigation is complete
+    // Only revalidate once when component mounts, not on every revalidator change
     const timer = setTimeout(() => {
       revalidator.revalidate();
     }, 100);
     
     return () => clearTimeout(timer);
-  }, [revalidator]);
+  }, []); // Empty dependency array - only run once on mount
 
   // Show toast notification when data is being refreshed
   useEffect(() => {
