@@ -27,7 +27,9 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { QuickNotes } from "~/components/ui";
-import { useLoaderData, useActionData } from "react-router";
+import { useLoaderData, useActionData, useRevalidator } from "react-router";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -131,7 +133,6 @@ export async function action({ request, context, params }: Route.ActionArgs) {
           tags: tags?.toString() || null,
           householdId: householdId.toString(),
           createdBy: parseInt(noteMemberId.toString()),
-          createdAt: new Date().toISOString(),
         })
         .returning()
         .get();
@@ -437,6 +438,31 @@ export default function CategoryRecordTypes() {
   } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const { session } = useAuth();
+  const revalidator = useRevalidator();
+
+  // Refresh data when component mounts to ensure we have the latest record types
+  useEffect(() => {
+    // Small delay to ensure navigation is complete
+    const timer = setTimeout(() => {
+      revalidator.revalidate();
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [revalidator]);
+
+  // Show toast notification when data is being refreshed
+  useEffect(() => {
+    if (revalidator.state === "loading") {
+      toast.info("Refreshing data...", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
+  }, [revalidator.state]);
 
   const handleAddRecordType = () => {
     navigate(

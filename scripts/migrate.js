@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
-const MIGRATIONS_DIR = join(__dirname, '..', 'db', 'migrations');
+const MIGRATIONS_DIR = join(__dirname, '..', 'migrations');
 const DB_NAME = 'kimmy-app-db';
 
 function getMigrationFiles() {

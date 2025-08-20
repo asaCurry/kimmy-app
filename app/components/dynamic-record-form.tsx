@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useFetcher } from "react-router";
+import { toast } from "react-toastify";
 import {
   PageHeader,
   Card,
@@ -183,49 +184,9 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
     );
   };
 
-  // Enhanced success message
-  const getSuccessMessage = () => {
-    if (!fetcher.data?.success) return null;
 
-    return (
-      <div className="p-4 bg-green-900/20 border border-green-700 rounded-md mb-4">
-        <h3 className="text-green-400 font-medium mb-2 flex items-center gap-2">
-          <span>✅</span>
-          {fetcher.data.message || "Record saved successfully!"}
-        </h3>
-        {fetcher.data.recordId && (
-          <p className="text-green-300 text-sm">
-            Record ID: {fetcher.data.recordId}
-          </p>
-        )}
-      </div>
-    );
-  };
 
-  // Enhanced error message
-  const getErrorMessage = () => {
-    if (!fetcher.data?.error) return null;
 
-    return (
-      <div className="p-4 bg-red-900/20 border border-red-700 rounded-md mb-4">
-        <h3 className="text-red-400 font-medium mb-2 flex items-center gap-2">
-          <span>❌</span>
-          Error saving record
-        </h3>
-        <p className="text-red-300 text-sm">{fetcher.data.error}</p>
-        {fetcher.data.details && (
-          <details className="mt-2">
-            <summary className="text-red-300 text-sm cursor-pointer">
-              Technical details
-            </summary>
-            <pre className="text-red-300 text-xs mt-2 bg-red-900/30 p-2 rounded overflow-auto">
-              {JSON.stringify(fetcher.data.details, null, 2)}
-            </pre>
-          </details>
-        )}
-      </div>
-    );
-  };
 
   // Form validation status
   const getFormStatus = () => {
@@ -254,6 +215,32 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
       className: "text-slate-400",
     };
   };
+
+  // Show toast notification when form validation status changes
+  React.useEffect(() => {
+    const hasErrors = Object.keys(errors).length > 0;
+    const hasTouchedFields = Object.keys(touchedFields).length > 0;
+
+    if (hasTouchedFields && hasErrors) {
+      toast.error(`${Object.keys(errors).length} field(s) have errors`, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } else if (hasTouchedFields && isValid) {
+      toast.success("Form is valid and ready to submit!", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
+  }, [errors, touchedFields, isValid]);
 
   const formStatus = getFormStatus();
 
@@ -308,12 +295,34 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
     });
   };
 
-  // Handle successful submission
+  // Handle form submission response
   React.useEffect(() => {
-    if (fetcher.data?.success) {
-      // Navigate back to the member's category view
-      if (onBack) {
-        onBack();
+    if (fetcher.data) {
+      if (fetcher.data.success) {
+        // Show success toast
+        toast.success(fetcher.data.message || "Record saved successfully!", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        
+        // Navigate back to the member's category view
+        if (onBack) {
+          onBack();
+        }
+      } else if (fetcher.data.error) {
+        // Show error toast
+        toast.error(fetcher.data.error || "Failed to save record", {
+          position: "top-right",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     }
   }, [fetcher.data, onBack]);
@@ -368,11 +377,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
             {/* Error Summary */}
             {getErrorSummary()}
 
-            {/* Success Message */}
-            {getSuccessMessage()}
 
-            {/* Error Message */}
-            {getErrorMessage()}
 
             {/* Title Field */}
             <div className="space-y-2">

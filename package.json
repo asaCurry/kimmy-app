@@ -36,6 +36,7 @@
     "react-dom": "19.0.0",
     "react-hook-form": "^7.0.0",
     "react-router": "7.6.3",
+    "react-toastify": "^11.0.5",
     "resend": "^3.0.0",
     "tailwind-merge": "^2.0.0",
     "zod": "^3.0.0"
@@ -65,6 +66,9 @@
     "db:migrate": "node scripts/migrate.js local",
     "db:migrate:remote": "node scripts/migrate.js remote",
     "db:migrate:both": "node scripts/migrate.js both",
+    "db:reset:local": "node scripts/reset-db.js local",
+    "db:reset:remote": "node scripts/reset-db.js remote",
+    "db:reset:both": "node scripts/reset-db.js both",
     "db:verify": "node scripts/verify-sync.js",
     "db:studio": "drizzle-kit studio",
     "deploy": "npm run build && wrangler deploy",

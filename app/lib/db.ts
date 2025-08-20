@@ -396,7 +396,6 @@ export const recordDb = {
     try {
       const updateData = {
         ...updates,
-        updatedAt: new Date().toISOString(),
       };
 
       const result = await db
@@ -522,7 +521,6 @@ export const inviteCodeDb = {
         .update(schema.households)
         .set({
           inviteCode: newInviteCode,
-          updatedAt: new Date().toISOString(),
         })
         .where(eq(schema.households.id, householdId))
         .returning();

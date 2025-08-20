@@ -160,7 +160,6 @@ export async function action({ request, context, params }: { request: Request; c
         tags: formData.get("tags") as string,
         isPrivate: formData.get("isPrivate") === "true" ? 1 : 0,
         datetime: formData.get("datetime") as string,
-        updatedAt: new Date().toISOString(),
       };
 
       // Validate required fields

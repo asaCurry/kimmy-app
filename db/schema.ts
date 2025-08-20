@@ -1,12 +1,13 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
 
 // Households table
 export const households = sqliteTable("households", {
   id: text("id").primaryKey(), // UUID string
   name: text("name").notNull(),
   inviteCode: text("invite_code").unique().notNull(),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
-  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
 });
 
 // Users/Household members table
@@ -21,7 +22,7 @@ export const users = sqliteTable("users", {
   role: text("role").default("member"), // 'admin', 'member'
   age: integer("age"), // for children
   relationshipToAdmin: text("relationship_to_admin"), // 'self', 'spouse', 'child', etc.
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
 
 // Record types table (flexible record definitions)
@@ -38,7 +39,7 @@ export const recordTypes = sqliteTable("record_types", {
   color: text("color"), // Color for the record type
   allowPrivate: integer("allow_private").default(0), // 0 = no privacy option, 1 = privacy option available
   createdBy: integer("created_by").references(() => users.id),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
 
 // Records table (actual data entries)
@@ -56,8 +57,8 @@ export const records = sqliteTable("records", {
   attachments: text("attachments"), // JSON array of file URLs
   isPrivate: integer("is_private").default(0), // 0 = shared, 1 = private
   datetime: text("datetime"), // When the record occurred (ISO string), defaults to createdAt if not specified
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
-  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
 });
 
 // Quick notes table (for rapid note-taking)
@@ -71,7 +72,7 @@ export const quickNotes = sqliteTable("quick_notes", {
   tags: text("tags"), // Comma-separated tags
   attachments: text("attachments"), // JSON array of file URLs
   recordId: integer("record_id").references(() => records.id), // Optional link to a record
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
 
 // Contact submissions table (for external contact forms)
@@ -80,7 +81,7 @@ export const contactSubmissions = sqliteTable("contact_submissions", {
   name: text("name").notNull(),
   email: text("email").notNull(),
   message: text("message").notNull(),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
 
 // Type exports

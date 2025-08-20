@@ -1,6 +1,6 @@
 import type { Route } from "./+types/member.$memberId";
 import * as React from "react";
-import { Link, redirect } from "react-router";
+import { Link, redirect, useNavigate } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
@@ -248,6 +248,7 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
   } = loaderData;
   const { session } = useAuth();
   const [showCreateForm, setShowCreateForm] = React.useState(false);
+  const navigate = useNavigate();
 
   // Create a basic member profile from session data if no member data from loader
   const currentMember =
@@ -303,7 +304,7 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                 You'll need to create record types before you can start logging
                 records.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
                 <Link
                   to={`/member/${currentMember.id}/manage-categories`}
                   className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-colors"
@@ -345,7 +346,7 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                       className="block cursor-pointer"
                       onClick={() => {
                         console.log(`Navigating to category: ${category}`);
-                        window.location.href = `/member/${currentMember.id}/category/${encodeURIComponent(category)}`;
+                        navigate(`/member/${currentMember.id}/category/${encodeURIComponent(category)}`);
                       }}
                     >
                       <CategoryCard

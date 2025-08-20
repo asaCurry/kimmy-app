@@ -9,6 +9,7 @@ import { Plus, ArrowLeft } from "lucide-react";
 import { useDynamicFields } from "~/hooks/use-dynamic-fields";
 import { DynamicFieldEditor } from "~/components/ui/dynamic-field-editor";
 import { CategoryTypeahead } from "~/components/ui/category-typeahead";
+import { toast } from "react-toastify";
 import {
   Select,
   SelectContent,
@@ -87,14 +88,41 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     });
   };
 
-  // Handle successful submission
+  // Handle form submission response
   React.useEffect(() => {
-    if (fetcher.data?.success) {
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        // Default behavior: reload the page
-        window.location.reload();
+    if (fetcher.data) {
+      if (fetcher.data.success) {
+        // Show success toast
+        toast.success("Record type created successfully!", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        
+        // Redirect after a brief delay to let user see the toast
+        const timer = setTimeout(() => {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            // Default behavior: reload the page
+            window.location.reload();
+          }
+        }, 1000); // Reduced delay since toast is less intrusive
+        
+        return () => clearTimeout(timer);
+      } else if (fetcher.data.error) {
+        // Show error toast
+        toast.error(fetcher.data.error || "Failed to create record type", {
+          position: "top-right",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     }
   }, [fetcher.data, onSuccess]);
@@ -132,7 +160,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
               value={formData.category}
               onChange={value => setFormData({ ...formData, category: value })}
               placeholder="Select or type a category..."
-              className="bg-slate-700 border-slate-600 text-slate-200"
+              className="bg-slate-600 text-slate-200"
               required
               householdId={householdId}
               allowCreate={true}

@@ -10,6 +10,8 @@ import type { Route } from "./+types/root";
 import { AuthProvider } from "~/contexts/auth-context";
 import { HouseholdProvider } from "~/contexts/household-context";
 import { CategoriesProvider } from "~/contexts/categories-context";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -49,6 +51,18 @@ export default function App() {
       <HouseholdProvider>
         <CategoriesProvider>
           <Outlet />
+          <ToastContainer
+            position="top-right"
+            autoClose={4000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
         </CategoriesProvider>
       </HouseholdProvider>
     </AuthProvider>

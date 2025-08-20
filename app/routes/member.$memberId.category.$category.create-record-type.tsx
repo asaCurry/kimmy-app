@@ -1,6 +1,6 @@
 import type { Route } from "./+types/member.$memberId.category.$category.create-record-type";
 import * as React from "react";
-import { redirect } from "react-router";
+import { redirect, useNavigate } from "react-router";
 import { PageLayout } from "~/components/ui/layout";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
@@ -185,6 +185,7 @@ const CreateRecordType: React.FC<Route.ComponentProps> = ({
 }) => {
   const { member, category, householdId } = loaderData;
   const { session } = useAuth();
+  const navigate = useNavigate();
 
   // Create a basic member profile from session data if no member data from loader
   const currentMember =
@@ -235,9 +236,10 @@ const CreateRecordType: React.FC<Route.ComponentProps> = ({
           createdBy={currentMember.id}
           category={category}
           existingCategories={loaderData.existingCategories}
-          onSuccess={() =>
-            (window.location.href = `/member/${currentMember.id}/category/${encodeURIComponent(category)}`)
-          }
+          onSuccess={() => {
+            // Navigate to the category page with the newly created record type
+            navigate(`/member/${currentMember.id}/category/${encodeURIComponent(category)}`);
+          }}
           showBackButton={true}
           className="space-y-8"
         />
