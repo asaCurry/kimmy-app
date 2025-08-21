@@ -86,8 +86,7 @@ export async function loader({
       request,
       context.cloudflare?.env
     );
-    console.log("householdId", householdId);
-    console.log("householdMembers", householdMembers);
+
 
     // Verify the user is accessing their own household data
     if (householdId !== session.currentHouseholdId) {
@@ -102,7 +101,7 @@ export async function loader({
           context.cloudflare?.env,
           householdId
         );
-        console.log("household", household);
+
         inviteCode = household?.inviteCode;
       } catch (error) {
         console.error("Failed to load invite code:", error);
@@ -117,7 +116,7 @@ export async function loader({
       inviteCode,
     };
   } catch (error) {
-    console.log("❌ Error loading household data:", error);
+
     // If it's a redirect, re-throw it
     if (
       error instanceof Response &&
@@ -142,7 +141,7 @@ const Manage: React.FC = () => {
     householdId: loaderHouseholdId,
     inviteCode,
   } = useLoaderData<LoaderData>();
-  console.log("inviteCode", inviteCode, loaderHouseholdId);
+
   const fetcher = useFetcher();
   const isSeeding = fetcher.state === "submitting";
 
@@ -168,12 +167,10 @@ const Manage: React.FC = () => {
 
   const handleMemberUpdated = () => {
     // TODO: Implement member update refresh
-    console.log("Member updated, should refresh data");
   };
 
   const handleMemberRemoved = () => {
     // TODO: Implement member removal refresh
-    console.log("Member removed, should refresh data");
   };
 
   // Show loading while checking auth
@@ -267,7 +264,6 @@ const Manage: React.FC = () => {
             householdId={currentHouseholdId}
             currentInviteCode={inviteCode}
             onInviteCodeGenerated={newCode => {
-              console.log("New invite code generated:", newCode);
               // TODO: Update the local state or refresh the page to show the new code
             }}
           />

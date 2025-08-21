@@ -76,7 +76,6 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
 
   React.useEffect(() => {
     if (fetcher.data) {
-      console.log("Fetcher response:", fetcher.data);
       if (fetcher.data.success) {
         toast.success(
           tracker ? "Tracker updated successfully!" : "Tracker created successfully!",
@@ -90,18 +89,7 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
     }
   }, [fetcher.data, tracker, onSuccess]);
 
-  React.useEffect(() => {
-    if (fetcher.state === "submitting") {
-      console.log("Form is submitting...");
-    }
-    if (fetcher.state === "error") {
-      console.error("Fetcher error:", fetcher.error);
-    }
-  }, [fetcher.state, fetcher.error]);
-
   const onSubmit = (data: CreateTrackerInput) => {
-    console.log("Form data being submitted:", data);
-    
     const formData = new FormData();
     formData.append("_action", tracker ? "update" : "create");
     
@@ -115,11 +103,6 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
     formData.append("unit", selectedUnit === "custom" ? customUnit : data.unit);
     formData.append("color", data.color);
     formData.append("icon", customIcon);
-
-    console.log("FormData contents:");
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
 
     fetcher.submit(formData, { method: "post" });
   };

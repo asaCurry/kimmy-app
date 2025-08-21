@@ -33,11 +33,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
   const [isExpanded, setIsExpanded] = React.useState(false);
   const fieldConfig = getFieldTypeConfig(field.type);
   
-  // Debug: Log the field data to see what we're getting
-  console.log("DynamicFieldEditor - field:", field);
-  console.log("DynamicFieldEditor - field.type:", field.type);
-  console.log("DynamicFieldEditor - field.options:", field.options);
-  console.log("DynamicFieldEditor - fieldConfig:", fieldConfig);
+
 
   // Safety check for fieldConfig
   if (!fieldConfig) {

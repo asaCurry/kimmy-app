@@ -51,11 +51,7 @@ export async function action({ request, context, params }: Route.ActionArgs) {
     const formData = await request.formData();
     const action = formData.get("_action");
 
-    console.log("Category action - received action:", action);
-    console.log(
-      "Category action - form data keys:",
-      Array.from(formData.keys())
-    );
+
 
     // Handle record deletion
     if (action === "delete" && formData.has("recordId")) {
@@ -137,7 +133,7 @@ export async function action({ request, context, params }: Route.ActionArgs) {
         .returning()
         .get();
 
-      console.log("Quick note created:", newNote);
+
       return { success: true, note: newNote };
     }
 
@@ -160,15 +156,10 @@ export async function action({ request, context, params }: Route.ActionArgs) {
         .delete(quickNotes)
         .where(eq(quickNotes.id, parseInt(noteId.toString())));
 
-      console.log("Quick note deleted:", noteId);
       return { success: true, deletedNoteId: parseInt(noteId.toString()) };
     }
 
-    // For unknown actions, log and return null instead of throwing an error
-    console.log("Category action - unknown action received:", action);
-    console.log(
-      "Category action - this might be from a different form or component"
-    );
+    // For unknown actions, return null instead of throwing an error
 
     // Return null to indicate no action was taken, but don't crash
     return null;
@@ -180,21 +171,18 @@ export async function action({ request, context, params }: Route.ActionArgs) {
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
   try {
-    console.log("Category route loader - starting...");
-    console.log("Category route loader - params:", params);
+
     const env = (context as any).cloudflare?.env;
 
     if (!env?.DB) {
-      console.log("Category route loader - no DB available");
+
       throw new Response("Database not available", { status: 500 });
     }
 
     // Check authentication first
     const cookieHeader = request.headers.get("cookie");
     if (!cookieHeader) {
-      console.log(
-        "Category route loader - no cookies found, redirecting to welcome"
-      );
+
       throw redirect("/welcome");
     }
 
@@ -211,9 +199,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
     const sessionData = cookies["kimmy_auth_session"];
     if (!sessionData) {
-      console.log(
-        "Category route loader - no session cookie found, redirecting to welcome"
-      );
+
       throw redirect("/welcome");
     }
 
@@ -221,17 +207,13 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     try {
       session = JSON.parse(decodeURIComponent(sessionData));
     } catch (error) {
-      console.log(
-        "Category route loader - invalid session data, redirecting to welcome"
-      );
+
       throw redirect("/welcome");
     }
 
     // Check if user has a valid session with a household
     if (!session.currentHouseholdId) {
-      console.log(
-        "Category route loader - no household ID in session, redirecting to welcome"
-      );
+
       throw redirect("/welcome");
     }
 
@@ -241,7 +223,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       throw new Response("Member ID required", { status: 400 });
     }
 
-    console.log("Category route loader - about to load household data...");
+
 
     // Load household data directly from database instead of using the helper
     const db = getDatabase(env);
@@ -254,9 +236,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       .get();
 
     if (!household) {
-      console.log(
-        "Category route loader - household not found, redirecting to welcome"
-      );
+
       throw redirect("/welcome");
     }
 
@@ -282,20 +262,12 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     );
 
     if (!currentMember) {
-      console.log(
-        "Category route loader - member not found, redirecting to welcome"
-      );
       throw redirect("/welcome");
     }
 
     const householdId = session.currentHouseholdId;
 
-    console.log("Category route loader - household data loaded:", {
-      householdId,
-      currentMember: currentMember?.name,
-    });
 
-    console.log("Category route loader - about to fetch record types...");
     // Fetch record types for this household and category
     const recordTypesResult = await db
       .select()
@@ -306,10 +278,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
           eq(recordTypes.category, category)
         )
       );
-    console.log(
-      "Category route loader - record types fetched:",
-      recordTypesResult.length
-    );
+
 
     // Parse the fields JSON for each record type
     const parsedRecordTypes = recordTypesResult.map(rt => {
@@ -346,7 +315,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       };
     });
 
-    console.log("Category route loader - about to fetch records...");
+
     // Fetch records for each record type, filtered by the specific member
     const recordsData = await db
       .select()
@@ -357,7 +326,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
           eq(records.memberId, parseInt(memberId))
         )
       );
-    console.log("Category route loader - records fetched:", recordsData.length);
+
 
     // Group records by record type
     const recordsByType = recordsData.reduce(
@@ -389,22 +358,13 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         .limit(20);
 
       memberQuickNotes = quickNotesResult;
-      console.log(
-        "Category route loader - quick notes loaded:",
-        memberQuickNotes.length
-      );
+
     } catch (error) {
       console.error("Failed to load quick notes:", error);
       memberQuickNotes = [];
     }
 
-    console.log("Category route loader - returning data:", {
-      member: currentMember?.name,
-      category,
-      recordTypesCount: parsedRecordTypes.length,
-      recordsCount: Object.keys(recordsByType).length,
-      quickNotesCount: memberQuickNotes.length,
-    });
+
 
     return {
       member: currentMember,
@@ -473,13 +433,13 @@ export default function CategoryRecordTypes() {
   const handleNoteCreated = (note: any) => {
     // This function is called when a quick note is created
     // The page will automatically refresh due to the action redirect
-    console.log("Quick note created:", note);
+
   };
 
   const handleNoteDeleted = (noteId: number) => {
     // This function is called when a quick note is deleted
     // The page will automatically refresh due to the action redirect
-    console.log("Quick note deleted:", noteId);
+
   };
 
   if (!member) {

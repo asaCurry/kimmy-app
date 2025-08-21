@@ -36,7 +36,7 @@ export function TrackerCard({
   const [isTracking, setIsTracking] = React.useState(!!activeEntry);
   const [localTrackingStart, setLocalTrackingStart] = React.useState<string | null>(null);
   const [elapsedTime, setElapsedTime] = React.useState<string>("");
-  console.log("stats", stats);
+
   // Update elapsed time every second while tracking
   React.useEffect(() => {
     if (isTracking && localTrackingStart) {
@@ -113,7 +113,6 @@ export function TrackerCard({
   };
 
   const formatDuration = (minutes: number, showSeconds = true) => {
-    console.log("formatDuration", minutes, showSeconds);
     if (minutes < 1) {
       // Less than 1 minute, show seconds for precision
       const totalSeconds = Math.round(minutes * 60);

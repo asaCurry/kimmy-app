@@ -23,13 +23,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       trackerDB.getAllTrackerEntries(session.currentHouseholdId),
     ]);
 
-    console.log("Loader fetched data:", {
-      trackersCount: trackers.length,
-      activeEntriesCount: activeEntries.length,
-      trackerEntriesCount: trackerEntries.length,
-      sampleTrackerEntries: trackerEntries.slice(0, 3)
-    });
-    console.log("trackerEntries", trackerEntries);
+
     return { success: true, trackers, activeEntries, trackerEntries };
   });
 }
@@ -39,11 +33,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     const formData = await request.formData();
     const action = formData.get("_action") as string;
 
-    console.log("Member trackers action received:", action);
-    console.log("Form data contents:");
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
+
 
     const trackerDB = new TrackerDB(db);
 
@@ -168,14 +158,9 @@ export default function TrackersPage() {
   };
 
   const getTrackerStats = (tracker: Tracker) => {
-    console.log("getTrackerStats called for tracker:", tracker.id);
-    console.log("All trackerEntries:", trackerEntries);
-    
     const entries = trackerEntries.filter(entry => entry.trackerId === tracker.id);
-    console.log("Filtered entries for tracker", tracker.id, ":", entries);
     
     if (entries.length === 0) {
-      console.log("No entries found for tracker", tracker.id);
       return {
         totalValue: 0,
         entryCount: 0,
@@ -184,14 +169,11 @@ export default function TrackersPage() {
     }
 
     const totalValue = entries.reduce((sum, entry) => {
-      console.log("Entry value:", entry.value, "Current sum:", sum);
       return sum + (entry.value || 0);
     }, 0);
     
     const entryCount = entries.length;
     const averageValue = entryCount > 0 ? totalValue / entryCount : 0;
-
-    console.log("Calculated stats for tracker", tracker.id, ":", { totalValue, entryCount, averageValue });
 
     return {
       totalValue,
