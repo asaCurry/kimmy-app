@@ -11,10 +11,18 @@ export function getDatabase(env: any) {
 
 // Consolidated session validation utility
 export function getSession(request: Request) {
-  const session = extractSessionFromCookies(request.headers.get("cookie"));
+  const cookieHeader = request.headers.get("cookie");
+  console.log("🔍 getSession - Cookie header:", cookieHeader);
+  
+  const session = extractSessionFromCookies(cookieHeader);
+  console.log("🔍 getSession - Extracted session:", session);
+  
   if (!session?.userId) {
+    console.log("❌ getSession - No valid session found, throwing 401");
     throw new Response("Unauthorized", { status: 401 });
   }
+  
+  console.log("✅ getSession - Valid session found for user:", session.userId);
   return session;
 }
 
@@ -73,6 +81,11 @@ export async function withDatabaseAndSession<T>(
     const session = getSession(request);
     return await operation(db, session);
   } catch (error) {
+    // If it's already a Response (like 401 Unauthorized), re-throw it directly
+    if (error instanceof Response) {
+      throw error;
+    }
+    // Otherwise, handle it with the error handler
     handleError(error, "process authenticated operation");
   }
 }

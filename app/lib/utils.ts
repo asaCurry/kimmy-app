@@ -11,11 +11,17 @@ export function cn(...inputs: ClassValue[]) {
 export function parseCookies(
   cookieHeader: string | null
 ): Record<string, string> {
-  if (!cookieHeader) return {};
+  console.log("🔧 parseCookies - Input:", cookieHeader);
+  
+  if (!cookieHeader) {
+    console.log("🔧 parseCookies - No cookie header, returning empty object");
+    return {};
+  }
 
-  return cookieHeader.split(";").reduce(
+  const result = cookieHeader.split(";").reduce(
     (acc, cookie) => {
       const [key, value] = cookie.trim().split("=");
+      console.log(`🔧 parseCookies - Processing cookie: "${key}" = "${value}"`);
       if (key && value) {
         acc[key] = value;
       }
@@ -23,6 +29,9 @@ export function parseCookies(
     },
     {} as Record<string, string>
   );
+  
+  console.log("🔧 parseCookies - Final result:", result);
+  return result;
 }
 
 /**
@@ -43,16 +52,30 @@ export function isDatabaseAvailable(env: any): boolean {
  * Safely extract session data from cookies
  */
 export function extractSessionFromCookies(cookieHeader: string | null): any {
-  if (!cookieHeader) return null;
+  console.log("🍪 extractSessionFromCookies - Cookie header:", cookieHeader);
+  
+  if (!cookieHeader) {
+    console.log("🍪 extractSessionFromCookies - No cookie header");
+    return null;
+  }
 
   const cookies = parseCookies(cookieHeader);
+  console.log("🍪 extractSessionFromCookies - Parsed cookies:", cookies);
+  
   const sessionData = cookies["kimmy_auth_session"];
+  console.log("🍪 extractSessionFromCookies - Session data:", sessionData);
 
-  if (!sessionData) return null;
+  if (!sessionData) {
+    console.log("🍪 extractSessionFromCookies - No session data found");
+    return null;
+  }
 
   try {
-    return JSON.parse(decodeURIComponent(sessionData));
-  } catch {
+    const parsed = JSON.parse(decodeURIComponent(sessionData));
+    console.log("🍪 extractSessionFromCookies - Successfully parsed session:", parsed);
+    return parsed;
+  } catch (error) {
+    console.log("🍪 extractSessionFromCookies - Failed to parse session:", error);
     return null;
   }
 }
