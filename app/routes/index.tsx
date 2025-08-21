@@ -1,69 +1,118 @@
 import type { Route } from "./+types/index";
 import * as React from "react";
 import { useNavigate, useLoaderData, redirect } from "react-router";
-import { PageLayout } from "~/components/ui/layout";
-import { useAuth, RequireAuth } from "~/contexts/auth-context";
+import { PageLayout, PageHeader } from "~/components/ui/layout";
+import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { MemberCard } from "~/components/member-card";
 import type { Householdmember } from "~/lib/utils";
 import { QuickActionButton } from "~/components/ui/quick-action-button";
-
-import { extractEnv, parseCookies } from "~/lib/utils";
-import { getDatabase } from "~/lib/db-utils";
-import { records, recordTypes } from "~/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { RecentRecordsList } from "~/components/recent-records-list";
-import { RecordManagementProvider } from "~/contexts/record-management-context";
-import { RecordDrawer } from "~/components/ui/record-drawer";
+import { withDatabaseAndSession } from "~/lib/db-utils";
+import { users } from "~/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  try {
-    // Check if user has a valid session first
-    const cookieHeader = request.headers.get("cookie");
-
-    if (cookieHeader) {
-      const cookies = parseCookies(cookieHeader);
-      const sessionData = cookies["kimmy_auth_session"];
-
-      if (sessionData) {
-        try {
-          const session = JSON.parse(decodeURIComponent(sessionData));
-          if (session.currentHouseholdId) {
-            // User has a valid session with a household, allow access
-            // Data will be loaded in the component after authentication is confirmed
-            return { hasValidSession: true };
-          }
-        } catch (error) {
-          // Invalid session data, continue to redirect
-        }
-      }
+  return withDatabaseAndSession(request, context, async (db, session) => {
+    // Load household members directly from database
+    const members = await db
+      .select()
+      .from(users)
+      .where(eq(users.householdId, session.currentHouseholdId));
+    
+    if (!members.length) {
+      throw redirect("/welcome");
     }
 
-    // No valid session or household, redirect to welcome
-    return redirect("/welcome");
-  } catch (error) {
-    console.error("Loader error:", error);
-    return redirect("/welcome");
-  }
+    const householdMembers = members.map(member => ({
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      role: member.role || "member",
+      age: member.age || undefined,
+      relationshipToAdmin: member.relationshipToAdmin || undefined,
+    }));
+
+    // If only one member, redirect directly to their dashboard
+    if (householdMembers.length === 1) {
+      throw redirect(`/member/${householdMembers[0].id}`);
+    }
+
+    // If multiple members, return them for selection
+    return { 
+      hasValidSession: true, 
+      householdMembers,
+      householdId: session.currentHouseholdId
+    };
+  });
 }
 
-// Simple dashboard component for authenticated users
-function AuthenticatedDashboard() {
-  const { session } = useAuth();
+// Member selection component for households with multiple members
+function MemberSelection({ householdMembers, householdId }: { 
+  householdMembers: Array<{ id: number; name: string; email: string; role: string; age?: number }>;
+  householdId: string;
+}) {
   const navigate = useNavigate();
 
-  React.useEffect(() => {
-    // If user has a household, redirect to the member dashboard
-    if (session?.currentHouseholdId) {
-      navigate(`/member/${session.currentHouseholdId}`, { replace: true });
-    }
-  }, [session, navigate]);
+  const handleMemberSelect = (memberId: number) => {
+    navigate(`/member/${memberId}`);
+  };
 
   return (
     <PageLayout>
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading your dashboard...</p>
+      <PageHeader 
+        title="Select Household Member" 
+        subtitle="Choose which member you'd like to manage records and trackers for"
+      />
+      
+      <div className="container mx-auto px-4 py-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-slate-200 mb-4">
+              Welcome to Your Household
+            </h2>
+            <p className="text-slate-400 text-lg">
+              Select a household member to manage their records, trackers, and activities.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {householdMembers.map((member) => (
+              <div
+                key={member.id}
+                onClick={() => handleMemberSelect(member.id)}
+                className="cursor-pointer"
+              >
+                <MemberCard 
+                  member={member} 
+                  onSelect={() => handleMemberSelect(member.id)}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <div className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-blue-500/20 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                Quick Actions
+              </h3>
+              <p className="text-slate-400 mb-4">
+                Access household-wide features and management tools
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <QuickActionButton
+                  to="/trackers"
+                  icon="⏱️"
+                  title="All Trackers"
+                  description="View household activity trackers"
+                />
+                <QuickActionButton
+                  to="/manage"
+                  icon="⚙️"
+                  title="Manage Household"
+                  description="Add members, manage settings"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </PageLayout>
@@ -71,16 +120,19 @@ function AuthenticatedDashboard() {
 }
 
 export default function Index() {
-  const { hasValidSession } = useLoaderData<typeof loader>();
+  const loaderData = useLoaderData<typeof loader>();
 
   // If no valid session, this should have redirected in the loader
-  if (!hasValidSession) {
+  if (!loaderData?.hasValidSession) {
     return null;
   }
 
   return (
     <RequireAuth requireHousehold={true}>
-      <AuthenticatedDashboard />
+      <MemberSelection 
+        householdMembers={loaderData.householdMembers} 
+        householdId={loaderData.householdId}
+      />
     </RequireAuth>
   );
 }

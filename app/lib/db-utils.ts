@@ -38,7 +38,22 @@ export async function withDatabase<T>(
     const db = getDatabase(context.cloudflare?.env);
     return await operation(db);
   } catch (error) {
-    handleError(error, "process database operation");
+    console.error("withDatabase error:", error);
+    
+    // If it's already a Response, re-throw it
+    if (error instanceof Response) {
+      throw error;
+    }
+    
+    // If it's a database error, provide more details
+    if (error instanceof Error) {
+      console.error("Database operation failed:", error.message);
+      console.error("Stack trace:", error.stack);
+      throw new Response(`Database operation failed: ${error.message}`, { status: 500 });
+    }
+    
+    // Generic fallback
+    throw new Response("Database operation failed", { status: 500 });
   }
 }
 

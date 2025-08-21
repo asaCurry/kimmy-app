@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
 // Households table
@@ -84,6 +84,45 @@ export const contactSubmissions = sqliteTable("contact_submissions", {
   createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
 
+// Trackers table (for time tracking and activity logging)
+export const trackers = sqliteTable("trackers", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  description: text("description"),
+  type: text("type").notNull().default("time"), // 'time' for start/stop, 'cumulative' for sum of logs
+  unit: text("unit").notNull().default("minutes"), // 'minutes', 'hours', 'count', etc.
+  color: text("color").default("#3b82f6"), // Hex color for UI
+  icon: text("icon").default("⏱️"), // Icon or emoji
+  householdId: text("household_id")
+    .notNull()
+    .references(() => households.id),
+  createdBy: integer("created_by").references(() => users.id),
+  isActive: integer("is_active").default(1), // 0 = inactive, 1 = active
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+});
+
+// Tracker entries table (individual time logs or cumulative entries)
+export const trackerEntries = sqliteTable("tracker_entries", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  trackerId: integer("tracker_id")
+    .notNull()
+    .references(() => trackers.id),
+  householdId: text("household_id")
+    .notNull()
+    .references(() => households.id),
+  memberId: integer("member_id").references(() => users.id), // Which member this entry is for
+  createdBy: integer("created_by").references(() => users.id), // Who created the entry
+  value: real("value").notNull(), // Duration in minutes or cumulative amount
+  startTime: text("start_time"), // ISO string for time tracking start
+  endTime: text("end_time"), // ISO string for time tracking end
+  notes: text("notes"), // Optional notes about the entry
+  tags: text("tags"), // Comma-separated tags
+  isActive: integer("is_active").default(0), // For time tracking: 0 = completed, 1 = currently running
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+});
+
 // Type exports
 export type Household = typeof households.$inferSelect;
 export type NewHousehold = typeof households.$inferInsert;
@@ -97,3 +136,7 @@ export type QuickNote = typeof quickNotes.$inferSelect;
 export type NewQuickNote = typeof quickNotes.$inferInsert;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
 export type NewContactSubmission = typeof contactSubmissions.$inferInsert;
+export type Tracker = typeof trackers.$inferSelect;
+export type NewTracker = typeof trackers.$inferInsert;
+export type TrackerEntry = typeof trackerEntries.$inferSelect;
+export type NewTrackerEntry = typeof trackerEntries.$inferInsert;

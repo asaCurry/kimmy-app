@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
 import { useFetcher } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
@@ -24,8 +24,8 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
   currentInviteCode,
   onInviteCodeGenerated,
 }) => {
-  const [inviteCode, setInviteCode] = useState(currentInviteCode || "Loading...");
-  const [copied, setCopied] = useState(false);
+  const [inviteCode, setInviteCode] = React.useState(currentInviteCode || "Loading...");
+  const [copied, setCopied] = React.useState(false);
   const fetcher = useFetcher();
 
   // Update local state when prop changes

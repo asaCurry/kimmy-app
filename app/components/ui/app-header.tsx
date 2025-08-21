@@ -5,7 +5,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { Link } from "react-router";
-import { Home, Users, Plus, Settings, Bell, User, Menu, X } from "lucide-react";
+import { Home, Users, Plus, Settings, Bell, User, Menu, X, BarChart3 } from "lucide-react";
 import { Button } from "./button";
 import { useAuth } from "~/contexts/auth-context";
 import { cn } from "~/lib/utils";
@@ -56,6 +56,17 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
               >
                 <Home className="mr-2 h-4 w-4" />
                 Home
+              </Button>
+            </Link>
+
+            <Link to="/trackers">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-300 hover:text-white hover:bg-slate-800"
+              >
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Trackers
               </Button>
             </Link>
             <Link to="/manage">
@@ -175,6 +186,14 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
         >
           <Users className="h-5 w-5 text-slate-400" />
           <span className="text-slate-300">Manage Household</span>
+        </Link>
+        <Link
+          to="/trackers"
+          onClick={onClose}
+          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-colors"
+        >
+          <BarChart3 className="h-5 w-5 text-slate-400" />
+          <span className="text-slate-300">Trackers</span>
         </Link>
         <Link
           to="/manage/add-member"

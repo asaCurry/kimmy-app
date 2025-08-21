@@ -68,6 +68,20 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
           }}
         />
 
+        <Link to="/trackers">
+          <IconCard
+            icon={
+              <div className="text-2xl bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-lg">
+                <span className="text-2xl">⏱️</span>
+              </div>
+            }
+            title="Trackers"
+            description="Manage activity trackers and time logs"
+            showChevron={true}
+            className="hover:scale-105 transition-transform duration-200"
+          />
+        </Link>
+
         <IconCard
           icon={
             <div className="text-2xl bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-lg">
