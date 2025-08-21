@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             setIsAuthenticated(true);
           }
         }
-      } catch (error) {
+      } catch (_error) {
         // Clear invalid session data
         sessionStorage.clearSession();
         document.cookie =

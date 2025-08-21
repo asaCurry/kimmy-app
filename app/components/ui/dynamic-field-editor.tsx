@@ -3,7 +3,6 @@ import { Button } from "./button";
 import { Input } from "./input";
 import { Label } from "./label";
 import { Switch } from "./switch";
-import { Textarea } from "./textarea";
 import { Eye, EyeOff, Copy, Trash2, GripVertical } from "lucide-react";
 import type { DynamicField } from "~/lib/types/dynamic-fields";
 import { getFieldTypeConfig } from "~/lib/utils/dynamic-fields/field-creation";
@@ -19,7 +18,6 @@ interface DynamicFieldEditorProps {
   onDuplicate: (fieldId: string) => void;
   onToggleActive: (fieldId: string) => void;
   onReorder?: (fromIndex: number, toIndex: number) => void;
-  index: number;
   totalFields: number;
 }
 
@@ -30,7 +28,6 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
   onDuplicate,
   onToggleActive,
   onReorder,
-  index,
   totalFields,
 }) => {
   const [isExpanded, setIsExpanded] = React.useState(false);

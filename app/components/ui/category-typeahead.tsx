@@ -28,7 +28,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   allowCreate = true,
   maxSuggestions = 8,
 }) => {
-  const { categories, getCategorySuggestions, addCategory, loadCategories } =
+  const { getCategorySuggestions, addCategory, loadCategories } =
     useCategories();
   const [isOpen, setIsOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");

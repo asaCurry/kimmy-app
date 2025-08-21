@@ -15,7 +15,6 @@ import {
 import {
   Clock,
   Calendar,
-  User,
   Tag,
   Trash2,
   Edit,

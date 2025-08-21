@@ -16,7 +16,7 @@ import {
 interface InviteCodeManagerProps {
   householdId: string;
   currentInviteCode?: string;
-  onInviteCodeGenerated?: (newCode: string) => void;
+  onInviteCodeGenerated?: (_newCode: string) => void;
 }
 
 export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({

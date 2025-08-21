@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, useActionData, useNavigation } from "react-router";
+import { Form } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import {
@@ -15,7 +15,6 @@ import { RELATIONSHIP_TYPES } from "~/lib/types";
 
 interface HouseholdmemberFormProps {
   householdId: string;
-  onSubmit: (formData: FormData) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
   initialData?: {
@@ -31,7 +30,6 @@ interface HouseholdmemberFormProps {
 
 export const HouseholdmemberForm: React.FC<HouseholdmemberFormProps> = ({
   householdId,
-  onSubmit,
   onCancel,
   isSubmitting = false,
   initialData = {},

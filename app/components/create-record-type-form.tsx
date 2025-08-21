@@ -22,7 +22,6 @@ interface CreateRecordTypeFormProps {
   householdId: string;
   createdBy: number;
   category?: string; // Optional - if not provided, user can select
-  existingCategories?: string[]; // Optional - existing categories to show as suggestions
   onSuccess?: () => void;
   onCancel?: () => void;
   showBackButton?: boolean;
@@ -37,7 +36,6 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
   onCancel,
   showBackButton = false,
   className = "",
-  existingCategories,
 }) => {
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === "submitting";

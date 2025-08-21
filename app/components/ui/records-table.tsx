@@ -8,9 +8,6 @@ import type { Record, RecordType } from "~/db/schema";
 interface RecordsTableProps {
   records: Record[];
   recordType: RecordType;
-  memberId: string;
-  category: string;
-  householdId: string;
   onDelete: (recordId: number) => void;
   isDeleting: boolean;
 }
@@ -18,9 +15,6 @@ interface RecordsTableProps {
 export const RecordsTable: React.FC<RecordsTableProps> = ({
   records,
   recordType,
-  memberId,
-  category,
-  householdId,
   onDelete,
   isDeleting,
 }) => {

@@ -22,19 +22,12 @@ interface RecentRecord {
   tags?: string | null;
 }
 
-// Extended interface to include the full record type for context
-interface RecentRecordWithType extends RecentRecord {
-  recordType: RecordType;
-}
-
 interface RecentRecordsListProps {
   records: RecentRecord[];
-  householdMembers: any[];
 }
 
 export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
   records,
-  householdMembers,
 }) => {
   const { openRecord } = useRecordManagement();
 

@@ -1,0 +1,468 @@
+:102:24  warning  'setIsSubmitting' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:102:24  warning  'setIsSubmitting' is assigned a value but never used  no-unused-vars
+:102:41  warning  'context' is defined but never used  @typescript-eslint/no-unused-vars
+:102:41  warning  'context' is defined but never used  no-unused-vars
+:10:10  warning  'Button' is defined but never used    @typescript-eslint/no-unused-vars
+:10:10  warning  'Button' is defined but never used    no-unused-vars
+:10:10  warning  'PageLayout' is defined but never used       @typescript-eslint/no-unused-vars
+:10:10  warning  'PageLayout' is defined but never used       no-unused-vars
+:10:22  warning  'PageHeader' is defined but never used       @typescript-eslint/no-unused-vars
+:10:22  warning  'PageHeader' is defined but never used       no-unused-vars
+:10:3   warning  'CardHeader' is defined but never used       @typescript-eslint/no-unused-vars
+:10:3   warning  'CardHeader' is defined but never used       no-unused-vars
+:10:3   warning  'Users' is defined but never used        @typescript-eslint/no-unused-vars
+:10:3   warning  'Users' is defined but never used        no-unused-vars
+:11:10  warning  'Badge' is defined but never used     @typescript-eslint/no-unused-vars
+:11:10  warning  'Badge' is defined but never used     no-unused-vars
+:11:10  warning  'RequireAuth' is defined but never used      @typescript-eslint/no-unused-vars
+:11:10  warning  'RequireAuth' is defined but never used      no-unused-vars
+:11:3   warning  'CardTitle' is defined but never used        @typescript-eslint/no-unused-vars
+:11:3   warning  'CardTitle' is defined but never used        no-unused-vars
+:11:3  warning  '_loadContext' is defined but never used  @typescript-eslint/no-unused-vars
+:11:3  warning  '_loadContext' is defined but never used  no-unused-vars
+:124:3   warning  'params' is defined but never used  @typescript-eslint/no-unused-vars
+:124:3   warning  'params' is defined but never used  no-unused-vars
+:126:11  warning  'session' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:126:11  warning  'session' is assigned a value but never used  no-unused-vars
+:12:10  warning  'Edit' is defined but never used      @typescript-eslint/no-unused-vars
+:12:10  warning  'Edit' is defined but never used      no-unused-vars
+:12:10  warning  'Navigation' is defined but never used       @typescript-eslint/no-unused-vars
+:12:10  warning  'Navigation' is defined but never used       no-unused-vars
+:12:12  warning  'context' is defined but never used        no-unused-vars
+:12:13  warning  'value' is defined but never used  no-unused-vars
+:12:15  warning  'FormField' is defined but never used                  @typescript-eslint/no-unused-vars
+:12:15  warning  'FormField' is defined but never used                  no-unused-vars
+:12:16  warning  'Trash2' is defined but never used    @typescript-eslint/no-unused-vars
+:12:16  warning  'Trash2' is defined but never used    no-unused-vars
+:12:24  warning  'Crown' is defined but never used     @typescript-eslint/no-unused-vars
+:12:24  warning  'Crown' is defined but never used     no-unused-vars
+:12:3   warning  'Calendar' is defined but never used     @typescript-eslint/no-unused-vars
+:12:3   warning  'Calendar' is defined but never used     no-unused-vars
+:12:3  warning  'Settings' is defined but never used  @typescript-eslint/no-unused-vars
+:12:3  warning  'Settings' is defined but never used  no-unused-vars
+:12:31  warning  'User' is defined but never used      @typescript-eslint/no-unused-vars
+:12:31  warning  'User' is defined but never used      no-unused-vars
+:12:37  warning  'Eye' is defined but never used       @typescript-eslint/no-unused-vars
+:12:37  warning  'Eye' is defined but never used       no-unused-vars
+:132:3   warning  'targetMember' is defined but never used      @typescript-eslint/no-unused-vars
+:132:3   warning  'targetMember' is defined but never used      no-unused-vars
+:135:11  warning  'index' is defined but never used  @typescript-eslint/no-unused-vars
+:135:11  warning  'index' is defined but never used  no-unused-vars
+:136:11  warning  'session' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:136:11  warning  'session' is assigned a value but never used  no-unused-vars
+:137:3  warning  'isDirty' is defined but never used  @typescript-eslint/no-unused-vars
+:137:3  warning  'isDirty' is defined but never used  no-unused-vars
+:13:12  warning  'originalError' is defined but never used  no-unused-vars
+:13:24  warning  'params' is defined but never used            @typescript-eslint/no-unused-vars
+:13:24  warning  'params' is defined but never used            no-unused-vars
+:13:3   warning  'Accordion' is defined but never used                    @typescript-eslint/no-unused-vars
+:13:3   warning  'Accordion' is defined but never used                    no-unused-vars
+:13:3   warning  'BarChart3' is defined but never used    @typescript-eslint/no-unused-vars
+:13:3   warning  'BarChart3' is defined but never used    no-unused-vars
+:13:3  warning  'Bell' is defined but never used      @typescript-eslint/no-unused-vars
+:13:3  warning  'Bell' is defined but never used      no-unused-vars
+:140:31  warning  'e' is defined but never used                         @typescript-eslint/no-unused-vars
+:140:31  warning  'e' is defined but never used                         no-unused-vars
+:140:9   warning  'navigation' is assigned a value but never used        @typescript-eslint/no-unused-vars
+:140:9   warning  'navigation' is assigned a value but never used        no-unused-vars
+:141:24  warning  'householdMembers' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:141:24  warning  'householdMembers' is assigned a value but never used  no-unused-vars
+:14:10  warning  'Badge' is defined but never used            @typescript-eslint/no-unused-vars
+:14:10  warning  'Badge' is defined but never used            no-unused-vars
+:14:14  warning  'recordId' is defined but never used     no-unused-vars
+:14:15  warning  'RecordType' is defined but never used                 @typescript-eslint/no-unused-vars
+:14:15  warning  'RecordType' is defined but never used                 no-unused-vars
+:14:15  warning  'data' is defined but never used                     no-unused-vars
+:14:3   warning  'FormDescription' is defined but never used           @typescript-eslint/no-unused-vars
+:14:3   warning  'FormDescription' is defined but never used           no-unused-vars
+:14:3   warning  'Shield' is defined but never used       @typescript-eslint/no-unused-vars
+:14:3   warning  'Shield' is defined but never used       no-unused-vars
+:14:3   warning  'currentHouseholdId' is defined but never used  @typescript-eslint/no-unused-vars
+:14:3   warning  'currentHouseholdId' is defined but never used  no-unused-vars
+:157:3   warning  'targetMemberRole' is defined but never used  @typescript-eslint/no-unused-vars
+:157:3   warning  'targetMemberRole' is defined but never used  no-unused-vars
+:15:10  warning  'ArrowLeft' is defined but never used        @typescript-eslint/no-unused-vars
+:15:10  warning  'ArrowLeft' is defined but never used        no-unused-vars
+:15:10  warning  'convertFormDataToFields' is defined but never used    @typescript-eslint/no-unused-vars
+:15:10  warning  'convertFormDataToFields' is defined but never used    no-unused-vars
+:15:18  warning  'data' is defined but never used      no-unused-vars
+:15:21  warning  'UserPlus' is defined but never used         @typescript-eslint/no-unused-vars
+:15:21  warning  'UserPlus' is defined but never used         no-unused-vars
+:15:24  warning  'errors' is defined but never used                   no-unused-vars
+:15:3   warning  'LogOut' is defined but never used       @typescript-eslint/no-unused-vars
+:15:3   warning  'LogOut' is defined but never used       no-unused-vars
+:15:31  warning  'Settings' is defined but never used         @typescript-eslint/no-unused-vars
+:15:31  warning  'Settings' is defined but never used         no-unused-vars
+:15:41  warning  'Users' is defined but never used            @typescript-eslint/no-unused-vars
+:15:41  warning  'Users' is defined but never used            no-unused-vars
+:15:48  warning  'Home' is defined but never used             @typescript-eslint/no-unused-vars
+:15:48  warning  'Home' is defined but never used             no-unused-vars
+:15:54  warning  'Plus' is defined but never used             @typescript-eslint/no-unused-vars
+:15:54  warning  'Plus' is defined but never used             no-unused-vars
+:161:12  warning  'householdId' is defined but never used  @typescript-eslint/no-unused-vars
+:161:12  warning  'householdId' is defined but never used  no-unused-vars
+:162:24  warning  'householdMembers' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:162:24  warning  'householdMembers' is assigned a value but never used  no-unused-vars
+:169:3   warning  'request' is defined but never used                    @typescript-eslint/no-unused-vars
+:169:3   warning  'request' is defined but never used                    no-unused-vars
+:16:11  warning  'email' is assigned a value but never used        @typescript-eslint/no-unused-vars
+:16:11  warning  'email' is assigned a value but never used        no-unused-vars
+:16:18  warning  'recordId' is defined but never used  no-unused-vars
+:16:3   warning  'CardDescription' is defined but never used               @typescript-eslint/no-unused-vars
+:16:3   warning  'CardDescription' is defined but never used               no-unused-vars
+:16:3   warning  'CardDescription' is defined but never used   @typescript-eslint/no-unused-vars
+:16:3   warning  'CardDescription' is defined but never used   no-unused-vars
+:16:3   warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
+:16:3   warning  'CardDescription' is defined but never used  no-unused-vars
+:16:36  warning  'data' is defined but never used      no-unused-vars
+:170:3   warning  'context' is defined but never used                    @typescript-eslint/no-unused-vars
+:170:3   warning  'context' is defined but never used                    no-unused-vars
+:17:14  warning  'fieldId' is defined but never used    no-unused-vars
+:17:18  warning  'recordId' is defined but never used  no-unused-vars
+:17:23  warning  'db' is defined but never used               no-unused-vars
+:17:3   warning  'CardHeader' is defined but never used        @typescript-eslint/no-unused-vars
+:17:3   warning  'CardHeader' is defined but never used        no-unused-vars
+:17:31  warning  'updates' is defined but never used    no-unused-vars
+:182:21  warning  'params' is defined but never used                     @typescript-eslint/no-unused-vars
+:182:21  warning  'params' is defined but never used                     no-unused-vars
+:182:3   warning  'params' is defined but never used  @typescript-eslint/no-unused-vars
+:182:3   warning  'params' is defined but never used  no-unused-vars
+:185:5   warning  'householdId' is assigned a value but never used       @typescript-eslint/no-unused-vars
+:185:5   warning  'householdId' is assigned a value but never used       no-unused-vars
+:186:5   warning  'householdMembers' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:186:5   warning  'householdMembers' is assigned a value but never used  no-unused-vars
+:18:10  warning  'useAuth' is defined but never used      @typescript-eslint/no-unused-vars
+:18:10  warning  'useAuth' is defined but never used      no-unused-vars
+:18:11  warning  'dateOfBirth' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:18:11  warning  'dateOfBirth' is assigned a value but never used  no-unused-vars
+:18:14  warning  'fieldId' is defined but never used    no-unused-vars
+:18:14  warning  'formData' is defined but never used       no-unused-vars
+:18:21  warning  'fields' is defined but never used                 no-unused-vars
+:18:3   warning  'CardTitle' is defined but never used         @typescript-eslint/no-unused-vars
+:18:3   warning  'CardTitle' is defined but never used         no-unused-vars
+:18:3   warning  'User' is defined but never used   @typescript-eslint/no-unused-vars
+:18:3   warning  'User' is defined but never used   no-unused-vars
+:194:14  warning  'recordId' is defined but never used                     no-unused-vars
+:19:10  warning  'cn' is defined but never used           @typescript-eslint/no-unused-vars
+:19:10  warning  'cn' is defined but never used           no-unused-vars
+:19:15  warning  'householdId' is defined but never used  no-unused-vars
+:19:17  warning  'fieldId' is defined but never used    no-unused-vars
+:19:21  warning  'Edit' is defined but never used                         @typescript-eslint/no-unused-vars
+:19:21  warning  'Edit' is defined but never used                         no-unused-vars
+:19:28  warning  'newCode' is defined but never used  no-unused-vars
+:19:3   warning  'Tag' is defined but never used    @typescript-eslint/no-unused-vars
+:19:3   warning  'Tag' is defined but never used    no-unused-vars
+:19:36  warning  'memberData' is defined but never used   no-unused-vars
+:1:10  warning  'useState' is defined but never used         @typescript-eslint/no-unused-vars
+:1:10  warning  'useState' is defined but never used         no-unused-vars
+:1:10  warning  'useState' is defined but never used  @typescript-eslint/no-unused-vars
+:1:10  warning  'useState' is defined but never used  no-unused-vars
+:1:16  warning  'useLocation' is defined but never used  @typescript-eslint/no-unused-vars
+:1:16  warning  'useLocation' is defined but never used  no-unused-vars
+:1:20  warning  'useEffect' is defined but never used        @typescript-eslint/no-unused-vars
+:1:20  warning  'useEffect' is defined but never used        no-unused-vars
+:1:30  warning  'count' is defined but never used            @typescript-eslint/no-unused-vars
+:1:30  warning  'count' is defined but never used            no-unused-vars
+:200:36  warning  'session' is defined but never used           @typescript-eslint/no-unused-vars
+:200:36  warning  'session' is defined but never used           no-unused-vars
+:202:14  warning  'error' is defined but never used             @typescript-eslint/no-unused-vars
+:202:14  warning  'error' is defined but never used             no-unused-vars
+:204:5   warning  'householdMembers' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:204:5   warning  'householdMembers' is assigned a value but never used  no-unused-vars
+:20:11  warning  'email' is defined but never used     no-unused-vars
+:20:14  warning  'error' is defined but never used                 no-unused-vars
+:20:20  warning  'fieldId' is defined but never used    no-unused-vars
+:20:20  warning  'householdId' is defined but never used   no-unused-vars
+:20:26  warning  'password' is defined but never used  no-unused-vars
+:20:28  warning  'errorInfo' is defined but never used             no-unused-vars
+:20:3   warning  'Eye' is defined but never used         @typescript-eslint/no-unused-vars
+:20:3   warning  'Eye' is defined but never used         no-unused-vars
+:20:3  warning  'UpdateTrackerInput' is defined but never used  @typescript-eslint/no-unused-vars
+:20:3  warning  'UpdateTrackerInput' is defined but never used  no-unused-vars
+:215:11  warning  'session' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:215:11  warning  'session' is assigned a value but never used  no-unused-vars
+:21:10  warning  'Input' is defined but never used            @typescript-eslint/no-unused-vars
+:21:10  warning  'Input' is defined but never used            no-unused-vars
+:21:12  warning  'navigate' is defined but never used  no-unused-vars
+:21:16  warning  'fromIndex' is defined but never used  no-unused-vars
+:21:17  warning  'householdId' is defined but never used   no-unused-vars
+:21:3   warning  'Save' is defined but never used        @typescript-eslint/no-unused-vars
+:21:3   warning  'Save' is defined but never used        no-unused-vars
+:21:3   warning  'memberId' is defined but never used     @typescript-eslint/no-unused-vars
+:21:3   warning  'memberId' is defined but never used     no-unused-vars
+:21:35  warning  'toIndex' is defined but never used    no-unused-vars
+:21:38  warning  'categoryName' is defined but never used  no-unused-vars
+:21:5   warning  'householdId' is defined but never used  no-unused-vars
+:22:10  warning  'Label' is defined but never used            @typescript-eslint/no-unused-vars
+:22:10  warning  'Label' is defined but never used            no-unused-vars
+:22:19  warning  'session' is defined but never used   no-unused-vars
+:22:22  warning  'query' is defined but never used         no-unused-vars
+:22:27  warning  'Timer' is defined but never used             @typescript-eslint/no-unused-vars
+:22:27  warning  'Timer' is defined but never used             no-unused-vars
+:22:3   warning  'X' is defined but never used           @typescript-eslint/no-unused-vars
+:22:3   warning  'X' is defined but never used           no-unused-vars
+:22:3   warning  'category' is defined but never used     @typescript-eslint/no-unused-vars
+:22:3   warning  'category' is defined but never used     no-unused-vars
+:22:5   warning  'userId' is defined but never used       no-unused-vars
+:234:12  warning  'code' is defined but never used     no-unused-vars
+:236:12  warning  'details' is defined but never used  no-unused-vars
+:23:28  warning  'query' is defined but never used         no-unused-vars
+:23:3   warning  'householdId' is defined but never used  @typescript-eslint/no-unused-vars
+:23:3   warning  'householdId' is defined but never used  no-unused-vars
+:23:38  warning  'Clock' is defined but never used                         @typescript-eslint/no-unused-vars
+:23:38  warning  'Clock' is defined but never used                         no-unused-vars
+:23:43  warning  'maxResults' is defined but never used    no-unused-vars
+:23:5   warning  'userData' is defined but never used     no-unused-vars
+:243:5   warning  'householdMembers' is assigned a value but never used     @typescript-eslint/no-unused-vars
+:243:5   warning  'householdMembers' is assigned a value but never used     no-unused-vars
+:24:23  warning  'RecordType' is defined but never used  @typescript-eslint/no-unused-vars
+:24:23  warning  'RecordType' is defined but never used  no-unused-vars
+:24:3   warning  'Select' is defined but never used           @typescript-eslint/no-unused-vars
+:24:3   warning  'Select' is defined but never used           no-unused-vars
+:25:16  warning  'record' is defined but never used      no-unused-vars
+:25:18  warning  'memberId' is defined but never used     no-unused-vars
+:25:21  warning  'setIsLoading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:25:21  warning  'setIsLoading' is assigned a value but never used  no-unused-vars
+:25:3   warning  'SelectContent' is defined but never used    @typescript-eslint/no-unused-vars
+:25:3   warning  'SelectContent' is defined but never used    no-unused-vars
+:25:32  warning  'recordType' is defined but never used  no-unused-vars
+:264:36  warning  'newCode' is defined but never used           @typescript-eslint/no-unused-vars
+:264:36  warning  'newCode' is defined but never used           no-unused-vars
+:26:11  warning  'RecentRecordWithType' is defined but never used  @typescript-eslint/no-unused-vars
+:26:11  warning  'RecentRecordWithType' is defined but never used  no-unused-vars
+:26:18  warning  'memberId' is defined but never used     no-unused-vars
+:26:24  warning  'TrackerEntry' is defined but never used      @typescript-eslint/no-unused-vars
+:26:24  warning  'TrackerEntry' is defined but never used      no-unused-vars
+:26:3   warning  'SelectItem' is defined but never used       @typescript-eslint/no-unused-vars
+:26:3   warning  'SelectItem' is defined but never used       no-unused-vars
+:26:36  warning  'updates' is defined but never used      no-unused-vars
+:27:15  warning  'Tracker' is defined but never used                       @typescript-eslint/no-unused-vars
+:27:15  warning  'Tracker' is defined but never used                       no-unused-vars
+:27:19  warning  'mode' is defined but never used        no-unused-vars
+:27:22  warning  'householdId' is defined but never used  no-unused-vars
+:27:3   warning  'SelectTrigger' is defined but never used    @typescript-eslint/no-unused-vars
+:27:3   warning  'SelectTrigger' is defined but never used    no-unused-vars
+:27:43  warning  'role' is defined but never used         no-unused-vars
+:28:18  warning  'recordId' is defined but never used    no-unused-vars
+:28:20  warning  'householdId' is defined but never used  no-unused-vars
+:28:3   warning  'SelectValue' is defined but never used      @typescript-eslint/no-unused-vars
+:28:3   warning  'SelectValue' is defined but never used      no-unused-vars
+:293:18  warning  'error' is defined but never used             @typescript-eslint/no-unused-vars
+:293:18  warning  'error' is defined but never used             no-unused-vars
+:299:67  warning  'params' is defined but never used                     @typescript-eslint/no-unused-vars
+:299:67  warning  'params' is defined but never used                     no-unused-vars
+:29:18  warning  'recordId' is defined but never used    no-unused-vars
+:29:25  warning  'members' is defined but never used      no-unused-vars
+:29:36  warning  'updates' is defined but never used     no-unused-vars
+:2:10  warning  'Link' is defined but never used      @typescript-eslint/no-unused-vars
+:2:10  warning  'Link' is defined but never used      no-unused-vars
+:2:10  warning  'getDatabase' is defined but never used   @typescript-eslint/no-unused-vars
+:2:10  warning  'getDatabase' is defined but never used   no-unused-vars
+:2:10  warning  'userDb' is defined but never used                @typescript-eslint/no-unused-vars
+:2:10  warning  'userDb' is defined but never used                no-unused-vars
+:2:10  warning  'userDb' is defined but never used  @typescript-eslint/no-unused-vars
+:2:10  warning  'userDb' is defined but never used  no-unused-vars
+:2:16  warning  'useActionData' is defined but never used  @typescript-eslint/no-unused-vars
+:2:16  warning  'useActionData' is defined but never used  no-unused-vars
+:2:16  warning  'useNavigate' is defined but never used      @typescript-eslint/no-unused-vars
+:2:16  warning  'useNavigate' is defined but never used      no-unused-vars
+:2:23  warning  'useLoaderData' is defined but never used              @typescript-eslint/no-unused-vars
+:2:23  warning  'useLoaderData' is defined but never used              no-unused-vars
+:2:31  warning  'useNavigation' is defined but never used  @typescript-eslint/no-unused-vars
+:2:31  warning  'useNavigation' is defined but never used  no-unused-vars
+:2:35  warning  'User' is defined but never used        @typescript-eslint/no-unused-vars
+:2:35  warning  'User' is defined but never used        no-unused-vars
+:300:54  warning  'householdMembers' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:300:54  warning  'householdMembers' is assigned a value but never used  no-unused-vars
+:30:10  warning  'ArrowLeft' is defined but never used        @typescript-eslint/no-unused-vars
+:30:10  warning  'ArrowLeft' is defined but never used        no-unused-vars
+:30:17  warning  'isDeleting' is defined but never used  no-unused-vars
+:30:20  warning  'note' is defined but never used                   no-unused-vars
+:30:21  warning  'Save' is defined but never used             @typescript-eslint/no-unused-vars
+:30:21  warning  'Save' is defined but never used             no-unused-vars
+:30:25  warning  'useActionData' is defined but never used     @typescript-eslint/no-unused-vars
+:30:25  warning  'useActionData' is defined but never used     no-unused-vars
+:30:27  warning  'Trash2' is defined but never used           @typescript-eslint/no-unused-vars
+:30:27  warning  'Trash2' is defined but never used           no-unused-vars
+:30:3   warning  'Eye' is defined but never used          @typescript-eslint/no-unused-vars
+:30:3   warning  'Eye' is defined but never used          no-unused-vars
+:31:11  warning  'categories' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:31:11  warning  'categories' is assigned a value but never used  no-unused-vars
+:31:17  warning  'isUpdating' is defined but never used  no-unused-vars
+:31:18  warning  'entry' is defined but never used  no-unused-vars
+:31:20  warning  'noteId' is defined but never used                 no-unused-vars
+:31:24  warning  'params' is defined but never used                     @typescript-eslint/no-unused-vars
+:31:24  warning  'params' is defined but never used                     no-unused-vars
+:31:3   warning  'EyeOff' is defined but never used       @typescript-eslint/no-unused-vars
+:31:3   warning  'EyeOff' is defined but never used       no-unused-vars
+:34:3   warning  'onSubmit' is defined but never used       @typescript-eslint/no-unused-vars
+:34:3   warning  'onSubmit' is defined but never used       no-unused-vars
+:35:15  warning  'data' is defined but never used              no-unused-vars
+:35:15  warning  'db' is defined but never used       no-unused-vars
+:35:3   warning  'category' is defined but never used    @typescript-eslint/no-unused-vars
+:35:3   warning  'category' is defined but never used    no-unused-vars
+:362:31  warning  '_' is defined but never used                          @typescript-eslint/no-unused-vars
+:362:31  warning  '_' is defined but never used                          no-unused-vars
+:36:9  warning  'handleClearSession' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:36:9  warning  'handleClearSession' is assigned a value but never used  no-unused-vars
+:379:25  warning  'categoryRecordTypes' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:379:25  warning  'categoryRecordTypes' is assigned a value but never used  no-unused-vars
+:37:3   warning  'householdId' is defined but never used      @typescript-eslint/no-unused-vars
+:37:3   warning  'householdId' is defined but never used      no-unused-vars
+:37:3   warning  'householdMembers' is defined but never used      @typescript-eslint/no-unused-vars
+:37:3   warning  'householdMembers' is defined but never used      no-unused-vars
+:381:11  warning  'session' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:381:11  warning  'session' is assigned a value but never used  no-unused-vars
+:38:3   warning  'onMemberUpdated' is defined but never used  @typescript-eslint/no-unused-vars
+:38:3   warning  'onMemberUpdated' is defined but never used  no-unused-vars
+:3:10  warning  'Badge' is defined but never used        @typescript-eslint/no-unused-vars
+:3:10  warning  'Badge' is defined but never used        no-unused-vars
+:3:10  warning  'PageLayout' is defined but never used       @typescript-eslint/no-unused-vars
+:3:10  warning  'PageLayout' is defined but never used       no-unused-vars
+:3:10  warning  'recordTypes' is defined but never used   @typescript-eslint/no-unused-vars
+:3:10  warning  'recordTypes' is defined but never used   no-unused-vars
+:3:16  warning  'useNavigate' is defined but never used      @typescript-eslint/no-unused-vars
+:3:16  warning  'useNavigate' is defined but never used      no-unused-vars
+:3:22  warning  'PageHeader' is defined but never used       @typescript-eslint/no-unused-vars
+:3:22  warning  'PageHeader' is defined but never used       no-unused-vars
+:3:23  warning  'useLoaderData' is defined but never used              @typescript-eslint/no-unused-vars
+:3:23  warning  'useLoaderData' is defined but never used              no-unused-vars
+:414:30  warning  'note' is defined but never used              @typescript-eslint/no-unused-vars
+:414:30  warning  'note' is defined but never used              no-unused-vars
+:419:30  warning  'noteId' is defined but never used            @typescript-eslint/no-unused-vars
+:419:30  warning  'noteId' is defined but never used            no-unused-vars
+:41:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+:41:14  warning  'error' is defined but never used  no-unused-vars
+:43:15  warning  'recordId' is defined but never used     no-unused-vars
+:46:10  warning  'isSubmitting' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:46:10  warning  'isSubmitting' is assigned a value but never used  no-unused-vars
+:46:14  warning  'error' is defined but never used                    @typescript-eslint/no-unused-vars
+:46:14  warning  'error' is defined but never used                    no-unused-vars
+:46:3   warning  'memberId' is defined but never used          @typescript-eslint/no-unused-vars
+:46:3   warning  'memberId' is defined but never used          no-unused-vars
+:47:3   warning  'createdBy' is defined but never used         @typescript-eslint/no-unused-vars
+:47:3   warning  'createdBy' is defined but never used         no-unused-vars
+:48:48  warning  'index' is defined but never used  @typescript-eslint/no-unused-vars
+:48:48  warning  'index' is defined but never used  no-unused-vars
+:49:13  warning  'customOnSubmit' is defined but never used    @typescript-eslint/no-unused-vars
+:49:13  warning  'customOnSubmit' is defined but never used    no-unused-vars
+:4:10  warning  'RequireAuth' is defined but never used      @typescript-eslint/no-unused-vars
+:4:10  warning  'RequireAuth' is defined but never used      no-unused-vars
+:4:10  warning  'eq' is defined but never used            @typescript-eslint/no-unused-vars
+:4:10  warning  'eq' is defined but never used            no-unused-vars
+:4:23  warning  'useAuth' is defined but never used          @typescript-eslint/no-unused-vars
+:4:23  warning  'useAuth' is defined but never used          no-unused-vars
+:4:3   warning  'NewTracker' is defined but never used       @typescript-eslint/no-unused-vars
+:4:3   warning  'NewTracker' is defined but never used       no-unused-vars
+:4:32  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+:4:32  warning  'request' is defined but never used  no-unused-vars
+:4:41  warning  'context' is defined but never used  @typescript-eslint/no-unused-vars
+:4:41  warning  'context' is defined but never used  no-unused-vars
+:51:16  warning  'error' is defined but never used        @typescript-eslint/no-unused-vars
+:51:16  warning  'error' is defined but never used        no-unused-vars
+:51:3   warning  'householdId' is defined but never used      @typescript-eslint/no-unused-vars
+:51:3   warning  'householdId' is defined but never used      no-unused-vars
+:52:3   warning  'householdId' is defined but never used  @typescript-eslint/no-unused-vars
+:52:3   warning  'householdId' is defined but never used  no-unused-vars
+:53:9   warning  'handleRecordUpdate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:53:9   warning  'handleRecordUpdate' is assigned a value but never used  no-unused-vars
+:54:5   warning  'recordId' is defined but never used                     @typescript-eslint/no-unused-vars
+:54:5   warning  'recordId' is defined but never used                     no-unused-vars
+:55:21  warning  'recordId' is defined but never used    no-unused-vars
+:55:5   warning  'updates' is defined but never used                      @typescript-eslint/no-unused-vars
+:55:5   warning  'updates' is defined but never used                      no-unused-vars
+:56:14  warning  'error' is defined but never used             @typescript-eslint/no-unused-vars
+:56:14  warning  'error' is defined but never used             no-unused-vars
+:57:14  warning  'error' is defined but never used   @typescript-eslint/no-unused-vars
+:57:14  warning  'error' is defined but never used   no-unused-vars
+:57:5   warning  'recordId' is defined but never used    no-unused-vars
+:58:5   warning  'updates' is defined but never used     no-unused-vars
+:5:10  warning  'Navigation' is defined but never used       @typescript-eslint/no-unused-vars
+:5:10  warning  'Navigation' is defined but never used       no-unused-vars
+:5:15  warning  'Householdmember' is defined but never used     @typescript-eslint/no-unused-vars
+:5:15  warning  'Householdmember' is defined but never used     no-unused-vars
+:5:18  warning  'householdDb' is defined but never used   @typescript-eslint/no-unused-vars
+:5:18  warning  'householdDb' is defined but never used   no-unused-vars
+:5:23  warning  'useAuth' is defined but never used                    @typescript-eslint/no-unused-vars
+:5:23  warning  'useAuth' is defined but never used                    no-unused-vars
+:5:23  warning  'useAuth' is defined but never used          @typescript-eslint/no-unused-vars
+:5:23  warning  'useAuth' is defined but never used          no-unused-vars
+:5:3   warning  'CardContent' is defined but never used  @typescript-eslint/no-unused-vars
+:5:3   warning  'CardContent' is defined but never used  no-unused-vars
+:60:11  warning  'user' is assigned a value but never used                 @typescript-eslint/no-unused-vars
+:60:11  warning  'user' is assigned a value but never used                 no-unused-vars
+:63:51  warning  'householdId' is defined but never used   @typescript-eslint/no-unused-vars
+:63:51  warning  'householdId' is defined but never used   no-unused-vars
+:65:10  warning  'showCreateEntryForm' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:65:10  warning  'showCreateEntryForm' is assigned a value but never used  no-unused-vars
+:67:14  warning  'error' is defined but never used                         @typescript-eslint/no-unused-vars
+:67:14  warning  'error' is defined but never used                         no-unused-vars
+:67:5   warning  'db' is defined but never used       no-unused-vars
+:68:5   warning  'session' is defined but never used  no-unused-vars
+:6:10  warning  'Navigation' is defined but never used        @typescript-eslint/no-unused-vars
+:6:10  warning  'Navigation' is defined but never used        no-unused-vars
+:6:10  warning  'NoHousehold' is defined but never used       @typescript-eslint/no-unused-vars
+:6:10  warning  'NoHousehold' is defined but never used       no-unused-vars
+:6:10  warning  'Textarea' is defined but never used   @typescript-eslint/no-unused-vars
+:6:10  warning  'Textarea' is defined but never used   no-unused-vars
+:6:10  warning  'parseCookies' is defined but never used  @typescript-eslint/no-unused-vars
+:6:10  warning  'parseCookies' is defined but never used  no-unused-vars
+:6:26  warning  'householdDb' is defined but never used  @typescript-eslint/no-unused-vars
+:6:26  warning  'householdDb' is defined but never used  no-unused-vars
+:6:3   warning  'CardDescription' is defined but never used              @typescript-eslint/no-unused-vars
+:6:3   warning  'CardDescription' is defined but never used              no-unused-vars
+:6:3   warning  'NewTrackerEntry' is defined but never used  @typescript-eslint/no-unused-vars
+:6:3   warning  'NewTrackerEntry' is defined but never used  no-unused-vars
+:6:3   warning  'startTimeTrackingSchema' is defined but never used  @typescript-eslint/no-unused-vars
+:6:3   warning  'startTimeTrackingSchema' is defined but never used  no-unused-vars
+:71:5   warning  'control' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:71:5   warning  'control' is assigned a value but never used  no-unused-vars
+:75:12  warning  'error' is defined but never used             @typescript-eslint/no-unused-vars
+:75:12  warning  'error' is defined but never used             no-unused-vars
+:75:14  warning  'error' is defined but never used                      @typescript-eslint/no-unused-vars
+:75:14  warning  'error' is defined but never used                      no-unused-vars
+:77:3   warning  'showDetails' is assigned a value but never used  @typescript-eslint/no-unused-vars
+:77:3   warning  'showDetails' is assigned a value but never used  no-unused-vars
+:79:14  warning  'error' is defined but never used                      @typescript-eslint/no-unused-vars
+:79:14  warning  'error' is defined but never used                      no-unused-vars
+:7:15  warning  'Householdmember' is defined but never used  @typescript-eslint/no-unused-vars
+:7:15  warning  'Householdmember' is defined but never used  no-unused-vars
+:7:3   warning  'Card' is defined but never used             @typescript-eslint/no-unused-vars
+:7:3   warning  'Card' is defined but never used             no-unused-vars
+:7:3   warning  'Settings' is defined but never used     @typescript-eslint/no-unused-vars
+:7:3   warning  'Settings' is defined but never used     no-unused-vars
+:7:3   warning  'stopTimeTrackingSchema' is defined but never used   @typescript-eslint/no-unused-vars
+:7:3   warning  'stopTimeTrackingSchema' is defined but never used   no-unused-vars
+:7:3   warning  'useNavigate' is defined but never used      @typescript-eslint/no-unused-vars
+:7:3   warning  'useNavigate' is defined but never used      no-unused-vars
+:7:41  warning  'context' is defined but never used  @typescript-eslint/no-unused-vars
+:7:41  warning  'context' is defined but never used  no-unused-vars
+:82:11  warning  'index' is defined but never used  @typescript-eslint/no-unused-vars
+:82:11  warning  'index' is defined but never used  no-unused-vars
+:89:14  warning  'error' is defined but never used       @typescript-eslint/no-unused-vars
+:89:14  warning  'error' is defined but never used       no-unused-vars
+:8:14  warning  'value' is defined but never used                no-unused-vars
+:8:3   warning  'CardContent' is defined but never used      @typescript-eslint/no-unused-vars
+:8:3   warning  'CardContent' is defined but never used      no-unused-vars
+:8:3   warning  'Plus' is defined but never used         @typescript-eslint/no-unused-vars
+:8:3   warning  'Plus' is defined but never used         no-unused-vars
+:8:3   warning  'convertFormDataToFields' is defined but never used  @typescript-eslint/no-unused-vars
+:8:3   warning  'convertFormDataToFields' is defined but never used  no-unused-vars
+:8:3   warning  'useLoaderData' is defined but never used    @typescript-eslint/no-unused-vars
+:8:3   warning  'useLoaderData' is defined but never used    no-unused-vars
+:91:16  warning  'error' is defined but never used        @typescript-eslint/no-unused-vars
+:91:16  warning  'error' is defined but never used        no-unused-vars
+:92:16  warning  'error' is defined but never used     @typescript-eslint/no-unused-vars
+:92:16  warning  'error' is defined but never used     no-unused-vars
+:95:14  warning  'error' is defined but never used        @typescript-eslint/no-unused-vars
+:95:14  warning  'error' is defined but never used        no-unused-vars
+:98:28  warning  'entry' is defined but never used                         @typescript-eslint/no-unused-vars
+:98:28  warning  'entry' is defined but never used                         no-unused-vars
+:99:14  warning  'error' is defined but never used                        @typescript-eslint/no-unused-vars
+:99:14  warning  'error' is defined but never used                        no-unused-vars
+:9:3   warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
+:9:3   warning  'CardDescription' is defined but never used  no-unused-vars
+:9:3   warning  'Form' is defined but never used                      @typescript-eslint/no-unused-vars
+:9:3   warning  'Form' is defined but never used                      no-unused-vars
+:9:3  warning  'Form' is defined but never used  @typescript-eslint/no-unused-vars
+:9:3  warning  'Form' is defined but never used  no-unused-vars

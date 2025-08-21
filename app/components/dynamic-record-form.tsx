@@ -30,9 +30,7 @@ interface DynamicRecordFormProps {
   recordType: ParsedRecordType;
   householdId: string;
   memberId?: number;
-  createdBy?: number;
   onBack?: () => void;
-  onSubmit?: (data: any) => Promise<void>;
   onCancel?: () => void;
   initialData?: any;
   isSubmitting?: boolean;
@@ -44,9 +42,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   recordType,
   householdId,
   memberId,
-  createdBy,
   onBack,
-  onSubmit: customOnSubmit,
   onCancel,
   initialData,
   isSubmitting: customIsSubmitting = false,
@@ -68,7 +64,6 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors, isValid, isDirty, touchedFields },
     setValue,
     watch,

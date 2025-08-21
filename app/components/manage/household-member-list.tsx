@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
-import { Link, useNavigate, useFetcher } from "react-router";
+import { Link, useFetcher } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
@@ -27,15 +27,11 @@ interface Householdmember {
 
 interface HouseholdmemberListProps {
   householdMembers: Householdmember[];
-  householdId: string;
-  onMemberUpdated: () => void;
   onMemberRemoved: () => void;
 }
 
 export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
   householdMembers,
-  householdId,
-  onMemberUpdated,
   onMemberRemoved,
 }) => {
   const [removingMember, setRemovingMember] = useState<Householdmember | null>(

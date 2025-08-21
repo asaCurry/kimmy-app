@@ -17,22 +17,17 @@ import {
   Calendar,
   User,
   Tag,
-  Eye,
-  Save,
-  X,
 } from "lucide-react";
-import type { Record, RecordType } from "~/db/schema";
+import type { Record } from "~/db/schema";
 
 interface RecordDrawerProps {
   householdId: string;
   memberId: string;
-  category: string;
 }
 
 export const RecordDrawer: React.FC<RecordDrawerProps> = ({
   householdId,
   memberId,
-  category,
 }) => {
   const {
     selectedRecord: record,
@@ -86,7 +81,7 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
         ...recordType,
         fields: normalizedFields,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         ...recordType,
         fields: [],

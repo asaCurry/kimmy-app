@@ -1,18 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router";
-import { PageLayout, PageHeader } from "~/components/ui/layout";
-import { RequireAuth, useAuth } from "~/contexts/auth-context";
-import { Navigation } from "~/components/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
-import { ArrowLeft, UserPlus, Settings, Users, Home, Plus } from "lucide-react";
 import type { Householdmember } from "~/lib/utils";
 import { MemberCard } from "./member-card";
 

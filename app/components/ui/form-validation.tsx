@@ -126,7 +126,6 @@ export const ValidationSummary: React.FC<ValidationSummaryProps> = ({
 
 interface FormStatusProps {
   isValid: boolean;
-  isDirty: boolean;
   errorCount: number;
   touchedFieldCount: number;
   className?: string;
@@ -134,7 +133,6 @@ interface FormStatusProps {
 
 export const FormStatus: React.FC<FormStatusProps> = ({
   isValid,
-  isDirty,
   errorCount,
   touchedFieldCount,
   className,

@@ -9,8 +9,6 @@ import {
   Home,
   Users,
   Plus,
-  Settings,
-  Bell,
   User,
   Menu,
   X,

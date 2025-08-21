@@ -17,13 +17,16 @@ import {
 import { createTrackerSchema, updateTrackerSchema } from "~/lib/schemas";
 import type {
   CreateTrackerInput,
-  UpdateTrackerInput,
-  Tracker,
 } from "~/lib/schemas";
+
+// Local interface for tracker with ID
+interface TrackerWithId extends CreateTrackerInput {
+  id: number;
+}
 import { toast } from "react-toastify";
 
 interface CreateTrackerFormProps {
-  tracker?: Tracker;
+  tracker?: TrackerWithId;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
