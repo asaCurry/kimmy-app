@@ -87,7 +87,6 @@ export async function loader({
       context.cloudflare?.env
     );
 
-
     // Verify the user is accessing their own household data
     if (householdId !== session.currentHouseholdId) {
       throw redirect("/welcome");
@@ -116,7 +115,6 @@ export async function loader({
       inviteCode,
     };
   } catch (error) {
-
     // If it's a redirect, re-throw it
     if (
       error instanceof Response &&

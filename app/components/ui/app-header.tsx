@@ -5,7 +5,17 @@
 import * as React from "react";
 import { useState } from "react";
 import { Link } from "react-router";
-import { Home, Users, Plus, Settings, Bell, User, Menu, X, BarChart3 } from "lucide-react";
+import {
+  Home,
+  Users,
+  Plus,
+  Settings,
+  Bell,
+  User,
+  Menu,
+  X,
+  BarChart3,
+} from "lucide-react";
 import { Button } from "./button";
 import { useAuth } from "~/contexts/auth-context";
 import { cn } from "~/lib/utils";

@@ -1,11 +1,11 @@
 import type { ActionFunctionArgs } from "react-router";
 import { getDatabase } from "~/lib/db-utils";
 import { TrackerDB } from "~/lib/tracker-db";
-import { 
-  createTrackerEntrySchema, 
-  startTimeTrackingSchema, 
+import {
+  createTrackerEntrySchema,
+  startTimeTrackingSchema,
   stopTimeTrackingSchema,
-  quickLogSchema 
+  quickLogSchema,
 } from "~/lib/schemas";
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -24,55 +24,58 @@ export async function action({ request, context }: ActionFunctionArgs) {
       throw new Response("Unauthorized", { status: 401 });
     }
 
-      const cookies = cookieHeader.split(";").reduce(
-        (acc, cookie) => {
-          const [key, value] = cookie.trim().split("=");
-          if (key && value) {
-            acc[key] = value;
-          }
-          return acc;
-        },
-        {} as Record<string, string>
-      );
+    const cookies = cookieHeader.split(";").reduce(
+      (acc, cookie) => {
+        const [key, value] = cookie.trim().split("=");
+        if (key && value) {
+          acc[key] = value;
+        }
+        return acc;
+      },
+      {} as Record<string, string>
+    );
 
-      const sessionData = cookies["kimmy_auth_session"];
-      if (!sessionData) {
-        throw new Response("Unauthorized", { status: 401 });
-      }
+    const sessionData = cookies["kimmy_auth_session"];
+    if (!sessionData) {
+      throw new Response("Unauthorized", { status: 401 });
+    }
 
-      let session;
-      try {
-        session = JSON.parse(decodeURIComponent(sessionData));
-      } catch (error) {
-        throw new Response("Unauthorized", { status: 401 });
-      }
+    let session;
+    try {
+      session = JSON.parse(decodeURIComponent(sessionData));
+    } catch (error) {
+      throw new Response("Unauthorized", { status: 401 });
+    }
 
-      if (!session.currentHouseholdId || !session.userId) {
-        throw new Response("Unauthorized", { status: 401 });
-      }
+    if (!session.currentHouseholdId || !session.userId) {
+      throw new Response("Unauthorized", { status: 401 });
+    }
 
-      const formData = await request.formData();
-      const action = formData.get("_action") as string;
+    const formData = await request.formData();
+    const action = formData.get("_action") as string;
 
-      const trackerDB = new TrackerDB(db);
+    const trackerDB = new TrackerDB(db);
 
-      switch (action) {
-        case "complete-tracking": {
-          const data = {
-            trackerId: parseInt(formData.get("trackerId") as string),
-            memberId: formData.get("memberId") ? parseInt(formData.get("memberId") as string) : undefined,
-            startTime: formData.get("startTime") as string,
-            endTime: formData.get("endTime") as string,
-            notes: formData.get("notes") as string || undefined,
-          };
+    switch (action) {
+      case "complete-tracking": {
+        const data = {
+          trackerId: parseInt(formData.get("trackerId") as string),
+          memberId: formData.get("memberId")
+            ? parseInt(formData.get("memberId") as string)
+            : undefined,
+          startTime: formData.get("startTime") as string,
+          endTime: formData.get("endTime") as string,
+          notes: (formData.get("notes") as string) || undefined,
+        };
 
-          // Calculate duration in minutes with decimal precision
-          const start = new Date(data.startTime);
-          const end = new Date(data.endTime);
-          const durationMs = end.getTime() - start.getTime();
-          const durationMinutes = durationMs / (1000 * 60); // Keep decimal precision
+        // Calculate duration in minutes with decimal precision
+        const start = new Date(data.startTime);
+        const end = new Date(data.endTime);
+        const durationMs = end.getTime() - start.getTime();
+        const durationMinutes = durationMs / (1000 * 60); // Keep decimal precision
 
-          const entry = await trackerDB.createTrackerEntry({
+        const entry = await trackerDB.createTrackerEntry(
+          {
             trackerId: data.trackerId,
             memberId: data.memberId,
             value: durationMinutes,
@@ -80,66 +83,76 @@ export async function action({ request, context }: ActionFunctionArgs) {
             endTime: data.endTime,
             notes: data.notes,
             tags: undefined,
-          }, session.currentHouseholdId, session.userId);
+          },
+          session.currentHouseholdId,
+          session.userId
+        );
 
-          return { success: true, entry };
+        return { success: true, entry };
+      }
+
+      case "quick-log": {
+        const data = {
+          trackerId: parseInt(formData.get("trackerId") as string),
+          memberId: formData.get("memberId")
+            ? parseInt(formData.get("memberId") as string)
+            : undefined,
+          value: parseFloat(formData.get("value") as string),
+          notes: (formData.get("notes") as string) || undefined,
+          tags: (formData.get("tags") as string) || undefined,
+        };
+
+        const validatedData = quickLogSchema.parse(data);
+        const entry = await trackerDB.quickLog(
+          validatedData,
+          session.currentHouseholdId,
+          session.userId
+        );
+
+        return { success: true, entry };
+      }
+
+      case "create-entry": {
+        const data = {
+          trackerId: parseInt(formData.get("trackerId") as string),
+          memberId: formData.get("memberId")
+            ? parseInt(formData.get("memberId") as string)
+            : undefined,
+          value: parseFloat(formData.get("value") as string),
+          startTime: (formData.get("startTime") as string) || undefined,
+          endTime: (formData.get("endTime") as string) || undefined,
+          notes: (formData.get("notes") as string) || undefined,
+          tags: (formData.get("tags") as string) || undefined,
+        };
+
+        const validatedData = createTrackerEntrySchema.parse(data);
+        const entry = await trackerDB.createTrackerEntry(
+          validatedData,
+          session.currentHouseholdId,
+          session.userId
+        );
+
+        return { success: true, entry };
+      }
+
+      case "delete-entry": {
+        const id = parseInt(formData.get("id") as string);
+        if (isNaN(id)) {
+          return { success: false, error: "Invalid entry ID" };
         }
 
-        case "quick-log": {
-          const data = {
-            trackerId: parseInt(formData.get("trackerId") as string),
-            memberId: formData.get("memberId") ? parseInt(formData.get("memberId") as string) : undefined,
-            value: parseFloat(formData.get("value") as string),
-            notes: formData.get("notes") as string || undefined,
-            tags: formData.get("tags") as string || undefined,
-          };
-
-          const validatedData = quickLogSchema.parse(data);
-          const entry = await trackerDB.quickLog(
-            validatedData,
-            session.currentHouseholdId,
-            session.userId
-          );
-
-          return { success: true, entry };
+        const success = await trackerDB.deleteTrackerEntry(
+          id,
+          session.currentHouseholdId
+        );
+        if (!success) {
+          return { success: false, error: "Entry not found" };
         }
 
-        case "create-entry": {
-          const data = {
-            trackerId: parseInt(formData.get("trackerId") as string),
-            memberId: formData.get("memberId") ? parseInt(formData.get("memberId") as string) : undefined,
-            value: parseFloat(formData.get("value") as string),
-            startTime: formData.get("startTime") as string || undefined,
-            endTime: formData.get("endTime") as string || undefined,
-            notes: formData.get("notes") as string || undefined,
-            tags: formData.get("tags") as string || undefined,
-          };
+        return { success: true };
+      }
 
-          const validatedData = createTrackerEntrySchema.parse(data);
-          const entry = await trackerDB.createTrackerEntry(
-            validatedData,
-            session.currentHouseholdId,
-            session.userId
-          );
-
-          return { success: true, entry };
-        }
-
-        case "delete-entry": {
-          const id = parseInt(formData.get("id") as string);
-          if (isNaN(id)) {
-            return { success: false, error: "Invalid entry ID" };
-          }
-
-          const success = await trackerDB.deleteTrackerEntry(id, session.currentHouseholdId);
-          if (!success) {
-            return { success: false, error: "Entry not found" };
-          }
-
-          return { success: true };
-        }
-
-              default:
+      default:
         return { success: false, error: "Invalid action" };
     }
   } catch (error) {

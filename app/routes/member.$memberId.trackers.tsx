@@ -1,11 +1,22 @@
 import type { Route } from "./+types/member.$memberId.trackers";
 import * as React from "react";
-import { useLoaderData, useFetcher, useRevalidator, useParams } from "react-router";
+import {
+  useLoaderData,
+  useFetcher,
+  useRevalidator,
+  useParams,
+} from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { TrackerCard } from "~/components/tracker-card";
 import { CreateTrackerForm } from "~/components/create-tracker-form";
 import { Plus, BarChart3, Timer, Clock } from "lucide-react";
@@ -23,7 +34,6 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       trackerDB.getAllTrackerEntries(session.currentHouseholdId),
     ]);
 
-
     return { success: true, trackers, activeEntries, trackerEntries };
   });
 }
@@ -32,8 +42,6 @@ export async function action({ request, context }: Route.ActionArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
     const formData = await request.formData();
     const action = formData.get("_action") as string;
-
-
 
     const trackerDB = new TrackerDB(db);
 
@@ -50,18 +58,22 @@ export async function action({ request, context }: Route.ActionArgs) {
           throw new Response("Missing required fields", { status: 400 });
         }
 
-        const newTracker = await trackerDB.createTracker({
-          name,
-          description: description || "",
-          type,
-          unit,
-          color: color || "#3b82f6",
-          icon: icon || "⏱️",
-        }, session.currentHouseholdId, session.userId);
+        const newTracker = await trackerDB.createTracker(
+          {
+            name,
+            description: description || "",
+            type,
+            unit,
+            color: color || "#3b82f6",
+            icon: icon || "⏱️",
+          },
+          session.currentHouseholdId,
+          session.userId
+        );
 
         return { success: true, tracker: newTracker };
       }
-      
+
       case "update": {
         const id = formData.get("id") as string;
         const name = formData.get("name") as string;
@@ -75,18 +87,22 @@ export async function action({ request, context }: Route.ActionArgs) {
           throw new Response("Missing required fields", { status: 400 });
         }
 
-        const updatedTracker = await trackerDB.updateTracker(parseInt(id), {
-          name,
-          description: description || "",
-          type,
-          unit,
-          color: color || "#3b82f6",
-          icon: icon || "⏱️",
-        }, session.currentHouseholdId);
+        const updatedTracker = await trackerDB.updateTracker(
+          parseInt(id),
+          {
+            name,
+            description: description || "",
+            type,
+            unit,
+            color: color || "#3b82f6",
+            icon: icon || "⏱️",
+          },
+          session.currentHouseholdId
+        );
 
         return { success: true, tracker: updatedTracker };
       }
-      
+
       case "delete": {
         const id = formData.get("id") as string;
         if (!id) {
@@ -94,10 +110,10 @@ export async function action({ request, context }: Route.ActionArgs) {
         }
 
         await trackerDB.deleteTracker(parseInt(id), session.currentHouseholdId);
-        
+
         return { success: true, action: "delete" };
       }
-      
+
       default:
         throw new Response("Invalid action", { status: 400 });
     }
@@ -105,29 +121,40 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function TrackersPage() {
-  const { trackers, activeEntries, trackerEntries } = useLoaderData<typeof loader>();
+  const { trackers, activeEntries, trackerEntries } =
+    useLoaderData<typeof loader>();
   const { session } = useAuth();
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
   const [showCreateForm, setShowCreateForm] = React.useState(false);
-  const [editingTracker, setEditingTracker] = React.useState<Tracker | null>(null);
+  const [editingTracker, setEditingTracker] = React.useState<Tracker | null>(
+    null
+  );
   const { memberId } = useParams();
 
   React.useEffect(() => {
     if (fetcher.data) {
       if (fetcher.data.success) {
         if (fetcher.data.action === "delete") {
-          toast.success("Tracker deleted successfully!", { position: "top-right" });
+          toast.success("Tracker deleted successfully!", {
+            position: "top-right",
+          });
           revalidator.revalidate();
         }
       } else {
-        toast.error(fetcher.data.error || "Action failed", { position: "top-right" });
+        toast.error(fetcher.data.error || "Action failed", {
+          position: "top-right",
+        });
       }
     }
   }, [fetcher.data]); // Remove revalidator from dependency array
 
   const handleDeleteTracker = (tracker: Tracker) => {
-    if (!confirm(`Are you sure you want to delete "${tracker.name}"? This will also delete all associated entries.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${tracker.name}"? This will also delete all associated entries.`
+      )
+    ) {
       return;
     }
 
@@ -158,8 +185,10 @@ export default function TrackersPage() {
   };
 
   const getTrackerStats = (tracker: Tracker) => {
-    const entries = trackerEntries.filter(entry => entry.trackerId === tracker.id);
-    
+    const entries = trackerEntries.filter(
+      entry => entry.trackerId === tracker.id
+    );
+
     if (entries.length === 0) {
       return {
         totalValue: 0,
@@ -171,7 +200,7 @@ export default function TrackersPage() {
     const totalValue = entries.reduce((sum, entry) => {
       return sum + (entry.value || 0);
     }, 0);
-    
+
     const entryCount = entries.length;
     const averageValue = entryCount > 0 ? totalValue / entryCount : 0;
 
@@ -198,9 +227,21 @@ export default function TrackersPage() {
   return (
     <RequireAuth>
       <PageLayout>
-        <Navigation currentView="categories" member={trackers[0] ? { id: parseInt(memberId!), name: "Member", email: "", role: "member" as const } : undefined} />
+        <Navigation
+          currentView="categories"
+          member={
+            trackers[0]
+              ? {
+                  id: parseInt(memberId!),
+                  name: "Member",
+                  email: "",
+                  role: "member" as const,
+                }
+              : undefined
+          }
+        />
         <PageHeader title="Trackers">
-          <Button 
+          <Button
             onClick={() => setShowCreateForm(true)}
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
           >
@@ -224,11 +265,14 @@ export default function TrackersPage() {
                 <Card className="text-center py-12 bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
                   <CardContent>
                     <BarChart3 className="w-16 h-16 mx-auto text-slate-400 mb-4" />
-                    <h3 className="text-lg font-semibold mb-2 text-slate-200">No trackers yet</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-slate-200">
+                      No trackers yet
+                    </h3>
                     <p className="text-slate-400 mb-4">
-                      Create your first tracker to start monitoring activities, time, or progress.
+                      Create your first tracker to start monitoring activities,
+                      time, or progress.
                     </p>
-                    <Button 
+                    <Button
                       onClick={() => setShowCreateForm(true)}
                       className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                     >
@@ -247,10 +291,12 @@ export default function TrackersPage() {
                         Currently Tracking
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {activeEntries.map((entry) => {
-                          const tracker = trackers.find(t => t.id === entry.trackerId);
+                        {activeEntries.map(entry => {
+                          const tracker = trackers.find(
+                            t => t.id === entry.trackerId
+                          );
                           if (!tracker) return null;
-                          
+
                           return (
                             <TrackerCard
                               key={entry.id}
@@ -276,10 +322,12 @@ export default function TrackersPage() {
                       All Trackers
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {trackers.map((tracker) => {
-                        const activeEntry = getActiveEntryForTracker(tracker.id);
+                      {trackers.map(tracker => {
+                        const activeEntry = getActiveEntryForTracker(
+                          tracker.id
+                        );
                         const stats = getTrackerStats(tracker);
-                        
+
                         return (
                           <TrackerCard
                             key={tracker.id}

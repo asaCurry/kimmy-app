@@ -1,38 +1,46 @@
 import { eq, and, desc, sql, count } from "drizzle-orm";
 import { trackers, trackerEntries, users } from "~/db/schema";
-import type { 
-  NewTracker, 
-  Tracker, 
-  NewTrackerEntry, 
+import type {
+  NewTracker,
+  Tracker,
+  NewTrackerEntry,
   TrackerEntry,
   CreateTrackerInput,
   UpdateTrackerInput,
   CreateTrackerEntryInput,
   StartTimeTrackingInput,
   StopTimeTrackingInput,
-  QuickLogInput
+  QuickLogInput,
 } from "~/lib/schemas";
 
 export class TrackerDB {
   constructor(private db: any) {}
 
   // Tracker CRUD operations
-  async createTracker(data: CreateTrackerInput, householdId: string, createdBy: number): Promise<Tracker> {
-    console.log("TrackerDB.createTracker called with:", { data, householdId, createdBy });
+  async createTracker(
+    data: CreateTrackerInput,
+    householdId: string,
+    createdBy: number
+  ): Promise<Tracker> {
+    console.log("TrackerDB.createTracker called with:", {
+      data,
+      householdId,
+      createdBy,
+    });
     console.log("Database instance:", this.db);
-    
+
     try {
       // First, let's check if the trackers table exists by trying to query it
       console.log("Checking if trackers table exists...");
       const tableCheck = await this.db.select().from(trackers).limit(1);
       console.log("Table check result:", tableCheck);
-      
+
       console.log("Inserting tracker with values:", {
         ...data,
         householdId,
         createdBy,
       });
-      
+
       const [tracker] = await this.db
         .insert(trackers)
         .values({
@@ -41,7 +49,7 @@ export class TrackerDB {
           createdBy,
         })
         .returning();
-      
+
       console.log("Tracker created successfully:", tracker);
       return tracker;
     } catch (error) {
@@ -49,7 +57,7 @@ export class TrackerDB {
       console.error("Error details:", {
         name: error.name,
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
@@ -68,11 +76,15 @@ export class TrackerDB {
       .select()
       .from(trackers)
       .where(and(eq(trackers.id, id), eq(trackers.householdId, householdId)));
-    
+
     return tracker || null;
   }
 
-  async updateTracker(id: number, data: UpdateTrackerInput, householdId: string): Promise<Tracker | null> {
+  async updateTracker(
+    id: number,
+    data: UpdateTrackerInput,
+    householdId: string
+  ): Promise<Tracker | null> {
     const [tracker] = await this.db
       .update(trackers)
       .set({
@@ -81,7 +93,7 @@ export class TrackerDB {
       })
       .where(and(eq(trackers.id, id), eq(trackers.householdId, householdId)))
       .returning();
-    
+
     return tracker || null;
   }
 
@@ -89,18 +101,27 @@ export class TrackerDB {
     // First delete all entries for this tracker
     await this.db
       .delete(trackerEntries)
-      .where(and(eq(trackerEntries.trackerId, id), eq(trackerEntries.householdId, householdId)));
-    
+      .where(
+        and(
+          eq(trackerEntries.trackerId, id),
+          eq(trackerEntries.householdId, householdId)
+        )
+      );
+
     // Then delete the tracker
     const result = await this.db
       .delete(trackers)
       .where(and(eq(trackers.id, id), eq(trackers.householdId, householdId)));
-    
+
     return result.changes > 0;
   }
 
   // Tracker Entry operations
-  async createTrackerEntry(data: CreateTrackerEntryInput, householdId: string, createdBy: number): Promise<TrackerEntry> {
+  async createTrackerEntry(
+    data: CreateTrackerEntryInput,
+    householdId: string,
+    createdBy: number
+  ): Promise<TrackerEntry> {
     const [entry] = await this.db
       .insert(trackerEntries)
       .values({
@@ -109,15 +130,24 @@ export class TrackerDB {
         createdBy,
       })
       .returning();
-    
+
     return entry;
   }
 
-  async getTrackerEntries(trackerId: number, householdId: string, limit = 50): Promise<TrackerEntry[]> {
+  async getTrackerEntries(
+    trackerId: number,
+    householdId: string,
+    limit = 50
+  ): Promise<TrackerEntry[]> {
     return await this.db
       .select()
       .from(trackerEntries)
-      .where(and(eq(trackerEntries.trackerId, trackerId), eq(trackerEntries.householdId, householdId)))
+      .where(
+        and(
+          eq(trackerEntries.trackerId, trackerId),
+          eq(trackerEntries.householdId, householdId)
+        )
+      )
       .orderBy(desc(trackerEntries.createdAt))
       .limit(limit);
   }
@@ -130,51 +160,81 @@ export class TrackerDB {
       .orderBy(desc(trackerEntries.createdAt));
   }
 
-  async getTrackerEntry(id: number, householdId: string): Promise<TrackerEntry | null> {
+  async getTrackerEntry(
+    id: number,
+    householdId: string
+  ): Promise<TrackerEntry | null> {
     const [entry] = await this.db
       .select()
       .from(trackerEntries)
-      .where(and(eq(trackerEntries.id, id), eq(trackerEntries.householdId, householdId)));
-    
+      .where(
+        and(
+          eq(trackerEntries.id, id),
+          eq(trackerEntries.householdId, householdId)
+        )
+      );
+
     return entry || null;
   }
 
-  async updateTrackerEntry(id: number, data: Partial<TrackerEntry>, householdId: string): Promise<TrackerEntry | null> {
+  async updateTrackerEntry(
+    id: number,
+    data: Partial<TrackerEntry>,
+    householdId: string
+  ): Promise<TrackerEntry | null> {
     const [entry] = await this.db
       .update(trackerEntries)
       .set({
         ...data,
         updatedAt: new Date().toISOString(),
       })
-      .where(and(eq(trackerEntries.id, id), eq(trackerEntries.householdId, householdId)))
+      .where(
+        and(
+          eq(trackerEntries.id, id),
+          eq(trackerEntries.householdId, householdId)
+        )
+      )
       .returning();
-    
+
     return entry || null;
   }
 
   async deleteTrackerEntry(id: number, householdId: string): Promise<boolean> {
     const result = await this.db
       .delete(trackerEntries)
-      .where(and(eq(trackerEntries.id, id), eq(trackerEntries.householdId, householdId)));
-    
+      .where(
+        and(
+          eq(trackerEntries.id, id),
+          eq(trackerEntries.householdId, householdId)
+        )
+      );
+
     return result.changes > 0;
   }
 
   // Time tracking operations
-  async startTimeTracking(data: StartTimeTrackingInput, householdId: string, createdBy: number): Promise<TrackerEntry> {
+  async startTimeTracking(
+    data: StartTimeTrackingInput,
+    householdId: string,
+    createdBy: number
+  ): Promise<TrackerEntry> {
     // Check if there's already an active entry for this tracker and member
     const activeEntry = await this.db
       .select()
       .from(trackerEntries)
-      .where(and(
-        eq(trackerEntries.trackerId, data.trackerId),
-        eq(trackerEntries.memberId, data.memberId || createdBy),
-        eq(trackerEntries.isActive, 1),
-        eq(trackerEntries.householdId, householdId)
-      ));
+      .where(
+        and(
+          eq(trackerEntries.trackerId, data.trackerId),
+          eq(trackerEntries.memberId, data.memberId || createdBy),
+          eq(trackerEntries.isActive, 1),
+          eq(trackerEntries.householdId, householdId)
+        )
+      );
 
     if (activeEntry.length > 0) {
-      throw new Error("Time tracking is already active for this tracker and member");
+      throw new Error(
+        "Time tracking is already active for this tracker and member"
+      );
     }
 
     const [entry] = await this.db
@@ -190,11 +250,14 @@ export class TrackerDB {
         notes: data.notes,
       })
       .returning();
-    
+
     return entry;
   }
 
-  async stopTimeTracking(data: StopTimeTrackingInput, householdId: string): Promise<TrackerEntry> {
+  async stopTimeTracking(
+    data: StopTimeTrackingInput,
+    householdId: string
+  ): Promise<TrackerEntry> {
     const entry = await this.getTrackerEntry(data.entryId, householdId);
     if (!entry) {
       throw new Error("Tracker entry not found");
@@ -206,7 +269,9 @@ export class TrackerDB {
 
     const endTime = new Date();
     const startTime = new Date(entry.startTime!);
-    const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+    const durationMinutes = Math.round(
+      (endTime.getTime() - startTime.getTime()) / (1000 * 60)
+    );
 
     const [updatedEntry] = await this.db
       .update(trackerEntries)
@@ -219,12 +284,16 @@ export class TrackerDB {
       })
       .where(eq(trackerEntries.id, data.entryId))
       .returning();
-    
+
     return updatedEntry;
   }
 
   // Quick log for cumulative trackers
-  async quickLog(data: QuickLogInput, householdId: string, createdBy: number): Promise<TrackerEntry> {
+  async quickLog(
+    data: QuickLogInput,
+    householdId: string,
+    createdBy: number
+  ): Promise<TrackerEntry> {
     const [entry] = await this.db
       .insert(trackerEntries)
       .values({
@@ -236,7 +305,7 @@ export class TrackerDB {
         isActive: 0,
       })
       .returning();
-    
+
     return entry;
   }
 
@@ -245,14 +314,20 @@ export class TrackerDB {
     return await this.db
       .select()
       .from(trackerEntries)
-      .where(and(
-        eq(trackerEntries.isActive, 1),
-        eq(trackerEntries.householdId, householdId)
-      ));
+      .where(
+        and(
+          eq(trackerEntries.isActive, 1),
+          eq(trackerEntries.householdId, householdId)
+        )
+      );
   }
 
   // Get tracker statistics
-  async getTrackerStats(trackerId: number, householdId: string, days = 30): Promise<{
+  async getTrackerStats(
+    trackerId: number,
+    householdId: string,
+    days = 30
+  ): Promise<{
     totalValue: number;
     entryCount: number;
     averageValue: number;
@@ -264,11 +339,13 @@ export class TrackerDB {
     const entries = await this.db
       .select()
       .from(trackerEntries)
-      .where(and(
-        eq(trackerEntries.trackerId, trackerId),
-        eq(trackerEntries.householdId, householdId),
-        sql`${trackerEntries.createdAt} >= ${cutoffDate.toISOString()}`
-      ))
+      .where(
+        and(
+          eq(trackerEntries.trackerId, trackerId),
+          eq(trackerEntries.householdId, householdId),
+          sql`${trackerEntries.createdAt} >= ${cutoffDate.toISOString()}`
+        )
+      )
       .orderBy(desc(trackerEntries.createdAt));
 
     const totalValue = entries.reduce((sum, entry) => sum + entry.value, 0);
@@ -284,7 +361,9 @@ export class TrackerDB {
   }
 
   // Get household member info for trackers
-  async getHouseholdMembers(householdId: string): Promise<{ id: number; name: string }[]> {
+  async getHouseholdMembers(
+    householdId: string
+  ): Promise<{ id: number; name: string }[]> {
     return await this.db
       .select({
         id: users.id,

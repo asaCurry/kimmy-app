@@ -236,7 +236,9 @@ const CreateRecordType: React.FC<Route.ComponentProps> = ({
           existingCategories={loaderData.existingCategories}
           onSuccess={() => {
             // Navigate to the category page with the newly created record type
-            navigate(`/member/${currentMember.id}/category/${encodeURIComponent(category)}`);
+            navigate(
+              `/member/${currentMember.id}/category/${encodeURIComponent(category)}`
+            );
           }}
           showBackButton={true}
           className="space-y-8"

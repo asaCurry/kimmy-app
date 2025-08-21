@@ -13,7 +13,7 @@ import {
   BarChart3,
   Shield,
   LogOut,
-  Users2
+  Users2,
 } from "lucide-react";
 import { useAuth } from "~/contexts/auth-context";
 import { cn } from "~/lib/utils";

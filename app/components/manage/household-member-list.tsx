@@ -4,16 +4,16 @@ import { Link, useNavigate, useFetcher } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
-import { 
-  Users, 
-  UserPlus, 
-  Edit3, 
-  Trash2, 
-  Crown, 
-  User, 
+import {
+  Users,
+  UserPlus,
+  Edit3,
+  Trash2,
+  Crown,
+  User,
   Baby,
   Mail,
-  Calendar
+  Calendar,
 } from "lucide-react";
 
 interface Householdmember {
@@ -38,7 +38,9 @@ export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
   onMemberUpdated,
   onMemberRemoved,
 }) => {
-  const [removingMember, setRemovingMember] = useState<Householdmember | null>(null);
+  const [removingMember, setRemovingMember] = useState<Householdmember | null>(
+    null
+  );
   const fetcher = useFetcher();
 
   const handleRemove = (member: Householdmember) => {
@@ -76,12 +78,33 @@ export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
 
   const getRoleBadge = (role: string, age?: number) => {
     if (role === "admin") {
-      return <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Admin</Badge>;
+      return (
+        <Badge
+          variant="secondary"
+          className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
+        >
+          Admin
+        </Badge>
+      );
     }
     if (age) {
-      return <Badge variant="secondary" className="bg-pink-500/20 text-pink-400 border-pink-500/30">Child</Badge>;
+      return (
+        <Badge
+          variant="secondary"
+          className="bg-pink-500/20 text-pink-400 border-pink-500/30"
+        >
+          Child
+        </Badge>
+      );
     }
-    return <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 border-blue-500/30">Member</Badge>;
+    return (
+      <Badge
+        variant="secondary"
+        className="bg-blue-500/20 text-blue-400 border-blue-500/30"
+      >
+        Member
+      </Badge>
+    );
   };
 
   if (householdMembers.length === 0) {
@@ -95,7 +118,8 @@ export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
             No Household members Yet
           </h3>
           <p className="text-slate-400 mb-6 max-w-md mx-auto">
-            Get started by adding your first household member to begin managing your household.
+            Get started by adding your first household member to begin managing
+            your household.
           </p>
           <Link to="/manage/add-member">
             <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
@@ -125,8 +149,11 @@ export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
 
       {/* Member Cards */}
       <div className="grid gap-4">
-        {householdMembers.map((member) => (
-          <Card key={member.id} className="bg-slate-800/50 border-slate-700 hover:border-slate-600 transition-colors">
+        {householdMembers.map(member => (
+          <Card
+            key={member.id}
+            className="bg-slate-800/50 border-slate-700 hover:border-slate-600 transition-colors"
+          >
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -137,7 +164,7 @@ export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
                     </h3>
                     {getRoleBadge(member.role, member.age)}
                   </div>
-                  
+
                   <div className="space-y-2 text-sm text-slate-300">
                     {member.email && (
                       <div className="flex items-center gap-2">
@@ -145,23 +172,25 @@ export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
                         <span>{member.email}</span>
                       </div>
                     )}
-                    
+
                     {member.age && (
                       <div className="flex items-center gap-2">
                         <Calendar className="h-3 w-3" />
                         <span>{member.age} years old</span>
                       </div>
                     )}
-                    
+
                     {member.relationshipToAdmin && (
                       <div className="flex items-center gap-2">
                         <Users className="h-3 w-3" />
-                        <span className="capitalize">{member.relationshipToAdmin}</span>
+                        <span className="capitalize">
+                          {member.relationshipToAdmin}
+                        </span>
                       </div>
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex gap-2">
                   <Link to={`/manage/edit-member?memberId=${member.id}`}>
                     <Button
@@ -172,7 +201,7 @@ export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
                       <Edit3 className="h-4 w-4" />
                     </Button>
                   </Link>
-                  
+
                   {member.role !== "admin" && (
                     <Button
                       variant="outline"
@@ -195,16 +224,20 @@ export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="max-w-md w-full bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle className="text-red-400">Remove Household member</CardTitle>
+              <CardTitle className="text-red-400">
+                Remove Household member
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-slate-300">
-                Are you sure you want to remove <strong>{removingMember.name}</strong> from your household?
+                Are you sure you want to remove{" "}
+                <strong>{removingMember.name}</strong> from your household?
               </p>
               <p className="text-sm text-slate-400">
-                This action cannot be undone. All records associated with this member will be preserved.
+                This action cannot be undone. All records associated with this
+                member will be preserved.
               </p>
-              
+
               <div className="flex gap-3 pt-4">
                 <Button
                   variant="destructive"
@@ -212,7 +245,9 @@ export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
                   disabled={fetcher.state === "submitting"}
                   className="flex-1"
                 >
-                  {fetcher.state === "submitting" ? "Removing..." : "Remove Member"}
+                  {fetcher.state === "submitting"
+                    ? "Removing..."
+                    : "Remove Member"}
                 </Button>
                 <Button
                   variant="outline"

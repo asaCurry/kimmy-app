@@ -17,7 +17,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       .select()
       .from(users)
       .where(eq(users.householdId, session.currentHouseholdId));
-    
+
     if (!members.length) {
       throw redirect("/welcome");
     }
@@ -37,17 +37,26 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     }
 
     // If multiple members, return them for selection
-    return { 
-      hasValidSession: true, 
+    return {
+      hasValidSession: true,
       householdMembers,
-      householdId: session.currentHouseholdId
+      householdId: session.currentHouseholdId,
     };
   });
 }
 
 // Member selection component for households with multiple members
-function MemberSelection({ householdMembers, householdId }: { 
-  householdMembers: Array<{ id: number; name: string; email: string; role: string; age?: number }>;
+function MemberSelection({
+  householdMembers,
+  householdId,
+}: {
+  householdMembers: Array<{
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    age?: number;
+  }>;
   householdId: string;
 }) {
   const navigate = useNavigate();
@@ -58,11 +67,11 @@ function MemberSelection({ householdMembers, householdId }: {
 
   return (
     <PageLayout>
-      <PageHeader 
-        title="Select Household Member" 
+      <PageHeader
+        title="Select Household Member"
         subtitle="Choose which member you'd like to manage records and trackers for"
       />
-      
+
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
@@ -70,19 +79,20 @@ function MemberSelection({ householdMembers, householdId }: {
               Welcome to Your Household
             </h2>
             <p className="text-slate-400 text-lg">
-              Select a household member to manage their records, trackers, and activities.
+              Select a household member to manage their records, trackers, and
+              activities.
             </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {householdMembers.map((member) => (
+            {householdMembers.map(member => (
               <div
                 key={member.id}
                 onClick={() => handleMemberSelect(member.id)}
                 className="cursor-pointer"
               >
-                <MemberCard 
-                  member={member} 
+                <MemberCard
+                  member={member}
                   onSelect={() => handleMemberSelect(member.id)}
                 />
               </div>
@@ -129,8 +139,8 @@ export default function Index() {
 
   return (
     <RequireAuth requireHousehold={true}>
-      <MemberSelection 
-        householdMembers={loaderData.householdMembers} 
+      <MemberSelection
+        householdMembers={loaderData.householdMembers}
         householdId={loaderData.householdId}
       />
     </RequireAuth>

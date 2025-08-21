@@ -39,10 +39,7 @@ export default [
     "member/:memberId/manage-categories",
     "routes/member.$memberId.manage-categories.tsx"
   ),
-  route(
-    "member/:memberId/trackers",
-    "routes/member.$memberId.trackers.tsx"
-  ),
+  route("member/:memberId/trackers", "routes/member.$memberId.trackers.tsx"),
   route(
     "member/:memberId/tracker/:trackerId",
     "routes/member.$memberId.tracker.$trackerId.tsx"

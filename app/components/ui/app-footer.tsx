@@ -52,8 +52,8 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
               </h3>
             </div>
             <p className="text-sm text-slate-400">
-              Securely manage your household's records records and information in one
-              place.
+              Securely manage your household's records records and information
+              in one place.
             </p>
             {session?.currentHouseholdId && (
               <div className="text-xs text-slate-400">

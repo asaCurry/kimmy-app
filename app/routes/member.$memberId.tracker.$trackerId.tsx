@@ -1,11 +1,22 @@
 import * as React from "react";
 import type { Route } from "./+types/member.$memberId.tracker.$trackerId";
-import { useLoaderData, useFetcher, useRevalidator, useNavigate } from "react-router";
+import {
+  useLoaderData,
+  useFetcher,
+  useRevalidator,
+  useNavigate,
+} from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { TrackerCard } from "~/components/tracker-card";
 import { TrackerHistory } from "~/components/tracker-history";
 import { CreateTrackerForm } from "~/components/create-tracker-form";
@@ -25,7 +36,10 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     const trackerDB = new TrackerDB(db);
     const [tracker, entries, activeEntries] = await Promise.all([
       trackerDB.getTracker(parseInt(trackerId), session.currentHouseholdId),
-      trackerDB.getTrackerEntries(parseInt(trackerId), session.currentHouseholdId),
+      trackerDB.getTrackerEntries(
+        parseInt(trackerId),
+        session.currentHouseholdId
+      ),
       trackerDB.getActiveTimeTracking(session.currentHouseholdId),
     ]);
 
@@ -33,7 +47,9 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
       throw new Response("Tracker not found", { status: 404 });
     }
 
-    const activeEntry = activeEntries.find(entry => entry.trackerId === tracker.id);
+    const activeEntry = activeEntries.find(
+      entry => entry.trackerId === tracker.id
+    );
 
     return { success: true, tracker, entries, activeEntry };
   });
@@ -52,12 +68,16 @@ export default function TrackerDetailPage() {
     if (fetcher.data) {
       if (fetcher.data.success) {
         if (fetcher.data.action === "update") {
-          toast.success("Tracker updated successfully!", { position: "top-right" });
+          toast.success("Tracker updated successfully!", {
+            position: "top-right",
+          });
           setShowEditForm(false);
           revalidator.revalidate();
         }
       } else {
-        toast.error(fetcher.data.error || "Action failed", { position: "top-right" });
+        toast.error(fetcher.data.error || "Action failed", {
+          position: "top-right",
+        });
       }
     }
   }, [fetcher.data]); // Remove revalidator from dependency array
@@ -77,7 +97,9 @@ export default function TrackerDetailPage() {
 
   const handleEditEntry = (entry: TrackerEntry) => {
     // This could open a modal or navigate to an edit page
-    toast.info("Edit entry functionality coming soon!", { position: "top-right" });
+    toast.info("Edit entry functionality coming soon!", {
+      position: "top-right",
+    });
   };
 
   if (!tracker) {
@@ -96,7 +118,15 @@ export default function TrackerDetailPage() {
   return (
     <RequireAuth>
       <PageLayout>
-        <Navigation currentView="categories" member={{ id: parseInt(memberId!), name: "Member", email: "", role: "member" as const }} />
+        <Navigation
+          currentView="categories"
+          member={{
+            id: parseInt(memberId!),
+            name: "Member",
+            email: "",
+            role: "member" as const,
+          }}
+        />
         <PageHeader title={tracker.name}>
           <div className="flex gap-2">
             <Button
@@ -150,31 +180,40 @@ export default function TrackerDetailPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Total Entries</span>
+                        <span className="text-sm text-muted-foreground">
+                          Total Entries
+                        </span>
                         <span className="font-semibold">{entries.length}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Total {tracker.unit}</span>
+                        <span className="text-sm text-muted-foreground">
+                          Total {tracker.unit}
+                        </span>
                         <span className="font-semibold">
-                          {tracker.type === "time" 
+                          {tracker.type === "time"
                             ? `${Math.floor(entries.reduce((sum, e) => sum + e.value, 0) / 60)}h ${entries.reduce((sum, e) => sum + e.value, 0) % 60}m`
-                            : entries.reduce((sum, e) => sum + e.value, 0)
-                          }
+                            : entries.reduce((sum, e) => sum + e.value, 0)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Average</span>
+                        <span className="text-sm text-muted-foreground">
+                          Average
+                        </span>
                         <span className="font-semibold">
-                          {entries.length > 0 
+                          {entries.length > 0
                             ? tracker.type === "time"
                               ? `${Math.floor(entries.reduce((sum, e) => sum + e.value, 0) / entries.length / 60)}h ${Math.floor(entries.reduce((sum, e) => sum + e.value, 0) / entries.length) % 60}m`
-                              : Math.round(entries.reduce((sum, e) => sum + e.value, 0) / entries.length)
-                            : 0
-                          }
+                              : Math.round(
+                                  entries.reduce((sum, e) => sum + e.value, 0) /
+                                    entries.length
+                                )
+                            : 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Created</span>
+                        <span className="text-sm text-muted-foreground">
+                          Created
+                        </span>
                         <span className="font-semibold">
                           {new Date(tracker.createdAt).toLocaleDateString()}
                         </span>
@@ -188,7 +227,9 @@ export default function TrackerDetailPage() {
                         <CardTitle className="text-lg">Description</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-muted-foreground">{tracker.description}</p>
+                        <p className="text-muted-foreground">
+                          {tracker.description}
+                        </p>
                       </CardContent>
                     </Card>
                   )}

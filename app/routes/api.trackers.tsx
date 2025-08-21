@@ -3,8 +3,6 @@ import { getDatabase } from "~/lib/db-utils";
 import { TrackerDB } from "~/lib/tracker-db";
 import { createTrackerSchema, updateTrackerSchema } from "~/lib/schemas";
 
-
-
 export async function action({ request, context }: ActionFunctionArgs) {
   try {
     const env = (context as any).cloudflare?.env;
@@ -48,10 +46,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
       throw new Response("Unauthorized", { status: 401 });
     }
 
-          const formData = await request.formData();
-      const action = formData.get("_action") as string;
-
-
+    const formData = await request.formData();
+    const action = formData.get("_action") as string;
 
     const trackerDB = new TrackerDB(db);
 
@@ -60,11 +56,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
         try {
           const data = {
             name: formData.get("name") as string,
-            description: formData.get("description") as string || undefined,
+            description: (formData.get("description") as string) || undefined,
             type: formData.get("type") as "time" | "cumulative",
             unit: formData.get("unit") as string,
-            color: formData.get("color") as string || "#3b82f6",
-            icon: formData.get("icon") as string || "⏱️",
+            color: (formData.get("color") as string) || "#3b82f6",
+            icon: (formData.get("icon") as string) || "⏱️",
           };
 
           const validatedData = createTrackerSchema.parse(data);
@@ -74,7 +70,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
             session.currentHouseholdId,
             session.userId
           );
-
 
           return { success: true, tracker };
         } catch (error) {
@@ -93,12 +88,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
         }
 
         const data = {
-          name: formData.get("name") as string || undefined,
-          description: formData.get("description") as string || undefined,
-          type: formData.get("type") as "time" | "cumulative" || undefined,
-          unit: formData.get("unit") as string || undefined,
-          color: formData.get("color") as string || undefined,
-          icon: formData.get("icon") as string || undefined,
+          name: (formData.get("name") as string) || undefined,
+          description: (formData.get("description") as string) || undefined,
+          type: (formData.get("type") as "time" | "cumulative") || undefined,
+          unit: (formData.get("unit") as string) || undefined,
+          color: (formData.get("color") as string) || undefined,
+          icon: (formData.get("icon") as string) || undefined,
         };
 
         const validatedData = updateTrackerSchema.parse(data);
@@ -121,7 +116,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
           return { success: false, error: "Invalid tracker ID" };
         }
 
-        const success = await trackerDB.deleteTracker(id, session.currentHouseholdId);
+        const success = await trackerDB.deleteTracker(
+          id,
+          session.currentHouseholdId
+        );
         if (!success) {
           return { success: false, error: "Tracker not found" };
         }

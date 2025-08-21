@@ -6,7 +6,10 @@ export const createTrackerSchema = z.object({
   description: z.string().optional(),
   type: z.enum(["time", "cumulative"]).default("time"),
   unit: z.string().min(1, "Unit is required").max(20, "Unit too long"),
-  color: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid color format").default("#3b82f6"),
+  color: z
+    .string()
+    .regex(/^#[0-9A-F]{6}$/i, "Invalid color format")
+    .default("#3b82f6"),
   icon: z.string().max(10, "Icon too long").default("⏱️"),
 });
 

@@ -62,7 +62,7 @@ export const Drawer: React.FC<DrawerProps> = ({
         className="fixed inset-0 bg-black/50 z-40 transition-opacity"
         onClick={handleBackdropClick}
       />
-      
+
       {/* Drawer */}
       <div
         className={cn(
@@ -87,11 +87,9 @@ export const Drawer: React.FC<DrawerProps> = ({
             </button>
           </div>
         )}
-        
+
         {/* Content */}
-        <div className="h-full overflow-y-auto">
-          {children}
-        </div>
+        <div className="h-full overflow-y-auto">{children}</div>
       </div>
     </>
   );
@@ -102,9 +100,7 @@ export const DrawerContent: React.FC<{
   children: React.ReactNode;
   className?: string;
 }> = ({ children, className = "" }) => (
-  <div className={cn("p-6", className)}>
-    {children}
-  </div>
+  <div className={cn("p-6", className)}>{children}</div>
 );
 
 // Drawer Footer component for action buttons
@@ -112,7 +108,9 @@ export const DrawerFooter: React.FC<{
   children: React.ReactNode;
   className?: string;
 }> = ({ children, className = "" }) => (
-  <div className={cn("p-6 border-t border-slate-700 bg-slate-800/50", className)}>
+  <div
+    className={cn("p-6 border-t border-slate-700 bg-slate-800/50", className)}
+  >
     {children}
   </div>
 );

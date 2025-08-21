@@ -228,7 +228,6 @@ export async function action({
           message: "Record type created successfully",
         };
 
-
         return result;
       });
     }
@@ -303,8 +302,12 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                     <span className="text-2xl">⏱️</span>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-200">Activity Trackers</h3>
-                    <p className="text-slate-400">Monitor time, progress, and activities</p>
+                    <h3 className="text-lg font-semibold text-slate-200">
+                      Activity Trackers
+                    </h3>
+                    <p className="text-slate-400">
+                      Monitor time, progress, and activities
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -316,11 +319,11 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                       ⏱️ Member Trackers
                     </Button>
                   </Link>
-                  <Link
-                    to="/trackers"
-                    className="inline-block"
-                  >
-                    <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+                  <Link to="/trackers" className="inline-block">
+                    <Button
+                      variant="outline"
+                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                    >
                       📊 All Trackers
                     </Button>
                   </Link>
@@ -382,7 +385,9 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                       key={category}
                       className="block cursor-pointer"
                       onClick={() => {
-                        navigate(`/member/${currentMember.id}/category/${encodeURIComponent(category)}`);
+                        navigate(
+                          `/member/${currentMember.id}/category/${encodeURIComponent(category)}`
+                        );
                       }}
                     >
                       <CategoryCard
@@ -463,11 +468,11 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                             ⏱️ Member Trackers
                           </Button>
                         </Link>
-                        <Link
-                          to="/trackers"
-                          className="inline-block"
-                        >
-                          <Button variant="outline" className="w-full border-slate-600 text-slate-300 hover:bg-slate-700">
+                        <Link to="/trackers" className="inline-block">
+                          <Button
+                            variant="outline"
+                            className="w-full border-slate-600 text-slate-300 hover:bg-slate-700"
+                          >
                             📊 All Household Trackers
                           </Button>
                         </Link>

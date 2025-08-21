@@ -51,8 +51,6 @@ export async function action({ request, context, params }: Route.ActionArgs) {
     const formData = await request.formData();
     const action = formData.get("_action");
 
-
-
     // Handle record deletion
     if (action === "delete" && formData.has("recordId")) {
       const recordId = formData.get("recordId");
@@ -133,7 +131,6 @@ export async function action({ request, context, params }: Route.ActionArgs) {
         .returning()
         .get();
 
-
       return { success: true, note: newNote };
     }
 
@@ -171,18 +168,15 @@ export async function action({ request, context, params }: Route.ActionArgs) {
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
   try {
-
     const env = (context as any).cloudflare?.env;
 
     if (!env?.DB) {
-
       throw new Response("Database not available", { status: 500 });
     }
 
     // Check authentication first
     const cookieHeader = request.headers.get("cookie");
     if (!cookieHeader) {
-
       throw redirect("/welcome");
     }
 
@@ -199,7 +193,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
     const sessionData = cookies["kimmy_auth_session"];
     if (!sessionData) {
-
       throw redirect("/welcome");
     }
 
@@ -207,13 +200,11 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     try {
       session = JSON.parse(decodeURIComponent(sessionData));
     } catch (error) {
-
       throw redirect("/welcome");
     }
 
     // Check if user has a valid session with a household
     if (!session.currentHouseholdId) {
-
       throw redirect("/welcome");
     }
 
@@ -222,8 +213,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     if (!memberId) {
       throw new Response("Member ID required", { status: 400 });
     }
-
-
 
     // Load household data directly from database instead of using the helper
     const db = getDatabase(env);
@@ -236,7 +225,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       .get();
 
     if (!household) {
-
       throw redirect("/welcome");
     }
 
@@ -267,7 +255,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
     const householdId = session.currentHouseholdId;
 
-
     // Fetch record types for this household and category
     const recordTypesResult = await db
       .select()
@@ -278,7 +265,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
           eq(recordTypes.category, category)
         )
       );
-
 
     // Parse the fields JSON for each record type
     const parsedRecordTypes = recordTypesResult.map(rt => {
@@ -315,7 +301,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       };
     });
 
-
     // Fetch records for each record type, filtered by the specific member
     const recordsData = await db
       .select()
@@ -326,7 +311,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
           eq(records.memberId, parseInt(memberId))
         )
       );
-
 
     // Group records by record type
     const recordsByType = recordsData.reduce(
@@ -358,13 +342,10 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         .limit(20);
 
       memberQuickNotes = quickNotesResult;
-
     } catch (error) {
       console.error("Failed to load quick notes:", error);
       memberQuickNotes = [];
     }
-
-
 
     return {
       member: currentMember,
@@ -406,7 +387,7 @@ export default function CategoryRecordTypes() {
     const timer = setTimeout(() => {
       revalidator.revalidate();
     }, 100);
-    
+
     return () => clearTimeout(timer);
   }, []); // Empty dependency array - only run once on mount
 
@@ -433,13 +414,11 @@ export default function CategoryRecordTypes() {
   const handleNoteCreated = (note: any) => {
     // This function is called when a quick note is created
     // The page will automatically refresh due to the action redirect
-
   };
 
   const handleNoteDeleted = (noteId: number) => {
     // This function is called when a quick note is deleted
     // The page will automatically refresh due to the action redirect
-
   };
 
   if (!member) {

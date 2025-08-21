@@ -31,7 +31,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     }
 
     // Load household data from URL params
-    const { householdId, householdMembers } = await loadHouseholdData(request, env);
+    const { householdId, householdMembers } = await loadHouseholdData(
+      request,
+      env
+    );
 
     // If no household data found, redirect to welcome
     if (!householdId) {

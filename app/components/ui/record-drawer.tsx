@@ -1,25 +1,25 @@
 import * as React from "react";
-import { 
-  Drawer, 
-  DrawerContent, 
+import {
+  Drawer,
+  DrawerContent,
   DrawerFooter,
   Button,
   RecordContentDisplay,
   DateDisplay,
-  RelativeDate
+  RelativeDate,
 } from "~/components/ui";
 import { DynamicRecordForm } from "~/components";
 import { useRecordManagement } from "~/contexts";
-import { 
-  Edit, 
-  Trash2, 
-  Lock, 
-  Calendar, 
-  User, 
-  Tag, 
+import {
+  Edit,
+  Trash2,
+  Lock,
+  Calendar,
+  User,
+  Tag,
   Eye,
   Save,
-  X
+  X,
 } from "lucide-react";
 import type { Record, RecordType } from "~/db/schema";
 
@@ -58,26 +58,30 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
   // Parse the fields JSON for the record type - moved before conditional return
   const parsedRecordType = React.useMemo(() => {
     if (!recordType?.fields) return null;
-    
+
     try {
       let parsed;
-      if (typeof recordType.fields === 'string') {
+      if (typeof recordType.fields === "string") {
         parsed = JSON.parse(recordType.fields);
       } else if (Array.isArray(recordType.fields)) {
         parsed = recordType.fields;
       } else {
         parsed = recordType.fields;
       }
-      
+
       let normalizedFields = [];
-      if (parsed && typeof parsed === 'object' && Array.isArray(parsed.fields)) {
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        Array.isArray(parsed.fields)
+      ) {
         normalizedFields = parsed.fields;
       } else if (Array.isArray(parsed)) {
         normalizedFields = parsed;
       } else {
         normalizedFields = [];
       }
-      
+
       return {
         ...recordType,
         fields: normalizedFields,
@@ -96,12 +100,15 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
 
   // Find the member this record is about
   const recordMember = householdMembers.find(m => m.id === record.memberId);
-  
+
   // Find who created the record
   const recordCreator = householdMembers.find(m => m.id === record.createdBy);
 
   const handleDelete = async () => {
-    if (onDelete && confirm(`Are you sure you want to delete "${record.title}"?`)) {
+    if (
+      onDelete &&
+      confirm(`Are you sure you want to delete "${record.title}"?`)
+    ) {
       await onDelete(record.id);
     }
   };
@@ -121,7 +128,9 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
   const handleClose = () => {
     if (mode === "edit") {
       // Ask for confirmation if there are unsaved changes
-      if (confirm("You have unsaved changes. Are you sure you want to close?")) {
+      if (
+        confirm("You have unsaved changes. Are you sure you want to close?")
+      ) {
         setMode("view");
         onClose();
       }
@@ -130,24 +139,22 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
     }
   };
 
-  const drawerTitle = mode === "view" 
-    ? `${recordType.name}: ${record.title}`
-    : `Edit ${recordType.name}`;
+  const drawerTitle =
+    mode === "view"
+      ? `${recordType.name}: ${record.title}`
+      : `Edit ${recordType.name}`;
 
   return (
-    <Drawer 
-      isOpen={isOpen} 
-      onClose={handleClose}
-      title={drawerTitle}
-      size="xl"
-    >
+    <Drawer isOpen={isOpen} onClose={handleClose} title={drawerTitle} size="xl">
       {mode === "view" ? (
         // View Mode
         <>
           <DrawerContent className="space-y-6">
             {/* Record Content */}
             <div className="space-y-4">
-              <h4 className="text-lg font-medium text-slate-200">Record Details</h4>
+              <h4 className="text-lg font-medium text-slate-200">
+                Record Details
+              </h4>
               {parsedRecordType && (
                 <RecordContentDisplay
                   content={record.content}
@@ -160,25 +167,32 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
 
             {/* Metadata Section */}
             <div className="space-y-4 pt-4 border-t border-slate-700">
-              <h4 className="text-lg font-medium text-slate-200">Record Information</h4>
-              
+              <h4 className="text-lg font-medium text-slate-200">
+                Record Information
+              </h4>
+
               <div className="grid grid-cols-1 gap-4">
                 {/* Dates */}
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <Calendar className="w-4 h-4 text-slate-400" />
                     <div>
-                      <div className="text-sm text-slate-400">When it happened</div>
+                      <div className="text-sm text-slate-400">
+                        When it happened
+                      </div>
                       <div className="text-slate-200">
-                        {record.datetime && record.datetime !== record.createdAt ? (
+                        {record.datetime &&
+                        record.datetime !== record.createdAt ? (
                           <DateDisplay date={record.datetime} format="long" />
                         ) : (
-                          <span className="text-slate-500 italic">Not specified</span>
+                          <span className="text-slate-500 italic">
+                            Not specified
+                          </span>
                         )}
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3">
                     <Calendar className="w-4 h-4 text-slate-400" />
                     <div>
@@ -188,18 +202,21 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
                       </div>
                     </div>
                   </div>
-                  
-                  {record.updatedAt && record.updatedAt !== record.createdAt && (
-                    <div className="flex items-center space-x-3">
-                      <Calendar className="w-4 h-4 text-slate-400" />
-                      <div>
-                        <div className="text-sm text-slate-400">Last updated</div>
-                        <div className="text-slate-200">
-                          <RelativeDate date={record.updatedAt} />
+
+                  {record.updatedAt &&
+                    record.updatedAt !== record.createdAt && (
+                      <div className="flex items-center space-x-3">
+                        <Calendar className="w-4 h-4 text-slate-400" />
+                        <div>
+                          <div className="text-sm text-slate-400">
+                            Last updated
+                          </div>
+                          <div className="text-slate-200">
+                            <RelativeDate date={record.updatedAt} />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
 
                 {/* People */}
@@ -213,7 +230,7 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3">
                     <User className="w-4 h-4 text-slate-400" />
                     <div>
@@ -286,19 +303,19 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
         // Edit Mode
         <>
           <DrawerContent>
-                    {parsedRecordType && (
-          <DynamicRecordForm
-            recordType={parsedRecordType}
-            householdId={householdId}
-            memberId={parseInt(memberId)}
-            createdBy={record.createdBy || undefined}
-            initialData={record}
-            onSubmit={handleUpdate}
-            onCancel={() => setMode("view")}
-            isSubmitting={isUpdating}
-            mode="edit"
-          />
-        )}
+            {parsedRecordType && (
+              <DynamicRecordForm
+                recordType={parsedRecordType}
+                householdId={householdId}
+                memberId={parseInt(memberId)}
+                createdBy={record.createdBy || undefined}
+                initialData={record}
+                onSubmit={handleUpdate}
+                onCancel={() => setMode("view")}
+                isSubmitting={isUpdating}
+                mode="edit"
+              />
+            )}
           </DrawerContent>
         </>
       )}

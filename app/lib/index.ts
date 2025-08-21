@@ -7,19 +7,40 @@ export { authApi } from "./auth-db";
 export { loadHouseholdDataWithMember } from "./loader-helpers";
 
 // Validation
-export { validateField, validateForm, VALIDATION_PATTERNS, COMMON_RULES } from "./validation";
+export {
+  validateField,
+  validateForm,
+  VALIDATION_PATTERNS,
+  COMMON_RULES,
+} from "./validation";
 
 // Utilities
-export { cn, parseCookies, extractEnv, isDatabaseAvailable, extractSessionFromCookies } from "./utils";
+export {
+  cn,
+  parseCookies,
+  extractEnv,
+  isDatabaseAvailable,
+  extractSessionFromCookies,
+} from "./utils";
 
 // Error Handling
-export { logError, logApiError, logComponentError, logActionError, safeAsync } from "./error-utils";
+export {
+  logError,
+  logApiError,
+  logComponentError,
+  logActionError,
+  safeAsync,
+} from "./error-utils";
 
 // Permissions
-export { getHouseholdPermissions, canUserPerformAction, canAccessMemberRecords } from "./permissions";
+export {
+  getHouseholdPermissions,
+  canUserPerformAction,
+  canAccessMemberRecords,
+} from "./permissions";
 
 // Types
-export type { 
+export type {
   User,
   UserProfile,
   Household,
@@ -30,21 +51,21 @@ export type {
   Invitation,
   FormField,
   Record,
-  RecordType
+  RecordType,
 } from "./types";
 
-export type { 
+export type {
   DynamicField,
   DynamicFieldConfig,
   FieldType,
   FieldValidation,
   SelectOption,
   FieldValue,
-  RecordData
+  RecordData,
 } from "./types/dynamic-fields";
 
 // Dynamic Fields
-export { 
+export {
   createFieldId,
   createDefaultField,
   getFieldTypeConfig,
@@ -64,5 +85,5 @@ export {
   deserializeFieldConfig,
   createRecordSchema,
   createFieldValidationSchema,
-  validateFieldAgainstSchema
+  validateFieldAgainstSchema,
 } from "./utils/dynamic-fields";

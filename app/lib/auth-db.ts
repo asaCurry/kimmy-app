@@ -225,7 +225,10 @@ export const authApi = {
       }
 
       // Find household by invite code
-      const household = await inviteCodeDb.getHouseholdByInviteCode(env, userData.inviteCode);
+      const household = await inviteCodeDb.getHouseholdByInviteCode(
+        env,
+        userData.inviteCode
+      );
       if (!household) {
         throw new Error("Invalid or expired invite code");
       }

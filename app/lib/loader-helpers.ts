@@ -90,12 +90,16 @@ export async function loadHouseholdDataWithMember(
   env: any,
   memberId?: string
 ): Promise<HouseholdData & { currentMember: any | null }> {
-  const { householdId, householdMembers } = await loadHouseholdData(request, env);
+  const { householdId, householdMembers } = await loadHouseholdData(
+    request,
+    env
+  );
 
   let currentMember = null;
   if (householdId && memberId) {
     currentMember =
-      householdMembers.find(member => member.id.toString() === memberId) || null;
+      householdMembers.find(member => member.id.toString() === memberId) ||
+      null;
   }
 
   return { householdId, householdMembers, currentMember };
@@ -109,7 +113,10 @@ export async function loadHouseholdDataWithCategories(
   request: Request,
   env: any
 ): Promise<HouseholdData & { categories: string[] }> {
-  const { householdId, householdMembers } = await loadHouseholdData(request, env);
+  const { householdId, householdMembers } = await loadHouseholdData(
+    request,
+    env
+  );
 
   // Default categories - in a real app, these might come from the database
   const defaultCategories = [

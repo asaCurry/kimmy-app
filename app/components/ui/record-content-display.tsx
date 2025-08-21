@@ -48,8 +48,8 @@ export const RecordContentDisplay: React.FC<RecordContentDisplayProps> = ({
   const { description, fields: contentFields } = parsedContent;
 
   // Check if this is the default empty structure
-  const isDefaultEmptyStructure = 
-    description === "No description provided" && 
+  const isDefaultEmptyStructure =
+    description === "No description provided" &&
     (!contentFields || Object.keys(contentFields).length === 0);
 
   if (isDefaultEmptyStructure) {
@@ -107,7 +107,11 @@ export const RecordContentDisplay: React.FC<RecordContentDisplayProps> = ({
 
   // Add description if available and meaningful
   if (description && description !== "No description provided") {
-    availableData.push({ key: "description", value: description, label: "Description" });
+    availableData.push({
+      key: "description",
+      value: description,
+      label: "Description",
+    });
   }
 
   // Add field values if available - this is where the actual field data is
@@ -115,20 +119,19 @@ export const RecordContentDisplay: React.FC<RecordContentDisplayProps> = ({
     Object.entries(contentFields)
       .filter(([key, value]) => {
         // Skip internal fields and empty values
-        const shouldInclude = (
+        const shouldInclude =
           !key.startsWith("_") &&
           value !== undefined &&
           value !== null &&
           value !== "" &&
-          key !== "description"
-        );
+          key !== "description";
         return shouldInclude;
       })
       .forEach(([key, value]) => {
         availableData.push({ key, value, label: formatKey(key) });
       });
   }
-  
+
   // Show available data in a clean format
   if (availableData.length === 0) {
     // If we have a description but it's the default, show a simple message
@@ -139,7 +142,7 @@ export const RecordContentDisplay: React.FC<RecordContentDisplayProps> = ({
         </div>
       );
     }
-    
+
     return (
       <div className={`text-slate-500 italic ${className}`}>
         No additional information available
@@ -259,16 +262,17 @@ const renderValue = (value: any): React.ReactNode => {
     if (Object.keys(value).length === 0) {
       return <span className="text-slate-500 italic">No data</span>;
     }
-    
+
     // If it has meaningful content, try to extract it
-    const entries = Object.entries(value).filter(([k, v]) => 
-      v !== undefined && v !== null && v !== "" && !k.startsWith("_")
+    const entries = Object.entries(value).filter(
+      ([k, v]) =>
+        v !== undefined && v !== null && v !== "" && !k.startsWith("_")
     );
-    
+
     if (entries.length === 0) {
       return <span className="text-slate-500 italic">No data</span>;
     }
-    
+
     // Show first few meaningful entries
     const displayEntries = entries.slice(0, 2);
     return (

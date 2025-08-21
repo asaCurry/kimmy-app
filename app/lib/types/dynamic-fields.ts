@@ -1,13 +1,13 @@
-export type FieldType = 
-  | "text" 
-  | "textarea" 
-  | "number" 
-  | "select" 
-  | "checkbox" 
-  | "date" 
-  | "email" 
-  | "url" 
-  | "phone" 
+export type FieldType =
+  | "text"
+  | "textarea"
+  | "number"
+  | "select"
+  | "checkbox"
+  | "date"
+  | "email"
+  | "url"
+  | "phone"
   | "file";
 
 export interface FieldValidation {
@@ -70,5 +70,5 @@ export const FIELD_TYPE_CONFIGS = {
   email: { label: "Email", icon: "📧", hasOptions: false },
   url: { label: "URL", icon: "🔗", hasOptions: false },
   phone: { label: "Phone", icon: "📞", hasOptions: false },
-  file: { label: "File Upload", icon: "📎", hasOptions: false }
+  file: { label: "File Upload", icon: "📎", hasOptions: false },
 };

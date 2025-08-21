@@ -5,29 +5,34 @@ The Trackers feature in Kimmy allows users to create and manage activity tracker
 ## Overview
 
 Trackers are flexible tools that can be used to:
+
 - **Time Tracking**: Start/stop timers for activities like reading, exercise, or work
 - **Cumulative Logging**: Track multiple entries that sum up over time (e.g., pages read, miles run)
 
 ## Features
 
 ### 1. Time Tracking
+
 - Start and stop timers for activities
 - Real-time elapsed time display
 - Automatic duration calculation
 - Notes and tags for each session
 
 ### 2. Cumulative Logging
+
 - Quick entry logging with custom values
 - Support for various units (minutes, hours, count, pages, miles, etc.)
 - Batch entry management
 
 ### 3. Flexible Configuration
+
 - Custom icons and colors
 - Configurable units (minutes, hours, count, custom)
 - Optional descriptions and tags
 - Household-based organization
 
 ### 4. History & Analytics
+
 - Comprehensive entry history
 - Filtering by date range and search terms
 - Sorting by various criteria
@@ -81,11 +86,13 @@ Trackers are flexible tools that can be used to:
 The feature uses two main tables:
 
 #### `trackers`
+
 - Basic tracker information (name, description, type, unit)
 - Visual customization (icon, color)
 - Household association and metadata
 
 #### `tracker_entries`
+
 - Individual time logs or cumulative entries
 - Start/end times for time tracking
 - Values, notes, and tags
@@ -106,18 +113,21 @@ The feature uses two main tables:
 ## Best Practices
 
 ### Time Tracking
+
 - Use descriptive names for easy identification
 - Add notes to track context and progress
 - Stop timers when switching activities
 - Review history regularly to identify patterns
 
 ### Cumulative Logging
+
 - Choose appropriate units for your activity
 - Use tags to categorize different types of entries
 - Log entries promptly for accurate tracking
 - Set realistic goals based on historical data
 
 ### Organization
+
 - Group related trackers by category or purpose
 - Use consistent naming conventions
 - Leverage colors and icons for visual organization
@@ -126,24 +136,28 @@ The feature uses two main tables:
 ## Examples
 
 ### Reading Tracker
+
 - **Type**: Cumulative Log
 - **Unit**: Pages
 - **Icon**: 📚
 - **Use Case**: Track daily reading progress
 
 ### Exercise Tracker
+
 - **Type**: Time Tracking
 - **Unit**: Minutes
 - **Icon**: 💪
 - **Use Case**: Monitor workout duration
 
 ### Work Hours Tracker
+
 - **Type**: Time Tracking
 - **Unit**: Hours
 - **Icon**: ⏰
 - **Use Case**: Track billable hours
 
 ### Water Intake Tracker
+
 - **Type**: Cumulative Log
 - **Unit**: Glasses
 - **Icon**: 💧
@@ -152,6 +166,7 @@ The feature uses two main tables:
 ## Mobile Optimization
 
 The tracker interface is fully responsive and mobile-friendly:
+
 - Touch-friendly buttons and controls
 - Optimized layouts for small screens
 - Easy navigation between views
@@ -160,6 +175,7 @@ The tracker interface is fully responsive and mobile-friendly:
 ## Future Enhancements
 
 Potential improvements for future versions:
+
 - Goal setting and progress tracking
 - Data export and reporting
 - Integration with external services

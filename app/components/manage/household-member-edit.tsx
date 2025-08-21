@@ -1,14 +1,32 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Form, useActionData, useNavigation, useNavigate, useLoaderData } from "react-router";
+import {
+  Form,
+  useActionData,
+  useNavigation,
+  useNavigate,
+  useLoaderData,
+} from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { RequireAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import {
   FormField,
@@ -47,7 +65,7 @@ export const HouseholdmemberEdit: React.FC<HouseholdmemberEditProps> = ({
 
   // Determine member type based on age and role
   const memberType: "adult" | "child" = member.age ? "child" : "adult";
-  
+
   // Parse name into first and last name
   const nameParts = member.name.split(" ");
   const firstName = nameParts[0] || "";
@@ -162,11 +180,7 @@ export const HouseholdmemberEdit: React.FC<HouseholdmemberEditProps> = ({
           {/* Hidden fields */}
           <input type="hidden" name="memberId" value={member.id} />
           <input type="hidden" name="memberType" value={memberType} />
-          <input
-            type="hidden"
-            name="currentHouseholdId"
-            value={householdId}
-          />
+          <input type="hidden" name="currentHouseholdId" value={householdId} />
 
           {errors.submit && (
             <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
@@ -184,14 +198,10 @@ export const HouseholdmemberEdit: React.FC<HouseholdmemberEditProps> = ({
                 name="firstName"
                 type="text"
                 value={formData.firstName}
-                onChange={e =>
-                  handleInputChange("firstName", e.target.value)
-                }
+                onChange={e => handleInputChange("firstName", e.target.value)}
                 placeholder="Enter first name"
               />
-              {errors.firstName && (
-                <FormError>{errors.firstName}</FormError>
-              )}
+              {errors.firstName && <FormError>{errors.firstName}</FormError>}
             </FormField>
 
             <FormField>
@@ -203,14 +213,10 @@ export const HouseholdmemberEdit: React.FC<HouseholdmemberEditProps> = ({
                 name="lastName"
                 type="text"
                 value={formData.lastName}
-                onChange={e =>
-                  handleInputChange("lastName", e.target.value)
-                }
+                onChange={e => handleInputChange("lastName", e.target.value)}
                 placeholder="Enter last name"
               />
-              {errors.lastName && (
-                <FormError>{errors.lastName}</FormError>
-              )}
+              {errors.lastName && <FormError>{errors.lastName}</FormError>}
             </FormField>
           </div>
 
@@ -242,16 +248,13 @@ export const HouseholdmemberEdit: React.FC<HouseholdmemberEditProps> = ({
                 name="dateOfBirth"
                 type="date"
                 value={formData.dateOfBirth}
-                onChange={e =>
-                  handleInputChange("dateOfBirth", e.target.value)
-                }
+                onChange={e => handleInputChange("dateOfBirth", e.target.value)}
               />
               {errors.dateOfBirth && (
                 <FormError>{errors.dateOfBirth}</FormError>
               )}
               <FormDescription>
-                Date of birth helps with age-appropriate features and
-                records
+                Date of birth helps with age-appropriate features and records
               </FormDescription>
             </FormField>
           )}
@@ -264,9 +267,7 @@ export const HouseholdmemberEdit: React.FC<HouseholdmemberEditProps> = ({
               id="relationship"
               name="relationship"
               value={formData.relationship}
-              onChange={e =>
-                handleInputChange("relationship", e.target.value)
-              }
+              onChange={e => handleInputChange("relationship", e.target.value)}
             >
               <option value="">Select relationship</option>
               {getRelationshipOptions().map(option => (
@@ -310,7 +311,7 @@ export const HouseholdmemberEdit: React.FC<HouseholdmemberEditProps> = ({
 function getDateFromAge(age: number): string {
   const today = new Date();
   const year = today.getFullYear() - age;
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }

@@ -142,12 +142,11 @@ export const HouseholdmemberForm: React.FC<HouseholdmemberFormProps> = ({
           )}
         </div>
         <CardTitle className="text-xl text-slate-100">
-          {mode === "edit" 
+          {mode === "edit"
             ? `Edit ${memberType === "adult" ? "Adult Member" : "Child"}`
-            : memberType === "adult" 
-              ? "Add Adult Member" 
-              : "Add Child"
-          }
+            : memberType === "adult"
+              ? "Add Adult Member"
+              : "Add Child"}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -157,7 +156,7 @@ export const HouseholdmemberForm: React.FC<HouseholdmemberFormProps> = ({
           <input
             type="hidden"
             name="currentHouseholdId"
-                            value={householdId || ""}
+            value={householdId || ""}
           />
 
           {/* Member Type Selection */}
@@ -202,14 +201,10 @@ export const HouseholdmemberForm: React.FC<HouseholdmemberFormProps> = ({
                 name="firstName"
                 type="text"
                 value={formData.firstName}
-                onChange={e =>
-                  handleInputChange("firstName", e.target.value)
-                }
+                onChange={e => handleInputChange("firstName", e.target.value)}
                 placeholder="Enter first name"
               />
-              {errors.firstName && (
-                <FormError>{errors.firstName}</FormError>
-              )}
+              {errors.firstName && <FormError>{errors.firstName}</FormError>}
             </FormField>
 
             <FormField>
@@ -221,14 +216,10 @@ export const HouseholdmemberForm: React.FC<HouseholdmemberFormProps> = ({
                 name="lastName"
                 type="text"
                 value={formData.lastName}
-                onChange={e =>
-                  handleInputChange("lastName", e.target.value)
-                }
+                onChange={e => handleInputChange("lastName", e.target.value)}
                 placeholder="Enter last name"
               />
-              {errors.lastName && (
-                <FormError>{errors.lastName}</FormError>
-              )}
+              {errors.lastName && <FormError>{errors.lastName}</FormError>}
             </FormField>
           </div>
 
@@ -260,16 +251,13 @@ export const HouseholdmemberForm: React.FC<HouseholdmemberFormProps> = ({
                 name="dateOfBirth"
                 type="date"
                 value={formData.dateOfBirth}
-                onChange={e =>
-                  handleInputChange("dateOfBirth", e.target.value)
-                }
+                onChange={e => handleInputChange("dateOfBirth", e.target.value)}
               />
               {errors.dateOfBirth && (
                 <FormError>{errors.dateOfBirth}</FormError>
               )}
               <FormDescription>
-                Date of birth helps with age-appropriate features and
-                records
+                Date of birth helps with age-appropriate features and records
               </FormDescription>
             </FormField>
           )}
@@ -282,9 +270,7 @@ export const HouseholdmemberForm: React.FC<HouseholdmemberFormProps> = ({
               id="relationship"
               name="relationship"
               value={formData.relationship}
-              onChange={e =>
-                handleInputChange("relationship", e.target.value)
-              }
+              onChange={e => handleInputChange("relationship", e.target.value)}
             >
               <option value="">Select relationship</option>
               {getRelationshipOptions().map(option => (
@@ -305,8 +291,12 @@ export const HouseholdmemberForm: React.FC<HouseholdmemberFormProps> = ({
               className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
             >
               {isSubmitting
-                ? mode === "edit" ? "Updating..." : "Adding Member..."
-                : mode === "edit" ? "Update Member" : "Add Member"}
+                ? mode === "edit"
+                  ? "Updating..."
+                  : "Adding Member..."
+                : mode === "edit"
+                  ? "Update Member"
+                  : "Add Member"}
             </Button>
 
             <Button

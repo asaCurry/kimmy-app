@@ -3,7 +3,15 @@ import { useFetcher, Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
-import { Clock, Play, Square, Plus, BarChart3, Timer, ExternalLink } from "lucide-react";
+import {
+  Clock,
+  Play,
+  Square,
+  Plus,
+  BarChart3,
+  Timer,
+  ExternalLink,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import type { Tracker, TrackerEntry } from "~/db/schema";
 
@@ -22,19 +30,21 @@ interface TrackerCardProps {
   };
 }
 
-export function TrackerCard({ 
-  tracker, 
-  activeEntry, 
-  onEdit, 
-  onDelete, 
+export function TrackerCard({
+  tracker,
+  activeEntry,
+  onEdit,
+  onDelete,
   onRefresh,
   showDetailLink = false,
   memberId,
-  stats
+  stats,
 }: TrackerCardProps) {
   const fetcher = useFetcher();
   const [isTracking, setIsTracking] = React.useState(!!activeEntry);
-  const [localTrackingStart, setLocalTrackingStart] = React.useState<string | null>(null);
+  const [localTrackingStart, setLocalTrackingStart] = React.useState<
+    string | null
+  >(null);
   const [elapsedTime, setElapsedTime] = React.useState<string>("");
 
   // Update elapsed time every second while tracking
@@ -43,7 +53,7 @@ export function TrackerCard({
       const interval = setInterval(() => {
         setElapsedTime(getElapsedTime(localTrackingStart, true)); // Show seconds while tracking
       }, 1000);
-      
+
       return () => clearInterval(interval);
     } else {
       setElapsedTime("");
@@ -58,15 +68,21 @@ export function TrackerCard({
         if (formData) {
           const action = formData.get("_action");
           if (action === "complete-tracking") {
-            toast.success("Time tracking completed and saved!", { position: "top-right" });
+            toast.success("Time tracking completed and saved!", {
+              position: "top-right",
+            });
             onRefresh?.();
           } else if (action === "quick-log") {
-            toast.success("Entry logged successfully!", { position: "top-right" });
+            toast.success("Entry logged successfully!", {
+              position: "top-right",
+            });
             onRefresh?.();
           }
         }
       } else {
-        toast.error(fetcher.data.error || "Action failed", { position: "top-right" });
+        toast.error(fetcher.data.error || "Action failed", {
+          position: "top-right",
+        });
         // If tracking failed, reset the local state
         if (fetcher.formData?.get("_action") === "complete-tracking") {
           setIsTracking(false);
@@ -85,7 +101,7 @@ export function TrackerCard({
 
   const handleStopTracking = () => {
     if (!localTrackingStart) return;
-    
+
     // Calculate duration and save the complete entry
     const endTime = new Date().toISOString();
     const formData = new FormData();
@@ -93,23 +109,29 @@ export function TrackerCard({
     formData.append("trackerId", tracker.id.toString());
     formData.append("startTime", localTrackingStart);
     formData.append("endTime", endTime);
-    
+
     // Reset local tracking state
     setLocalTrackingStart(null);
     setIsTracking(false);
-    
-    fetcher.submit(formData, { method: "post", action: "/api/tracker-entries" });
+
+    fetcher.submit(formData, {
+      method: "post",
+      action: "/api/tracker-entries",
+    });
   };
 
   const handleQuickLog = () => {
     const value = prompt(`Enter ${tracker.unit} to log:`);
     if (!value || isNaN(parseFloat(value))) return;
-    
+
     const formData = new FormData();
     formData.append("_action", "quick-log");
     formData.append("trackerId", tracker.id.toString());
     formData.append("value", value);
-    fetcher.submit(formData, { method: "post", action: "/api/tracker-entries" });
+    fetcher.submit(formData, {
+      method: "post",
+      action: "/api/tracker-entries",
+    });
   };
 
   const formatDuration = (minutes: number, showSeconds = true) => {
@@ -121,7 +143,7 @@ export function TrackerCard({
       }
       return `${totalSeconds}s`;
     }
-    
+
     if (minutes < 60) {
       if (showSeconds) {
         // While tracking, show minutes and seconds
@@ -135,16 +157,16 @@ export function TrackerCard({
       }
       return `${Math.round(minutes)}m`;
     }
-    
+
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    
+
     if (showSeconds && mins > 0) {
       // While tracking, show hours, minutes, and seconds
       const secs = Math.round(mins * 60);
       return `${hours}h ${secs}s`;
     }
-    
+
     // For completed sessions, show hours and minutes
     return mins > 0 ? `${hours}h ${Math.round(mins)}m` : `${hours}h`;
   };
@@ -166,11 +188,15 @@ export function TrackerCard({
             <CardTitle className="text-lg">{tracker.name}</CardTitle>
           </div>
           <div className="flex items-center gap-1">
-            <Badge 
+            <Badge
               variant={tracker.type === "time" ? "default" : "secondary"}
               className="text-xs"
             >
-              {tracker.type === "time" ? <Timer className="w-3 h-3 mr-1" /> : <BarChart3 className="w-3 h-3 mr-1" />}
+              {tracker.type === "time" ? (
+                <Timer className="w-3 h-3 mr-1" />
+              ) : (
+                <BarChart3 className="w-3 h-3 mr-1" />
+              )}
               {tracker.type}
             </Badge>
             <Badge variant="outline" className="text-xs">
@@ -182,7 +208,7 @@ export function TrackerCard({
           <p className="text-sm text-muted-foreground">{tracker.description}</p>
         )}
       </CardHeader>
-      
+
       <CardContent className="pt-0">
         {tracker.type === "time" ? (
           <div className="space-y-3">
@@ -232,36 +258,44 @@ export function TrackerCard({
             </Button>
           </div>
         )}
-        
+
         {/* Stats Section */}
         <div className="mt-3 pt-3 border-t border-slate-700/50">
           <div className="flex items-center justify-between text-sm">
             <span className="text-slate-400">Total tracked:</span>
             <span className="font-medium text-slate-200">
-              {tracker.type === "time" ? (
-                // For time trackers, show in hours:minutes format for completed sessions
-                stats ? formatDuration(stats.totalValue) : "0h 0m"
-              ) : (
-                // For cumulative trackers, show total value
-                stats ? stats.totalValue.toString() : "0"
-              )}
+              {tracker.type === "time"
+                ? // For time trackers, show in hours:minutes format for completed sessions
+                  stats
+                  ? formatDuration(stats.totalValue)
+                  : "0h 0m"
+                : // For cumulative trackers, show total value
+                  stats
+                  ? stats.totalValue.toString()
+                  : "0"}
             </span>
           </div>
           {tracker.type === "time" && (
             <div className="flex items-center justify-between text-sm mt-1">
               <span className="text-slate-400">Sessions:</span>
-              <span className="font-medium text-slate-200">{stats ? stats.entryCount : 0}</span>
+              <span className="font-medium text-slate-200">
+                {stats ? stats.entryCount : 0}
+              </span>
             </div>
           )}
         </div>
-        
+
         <div className="flex gap-2 mt-3">
           {showDetailLink && memberId && (
             <Link
               to={`/member/${memberId}/tracker/${tracker.id}`}
               className="flex-1"
             >
-              <Button size="sm" variant="ghost" className="w-full text-slate-400 hover:text-slate-300 hover:bg-slate-700/50">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-full text-slate-400 hover:text-slate-300 hover:bg-slate-700/50"
+              >
                 <ExternalLink className="w-4 h-4 mr-1" />
                 View Details
               </Button>
@@ -286,7 +320,7 @@ export function TrackerCard({
             >
               Delete
             </Button>
-            )}
+          )}
         </div>
       </CardContent>
     </Card>

@@ -31,9 +31,13 @@ interface RecordManagementActions {
   setUpdating: (isUpdating: boolean) => void;
 }
 
-interface RecordManagementContextValue extends RecordManagementState, RecordManagementActions {}
+interface RecordManagementContextValue
+  extends RecordManagementState,
+    RecordManagementActions {}
 
-const RecordManagementContext = React.createContext<RecordManagementContextValue | undefined>(undefined);
+const RecordManagementContext = React.createContext<
+  RecordManagementContextValue | undefined
+>(undefined);
 
 interface RecordManagementProviderProps {
   children: React.ReactNode;
@@ -49,10 +53,15 @@ interface RecordManagementProviderProps {
   memberId: string;
   category: string;
   onRecordDelete?: (recordId: number) => Promise<void>;
-  onRecordUpdate?: (recordId: number, updates: Partial<Record>) => Promise<void>;
+  onRecordUpdate?: (
+    recordId: number,
+    updates: Partial<Record>
+  ) => Promise<void>;
 }
 
-export const RecordManagementProvider: React.FC<RecordManagementProviderProps> = ({
+export const RecordManagementProvider: React.FC<
+  RecordManagementProviderProps
+> = ({
   children,
   householdMembers,
   householdId,
@@ -74,15 +83,18 @@ export const RecordManagementProvider: React.FC<RecordManagementProviderProps> =
     category,
   });
 
-  const openRecord = React.useCallback((record: Record, recordType: RecordType) => {
-    setState(prev => ({
-      ...prev,
-      selectedRecord: record,
-      selectedRecordType: recordType,
-      isDrawerOpen: true,
-      drawerMode: "view",
-    }));
-  }, []);
+  const openRecord = React.useCallback(
+    (record: Record, recordType: RecordType) => {
+      setState(prev => ({
+        ...prev,
+        selectedRecord: record,
+        selectedRecordType: recordType,
+        isDrawerOpen: true,
+        drawerMode: "view",
+      }));
+    },
+    []
+  );
 
   const closeRecord = React.useCallback(() => {
     setState(prev => ({
@@ -101,39 +113,45 @@ export const RecordManagementProvider: React.FC<RecordManagementProviderProps> =
     }));
   }, []);
 
-  const deleteRecord = React.useCallback(async (recordId: number) => {
-    if (!onRecordDelete) {
-      console.warn("No delete handler provided");
-      return;
-    }
+  const deleteRecord = React.useCallback(
+    async (recordId: number) => {
+      if (!onRecordDelete) {
+        console.warn("No delete handler provided");
+        return;
+      }
 
-    setState(prev => ({ ...prev, isDeleting: true }));
-    try {
-      await onRecordDelete(recordId);
-      closeRecord();
-    } catch (error) {
-      console.error("Failed to delete record:", error);
-    } finally {
-      setState(prev => ({ ...prev, isDeleting: false }));
-    }
-  }, [onRecordDelete, closeRecord]);
+      setState(prev => ({ ...prev, isDeleting: true }));
+      try {
+        await onRecordDelete(recordId);
+        closeRecord();
+      } catch (error) {
+        console.error("Failed to delete record:", error);
+      } finally {
+        setState(prev => ({ ...prev, isDeleting: false }));
+      }
+    },
+    [onRecordDelete, closeRecord]
+  );
 
-  const updateRecord = React.useCallback(async (recordId: number, updates: Partial<Record>) => {
-    if (!onRecordUpdate) {
-      console.warn("No update handler provided");
-      return;
-    }
+  const updateRecord = React.useCallback(
+    async (recordId: number, updates: Partial<Record>) => {
+      if (!onRecordUpdate) {
+        console.warn("No update handler provided");
+        return;
+      }
 
-    setState(prev => ({ ...prev, isUpdating: true }));
-    try {
-      await onRecordUpdate(recordId, updates);
-      setState(prev => ({ ...prev, drawerMode: "view" }));
-    } catch (error) {
-      console.error("Failed to update record:", error);
-    } finally {
-      setState(prev => ({ ...prev, isUpdating: false }));
-    }
-  }, [onRecordUpdate]);
+      setState(prev => ({ ...prev, isUpdating: true }));
+      try {
+        await onRecordUpdate(recordId, updates);
+        setState(prev => ({ ...prev, drawerMode: "view" }));
+      } catch (error) {
+        console.error("Failed to update record:", error);
+      } finally {
+        setState(prev => ({ ...prev, isUpdating: false }));
+      }
+    },
+    [onRecordUpdate]
+  );
 
   const setDeleting = React.useCallback((isDeleting: boolean) => {
     setState(prev => ({ ...prev, isDeleting }));
@@ -143,29 +161,32 @@ export const RecordManagementProvider: React.FC<RecordManagementProviderProps> =
     setState(prev => ({ ...prev, isUpdating }));
   }, []);
 
-  const contextValue: RecordManagementContextValue = React.useMemo(() => ({
-    ...state,
-    openRecord,
-    closeRecord,
-    setDrawerMode,
-    deleteRecord,
-    updateRecord,
-    setDeleting,
-    setUpdating,
-  }), [
-    state,
-    openRecord,
-    closeRecord,
-    setDrawerMode,
-    deleteRecord,
-    updateRecord,
-    setDeleting,
-    setUpdating,
-    householdMembers,
-    householdId,
-    memberId,
-    category,
-  ]);
+  const contextValue: RecordManagementContextValue = React.useMemo(
+    () => ({
+      ...state,
+      openRecord,
+      closeRecord,
+      setDrawerMode,
+      deleteRecord,
+      updateRecord,
+      setDeleting,
+      setUpdating,
+    }),
+    [
+      state,
+      openRecord,
+      closeRecord,
+      setDrawerMode,
+      deleteRecord,
+      updateRecord,
+      setDeleting,
+      setUpdating,
+      householdMembers,
+      householdId,
+      memberId,
+      category,
+    ]
+  );
 
   return (
     <RecordManagementContext.Provider value={contextValue}>
@@ -177,7 +198,9 @@ export const RecordManagementProvider: React.FC<RecordManagementProviderProps> =
 export const useRecordManagement = (): RecordManagementContextValue => {
   const context = React.useContext(RecordManagementContext);
   if (context === undefined) {
-    throw new Error("useRecordManagement must be used within a RecordManagementProvider");
+    throw new Error(
+      "useRecordManagement must be used within a RecordManagementProvider"
+    );
   }
   return context;
 };
@@ -186,18 +209,60 @@ export const useRecordManagement = (): RecordManagementContextValue => {
 export const useRecordManagementState = (): RecordManagementState => {
   const context = React.useContext(RecordManagementContext);
   if (context === undefined) {
-    throw new Error("useRecordManagementState must be used within a RecordManagementProvider");
+    throw new Error(
+      "useRecordManagementState must be used within a RecordManagementProvider"
+    );
   }
-  const { selectedRecord, selectedRecordType, isDrawerOpen, drawerMode, isDeleting, isUpdating, householdMembers, householdId, memberId, category } = context;
-  return { selectedRecord, selectedRecordType, isDrawerOpen, drawerMode, isDeleting, isUpdating, householdMembers, householdId, memberId, category };
+  const {
+    selectedRecord,
+    selectedRecordType,
+    isDrawerOpen,
+    drawerMode,
+    isDeleting,
+    isUpdating,
+    householdMembers,
+    householdId,
+    memberId,
+    category,
+  } = context;
+  return {
+    selectedRecord,
+    selectedRecordType,
+    isDrawerOpen,
+    drawerMode,
+    isDeleting,
+    isUpdating,
+    householdMembers,
+    householdId,
+    memberId,
+    category,
+  };
 };
 
 // Hook for components that only need the actions
 export const useRecordManagementActions = (): RecordManagementActions => {
   const context = React.useContext(RecordManagementContext);
   if (context === undefined) {
-    throw new Error("useRecordManagementActions must be used within a RecordManagementProvider");
+    throw new Error(
+      "useRecordManagementActions must be used within a RecordManagementProvider"
+    );
   }
-  const { openRecord, closeRecord, setDrawerMode, deleteRecord, updateRecord, setDeleting, setUpdating } = context;
-  return { openRecord, closeRecord, setDrawerMode, deleteRecord, updateRecord, setDeleting, setUpdating };
+  const {
+    openRecord,
+    closeRecord,
+    setDrawerMode,
+    deleteRecord,
+    updateRecord,
+    setDeleting,
+    setUpdating,
+  } = context;
+  return {
+    openRecord,
+    closeRecord,
+    setDrawerMode,
+    deleteRecord,
+    updateRecord,
+    setDeleting,
+    setUpdating,
+  };
 };

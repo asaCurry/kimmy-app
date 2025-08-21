@@ -101,7 +101,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
           pauseOnHover: true,
           draggable: true,
         });
-        
+
         // Redirect after a brief delay to let user see the toast
         const timer = setTimeout(() => {
           if (onSuccess) {
@@ -111,7 +111,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
             window.location.reload();
           }
         }, 1000); // Reduced delay since toast is less intrusive
-        
+
         return () => clearTimeout(timer);
       } else if (fetcher.data.error) {
         // Show error toast

@@ -14,7 +14,7 @@ import {
   formatSelectOptions,
   reorderFields,
   serializeFields,
-  deserializeFields
+  deserializeFields,
 } from "./dynamic-fields/index";
 
 export {
@@ -28,5 +28,5 @@ export {
   formatSelectOptions,
   reorderFields,
   serializeFields,
-  deserializeFields
+  deserializeFields,
 };

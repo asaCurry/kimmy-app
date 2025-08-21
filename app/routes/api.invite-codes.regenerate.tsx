@@ -21,16 +21,19 @@ export async function action({ request, context }: Route.ActionArgs) {
     // For now, we'll trust the request (this should be secured in production)
 
     // Regenerate the invite code
-    const newInviteCode = await inviteCodeDb.regenerateInviteCode(env, householdId);
+    const newInviteCode = await inviteCodeDb.regenerateInviteCode(
+      env,
+      householdId
+    );
 
     if (!newInviteCode) {
       return { error: "Failed to regenerate invite code" };
     }
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       inviteCode: newInviteCode,
-      message: "Invite code regenerated successfully" 
+      message: "Invite code regenerated successfully",
     };
   } catch (error) {
     console.error("Regenerate invite code API error:", error);

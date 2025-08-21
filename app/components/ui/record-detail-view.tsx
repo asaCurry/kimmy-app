@@ -1,34 +1,34 @@
 import * as React from "react";
 import { Link } from "react-router";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
   CardTitle,
-  CardFooter 
+  CardFooter,
 } from "./card";
 import { Button } from "./button";
-import { 
+import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbPage,
-  BreadcrumbSeparator
+  BreadcrumbSeparator,
 } from "./breadcrumb";
 import { RecordContentDisplay } from "./record-content-display";
 import { DateDisplay, RelativeDate } from "./date-display";
-import { 
-  Edit, 
-  Trash2, 
-  Lock, 
-  Calendar, 
-  User as UserIcon, 
-  Tag, 
+import {
+  Edit,
+  Trash2,
+  Lock,
+  Calendar,
+  User as UserIcon,
+  Tag,
   ArrowLeft,
   Eye,
-  EyeOff
+  EyeOff,
 } from "lucide-react";
 import type { Record, RecordType, User } from "~/db/schema";
 
@@ -55,35 +55,39 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
   recordTypeId,
   onDelete,
   isDeleting = false,
-  className = ""
+  className = "",
 }) => {
   // Find the member this record is about
   const recordMember = householdMembers.find(m => m.id === record.memberId);
-  
+
   // Find who created the record
   const recordCreator = householdMembers.find(m => m.id === record.createdBy);
-  
+
   // Parse the fields JSON for the record type
   const parsedRecordType = React.useMemo(() => {
     if (!recordType?.fields) return null;
-    
+
     try {
       let parsed;
-      if (typeof recordType.fields === 'string') {
+      if (typeof recordType.fields === "string") {
         parsed = JSON.parse(recordType.fields);
       } else if (Array.isArray(recordType.fields)) {
         parsed = recordType.fields;
       } else {
         parsed = recordType.fields;
       }
-      
+
       let normalizedFields = [];
-      if (parsed && typeof parsed === 'object' && Array.isArray(parsed.fields)) {
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        Array.isArray(parsed.fields)
+      ) {
         normalizedFields = parsed.fields;
       } else if (Array.isArray(parsed)) {
         normalizedFields = parsed;
       }
-      
+
       return {
         ...recordType,
         fields: normalizedFields,
@@ -97,7 +101,10 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
   }, [recordType]);
 
   const handleDelete = () => {
-    if (onDelete && confirm(`Are you sure you want to delete "${record.title}"?`)) {
+    if (
+      onDelete &&
+      confirm(`Are you sure you want to delete "${record.title}"?`)
+    ) {
       onDelete(record.id);
     }
   };
@@ -117,7 +124,9 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to={`/member/${memberId}/category/${encodeURIComponent(category)}`}>
+              <Link
+                to={`/member/${memberId}/category/${encodeURIComponent(category)}`}
+              >
                 {category}
               </Link>
             </BreadcrumbLink>
@@ -156,7 +165,7 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
                   </CardDescription>
                 </div>
               </div>
-              
+
               {/* Privacy Indicator */}
               {record.isPrivate && (
                 <div className="flex items-center space-x-2 text-yellow-500 text-sm">
@@ -171,7 +180,9 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
         <CardContent className="space-y-6">
           {/* Record Content */}
           <div className="space-y-4">
-            <h4 className="text-lg font-medium text-slate-200">Record Details</h4>
+            <h4 className="text-lg font-medium text-slate-200">
+              Record Details
+            </h4>
             {parsedRecordType && (
               <RecordContentDisplay
                 content={record.content}
@@ -184,25 +195,32 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
 
           {/* Metadata Section */}
           <div className="space-y-4 pt-4 border-t border-slate-700">
-            <h4 className="text-lg font-medium text-slate-200">Record Information</h4>
-            
+            <h4 className="text-lg font-medium text-slate-200">
+              Record Information
+            </h4>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Dates */}
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <Calendar className="w-4 h-4 text-slate-400" />
                   <div>
-                    <div className="text-sm text-slate-400">When it happened</div>
+                    <div className="text-sm text-slate-400">
+                      When it happened
+                    </div>
                     <div className="text-slate-200">
-                      {record.datetime && record.datetime !== record.createdAt ? (
+                      {record.datetime &&
+                      record.datetime !== record.createdAt ? (
                         <DateDisplay date={record.datetime} format="long" />
                       ) : (
-                        <span className="text-slate-500 italic">Not specified</span>
+                        <span className="text-slate-500 italic">
+                          Not specified
+                        </span>
                       )}
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <Calendar className="w-4 h-4 text-slate-400" />
                   <div>
@@ -212,7 +230,7 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
                     </div>
                   </div>
                 </div>
-                
+
                 {record.updatedAt && record.updatedAt !== record.createdAt && (
                   <div className="flex items-center space-x-3">
                     <Calendar className="w-4 h-4 text-slate-400" />
@@ -237,7 +255,7 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-4">
                   <UserIcon className="w-4 h-4 text-slate-400" />
                   <div>
@@ -278,7 +296,10 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
             <Link
               to={`/member/${memberId}/category/${encodeURIComponent(category)}/record/${recordTypeId}/edit/${record.id}`}
             >
-              <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+              <Button
+                variant="outline"
+                className="border-slate-600 text-slate-300 hover:bg-slate-700"
+              >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Record
               </Button>

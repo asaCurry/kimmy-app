@@ -61,9 +61,11 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
           className="hover:scale-105 transition-transform duration-200"
           onClick={() => {
             // Scroll to invite code manager section
-            const inviteSection = document.querySelector('[data-section="invite-code"]');
+            const inviteSection = document.querySelector(
+              '[data-section="invite-code"]'
+            );
             if (inviteSection) {
-              inviteSection.scrollIntoView({ behavior: 'smooth' });
+              inviteSection.scrollIntoView({ behavior: "smooth" });
             }
           }}
         />

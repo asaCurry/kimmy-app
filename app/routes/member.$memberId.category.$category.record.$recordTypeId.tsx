@@ -90,8 +90,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     // Load household data from URL params
-          const { householdId, householdMembers, currentMember } =
-        await loadHouseholdDataWithMember(request, env, memberId);
+    const { householdId, householdMembers, currentMember } =
+      await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no household data found, redirect to welcome
     if (!householdId) {
@@ -120,9 +120,13 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     if (recordTypeResult[0].fields) {
       try {
         const parsed = JSON.parse(recordTypeResult[0].fields);
-        
+
         // Extract the fields array from the parsed object
-        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.fields)) {
+        if (
+          parsed &&
+          typeof parsed === "object" &&
+          Array.isArray(parsed.fields)
+        ) {
           parsedFields = parsed.fields;
         } else if (Array.isArray(parsed)) {
           // Handle case where fields is directly an array
@@ -136,7 +140,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         parsedFields = [];
       }
     }
-    
+
     const recordType: ParsedRecordType = {
       ...recordTypeResult[0],
       description: recordTypeResult[0].description || null,
@@ -204,12 +208,16 @@ export async function action({
           if (!fieldsJson) {
             throw new Response("Record type has no fields", { status: 400 });
           }
-          
+
           const fields = JSON.parse(fieldsJson);
-          
+
           // Extract the fields array from the parsed object
           let normalizedFields = [];
-          if (fields && typeof fields === 'object' && Array.isArray(fields.fields)) {
+          if (
+            fields &&
+            typeof fields === "object" &&
+            Array.isArray(fields.fields)
+          ) {
             normalizedFields = fields.fields;
           } else if (Array.isArray(fields)) {
             // Handle case where fields is directly an array
@@ -217,7 +225,7 @@ export async function action({
           } else {
             normalizedFields = [];
           }
-          
+
           // Convert form data to dynamic fields using the utility function
           const dynamicFields: Record<string, any> = {};
           if (Array.isArray(normalizedFields)) {
@@ -228,7 +236,9 @@ export async function action({
               if (fieldValue !== null) {
                 switch (field.type) {
                   case "number":
-                    dynamicFields[fieldKey] = fieldValue ? parseFloat(fieldValue.toString()) : null;
+                    dynamicFields[fieldKey] = fieldValue
+                      ? parseFloat(fieldValue.toString())
+                      : null;
                     break;
                   case "checkbox":
                     dynamicFields[fieldKey] = fieldValue === "true";
@@ -287,7 +297,8 @@ export async function action({
 }
 
 const RecordForm: React.FC<Route.ComponentProps> = ({ loaderData, params }) => {
-  const { member, category, recordType, householdId, householdMembers } = loaderData;
+  const { member, category, recordType, householdId, householdMembers } =
+    loaderData;
   const { session } = useAuth();
   const navigate = useNavigate();
 
@@ -338,7 +349,7 @@ const RecordForm: React.FC<Route.ComponentProps> = ({ loaderData, params }) => {
             ...recordType,
             description: recordType.description || undefined,
             icon: recordType.icon || undefined,
-            color: recordType.color || undefined
+            color: recordType.color || undefined,
           }}
         />
 

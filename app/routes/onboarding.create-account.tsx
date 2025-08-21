@@ -39,7 +39,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 
     const formData = await request.formData();
 
-
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
     const email = formData.get("email") as string;
@@ -80,8 +79,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 
     // For "only me" option, no additional validation needed - household name will be auto-generated
 
-
-
     let session;
     if (selectedHouseholdType === "join" && inviteCode && inviteCode.trim()) {
       // Join existing household with invite code
@@ -110,8 +107,6 @@ export async function action({ request, context }: Route.ActionArgs) {
     if (!session) {
       return { error: "Account creation failed" };
     }
-
-
 
     // Return success with session data
     return { success: true, session };
@@ -162,22 +157,28 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
   }, [actionData, updateSession, navigate]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
-
     // Clear any previous errors
     setErrors({});
 
     // Temporarily disable validation on hidden fields to prevent browser validation errors
     const customHouseholdName = document.getElementById("customHouseholdName");
     const inviteCodeSection = document.getElementById("inviteCodeSection");
-    const householdNameInput = document.getElementById("householdName") as HTMLInputElement;
-    const inviteCodeInput = document.getElementById("inviteCode") as HTMLInputElement;
+    const householdNameInput = document.getElementById(
+      "householdName"
+    ) as HTMLInputElement;
+    const inviteCodeInput = document.getElementById(
+      "inviteCode"
+    ) as HTMLInputElement;
 
     // Store original required states
     const originalHouseholdNameRequired = householdNameInput?.required;
     const originalInviteCodeRequired = inviteCodeInput?.required;
 
     // Temporarily disable required on hidden fields
-    if (customHouseholdName?.classList.contains("hidden") && householdNameInput) {
+    if (
+      customHouseholdName?.classList.contains("hidden") &&
+      householdNameInput
+    ) {
       householdNameInput.required = false;
     }
     if (inviteCodeSection?.classList.contains("hidden") && inviteCodeInput) {
@@ -194,8 +195,6 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
     const householdType = formData.get("householdType") as string;
     const householdName = formData.get("householdName") as string;
     const inviteCode = formData.get("inviteCode") as string;
-    
-
 
     // Client-side validation
     const newErrors: Record<string, string> = {};
@@ -246,7 +245,7 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
     if (Object.keys(newErrors).length > 0) {
       e.preventDefault();
       setErrors(newErrors);
-      
+
       // Restore original required states
       if (householdNameInput) {
         householdNameInput.required = originalHouseholdNameRequired;
@@ -254,10 +253,10 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
       if (inviteCodeInput) {
         inviteCodeInput.required = originalInviteCodeRequired;
       }
-      
+
       return;
     }
-    
+
     // Restore original required states before form submission
     if (householdNameInput) {
       householdNameInput.required = originalHouseholdNameRequired;
@@ -265,7 +264,7 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
     if (inviteCodeInput) {
       inviteCodeInput.required = originalInviteCodeRequired;
     }
-    
+
     // If validation passes, let the form submit naturally
   };
 
@@ -276,7 +275,9 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
     const householdType = e.target.value;
     const customHouseholdName = document.getElementById("customHouseholdName");
     const inviteCodeSection = document.getElementById("inviteCodeSection");
-    const householdNameInput = document.getElementById("householdName") as HTMLInputElement;
+    const householdNameInput = document.getElementById(
+      "householdName"
+    ) as HTMLInputElement;
 
     if (customHouseholdName) {
       customHouseholdName.classList.toggle(
@@ -292,7 +293,7 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
     // Update required attribute based on household type
     if (householdNameInput) {
       householdNameInput.required = householdType === "custom";
-      
+
       // Clear the field value when switching to "Just me" to avoid validation issues
       if (householdType === "onlyMe") {
         householdNameInput.value = "";
@@ -304,12 +305,14 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
   useEffect(() => {
     // Since "custom" is the default, ensure the custom household name field is visible
     const customHouseholdName = document.getElementById("customHouseholdName");
-    const householdNameInput = document.getElementById("householdName") as HTMLInputElement;
-    
+    const householdNameInput = document.getElementById(
+      "householdName"
+    ) as HTMLInputElement;
+
     if (customHouseholdName) {
       customHouseholdName.classList.remove("hidden");
     }
-    
+
     // Set initial required state since "custom" is default
     if (householdNameInput) {
       householdNameInput.required = true;
@@ -350,8 +353,6 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
               className="space-y-6"
               noValidate
             >
-
-
               <div className="grid grid-cols-2 gap-4">
                 <FormField>
                   <FormLabel htmlFor="firstName" required>
@@ -449,7 +450,6 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
                     Choose how you'd like to set up your household (this will be
                     created automatically with your account)
                   </p>
-
                 </div>
 
                 {/* Household Type Selection */}

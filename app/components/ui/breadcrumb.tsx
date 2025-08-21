@@ -46,9 +46,7 @@ const BreadcrumbLink = React.forwardRef<
   const Comp = asChild ? React.Fragment : "a";
 
   if (asChild) {
-    return (
-      <Comp {...props} />
-    );
+    return <Comp {...props} />;
   }
 
   return (

@@ -12,23 +12,20 @@ import { ErrorBoundary } from "~/components/ui/error-boundary";
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
   const { memberId, category, recordTypeId, recordId } = params;
-  
+
   if (!memberId || !category || !recordTypeId || !recordId) {
     throw new Error("Missing required parameters");
   }
 
   try {
-    const { householdId, householdMembers, currentMember } = await loadHouseholdDataWithMember(
-      request,
-      context,
-      memberId
-    );
+    const { householdId, householdMembers, currentMember } =
+      await loadHouseholdDataWithMember(request, context, memberId);
 
     if (!householdId || !currentMember) {
       throw new Error("Household or member not found");
     }
 
-        // Load the record type
+    // Load the record type
     const db = getDatabase(context);
     const recordTypeResult = await db
       .select()
@@ -49,7 +46,10 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     // Parse the fields JSON
     let parsedFields = [];
     try {
-      if (recordTypeResult.fields && typeof recordTypeResult.fields === 'string') {
+      if (
+        recordTypeResult.fields &&
+        typeof recordTypeResult.fields === "string"
+      ) {
         parsedFields = JSON.parse(recordTypeResult.fields);
       } else if (Array.isArray(recordTypeResult.fields)) {
         parsedFields = recordTypeResult.fields;
@@ -61,20 +61,20 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
     const recordType = {
       ...recordTypeResult,
-      fields: parsedFields
+      fields: parsedFields,
     };
 
     // Load the specific record
     const record = await db
       .select()
       .from(records)
-              .where(
-          and(
-            eq(records.id, parseInt(recordId)),
-            eq(records.recordTypeId, parseInt(recordTypeId)),
-            eq(records.householdId, householdId)
-          )
+      .where(
+        and(
+          eq(records.id, parseInt(recordId)),
+          eq(records.recordTypeId, parseInt(recordTypeId)),
+          eq(records.householdId, householdId)
         )
+      )
       .get();
 
     if (!record) {
@@ -95,7 +95,15 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
   }
 }
 
-export async function action({ request, context, params }: { request: Request; context: any; params: any; }) {
+export async function action({
+  request,
+  context,
+  params,
+}: {
+  request: Request;
+  context: any;
+  params: any;
+}) {
   const formData = await request.formData();
   const action = formData.get("_action");
   const { memberId, category, recordTypeId, recordId } = params;
@@ -105,7 +113,11 @@ export async function action({ request, context, params }: { request: Request; c
   }
 
   try {
-    const { householdId } = await loadHouseholdDataWithMember(request, context, memberId);
+    const { householdId } = await loadHouseholdDataWithMember(
+      request,
+      context,
+      memberId
+    );
     if (!householdId) {
       throw new Error("Household not found");
     }
@@ -129,13 +141,12 @@ export async function action({ request, context, params }: { request: Request; c
         throw new Error("Record not found");
       }
 
-      await db
-        .delete(records)
-        .where(eq(records.id, parseInt(recordId)));
+      await db.delete(records).where(eq(records.id, parseInt(recordId)));
 
       // Redirect back to the records list
-      return redirect(`/member/${memberId}/category/${encodeURIComponent(category)}/record/${recordTypeId}`);
-
+      return redirect(
+        `/member/${memberId}/category/${encodeURIComponent(category)}/record/${recordTypeId}`
+      );
     } else if (action === "update") {
       // Handle record update
       const record = await db
@@ -174,7 +185,9 @@ export async function action({ request, context, params }: { request: Request; c
         .where(eq(records.id, parseInt(recordId)));
 
       // Redirect to the record detail view
-      return redirect(`/member/${memberId}/category/${encodeURIComponent(category)}/record/${recordTypeId}/view/${recordId}`);
+      return redirect(
+        `/member/${memberId}/category/${encodeURIComponent(category)}/record/${recordTypeId}/view/${recordId}`
+      );
     }
 
     throw new Error("Invalid action");
@@ -185,7 +198,14 @@ export async function action({ request, context, params }: { request: Request; c
 }
 
 const RecordEditPage: React.FC<{ loaderData: any }> = ({ loaderData }) => {
-  const { householdId, member, householdMembers, recordType, record, category } = loaderData;
+  const {
+    householdId,
+    member,
+    householdMembers,
+    recordType,
+    record,
+    category,
+  } = loaderData;
 
   if (!record) {
     return (
@@ -195,7 +215,9 @@ const RecordEditPage: React.FC<{ loaderData: any }> = ({ loaderData }) => {
           subtitle="The requested record could not be found"
         />
         <div className="text-center py-8">
-          <p className="text-slate-400">The record you're looking for doesn't exist or has been deleted.</p>
+          <p className="text-slate-400">
+            The record you're looking for doesn't exist or has been deleted.
+          </p>
         </div>
       </PageLayout>
     );
@@ -208,7 +230,7 @@ const RecordEditPage: React.FC<{ loaderData: any }> = ({ loaderData }) => {
         title={`Edit ${recordType.name}`}
         subtitle={`Editing record: ${record.title}`}
       />
-      
+
       <div className="max-w-4xl mx-auto">
         <DynamicRecordForm
           recordType={recordType}

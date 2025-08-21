@@ -18,7 +18,10 @@ import { HouseholdmemberEdit } from "~/components/manage/household-member-edit";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Edit Household member - Kimmy" },
-    { name: "description", content: "Edit a household member in your household" },
+    {
+      name: "description",
+      content: "Edit a household member in your household",
+    },
   ];
 }
 
@@ -38,7 +41,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     }
 
     // Load household data from URL params
-    const { householdId, householdMembers } = await loadHouseholdData(request, env);
+    const { householdId, householdMembers } = await loadHouseholdData(
+      request,
+      env
+    );
 
     // If no household data found, redirect to welcome
     if (!householdId) {
@@ -132,7 +138,8 @@ const EditMember: React.FC<Route.ComponentProps> = () => {
   const { session } = useAuth();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
-  const { householdId, householdMembers, member } = useLoaderData<typeof loader>();
+  const { householdId, householdMembers, member } =
+    useLoaderData<typeof loader>();
   const [isSuccess, setIsSuccess] = useState(false);
 
   // Handle action data changes

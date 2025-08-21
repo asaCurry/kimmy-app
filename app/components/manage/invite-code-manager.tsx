@@ -3,14 +3,14 @@ import { useFetcher } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { 
-  Key, 
-  Copy, 
-  RefreshCw, 
-  Check, 
+import {
+  Key,
+  Copy,
+  RefreshCw,
+  Check,
   Users,
   Share2,
-  QrCode
+  QrCode,
 } from "lucide-react";
 
 interface InviteCodeManagerProps {
@@ -24,7 +24,9 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
   currentInviteCode,
   onInviteCodeGenerated,
 }) => {
-  const [inviteCode, setInviteCode] = React.useState(currentInviteCode || "Loading...");
+  const [inviteCode, setInviteCode] = React.useState(
+    currentInviteCode || "Loading..."
+  );
   const [copied, setCopied] = React.useState(false);
   const fetcher = useFetcher();
 
@@ -49,7 +51,7 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy invite code:', error);
+      console.error("Failed to copy invite code:", error);
     }
   };
 
@@ -67,12 +69,12 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join My Household',
+          title: "Join My Household",
           text: `Use this invite code to join my household: ${inviteCode}`,
           url: window.location.origin,
         });
       } catch (error) {
-        console.error('Failed to share invite code:', error);
+        console.error("Failed to share invite code:", error);
       }
     } else {
       // Fallback to copying to clipboard
@@ -90,9 +92,12 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
             <Key className="h-6 w-6 text-white" />
           </div>
           <div>
-            <CardTitle className="text-xl text-slate-100">Invite Code</CardTitle>
+            <CardTitle className="text-xl text-slate-100">
+              Invite Code
+            </CardTitle>
             <p className="text-sm text-slate-400">
-              Share this code with household members to let them join your household
+              Share this code with household members to let them join your
+              household
             </p>
           </div>
         </div>
@@ -100,7 +105,9 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
       <CardContent className="space-y-6">
         {/* Current Invite Code */}
         <div className="space-y-3">
-          <label className="text-sm font-medium text-slate-300">Current Invite Code</label>
+          <label className="text-sm font-medium text-slate-300">
+            Current Invite Code
+          </label>
           <div className="flex gap-2">
             <Input
               value={inviteCode}
@@ -138,7 +145,7 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
             <Share2 className="h-4 w-4 mr-2" />
             Share
           </Button>
-          
+
           <Button
             onClick={handleGenerateNewCode}
             disabled={isGenerating}
@@ -150,9 +157,9 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
             ) : (
               <RefreshCw className="h-4 w-4 mr-2" />
             )}
-            {isGenerating ? 'Generating...' : 'New Code'}
+            {isGenerating ? "Generating..." : "New Code"}
           </Button>
-          
+
           <Button
             variant="outline"
             className="border-slate-600 text-slate-300 hover:bg-slate-700"
@@ -169,8 +176,13 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
             How to Use
           </h4>
           <div className="text-sm text-slate-300 space-y-1">
-            <p>• Share this code with household members via text, email, or social media</p>
-            <p>• They can enter this code when creating their account or joining</p>
+            <p>
+              • Share this code with household members via text, email, or
+              social media
+            </p>
+            <p>
+              • They can enter this code when creating their account or joining
+            </p>
             <p>• The code will automatically add them to your household</p>
             <p>• Generate a new code anytime for security</p>
           </div>
@@ -179,8 +191,9 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({
         {/* Security Note */}
         <div className="bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
           <p className="text-sm text-amber-400">
-            <strong>Security Note:</strong> Only share this code with people you trust. 
-            Anyone with this code can join your household. Generate a new code if you suspect it has been compromised.
+            <strong>Security Note:</strong> Only share this code with people you
+            trust. Anyone with this code can join your household. Generate a new
+            code if you suspect it has been compromised.
           </p>
         </div>
 

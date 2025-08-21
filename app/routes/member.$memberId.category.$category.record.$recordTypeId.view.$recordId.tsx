@@ -179,22 +179,21 @@ export async function action({
       }
 
       const db = getDatabase(env);
-      
+
       // Delete the record
       await db
         .delete(records)
         .where(
-          and(
-            eq(records.id, recordId),
-            eq(records.householdId, householdId)
-          )
+          and(eq(records.id, recordId), eq(records.householdId, householdId))
         );
 
       // Redirect back to the category view
       const memberId = formData.get("memberId") as string;
       const category = formData.get("category") as string;
-      
-      return redirect(`/member/${memberId}/category/${encodeURIComponent(category)}`);
+
+      return redirect(
+        `/member/${memberId}/category/${encodeURIComponent(category)}`
+      );
     }
 
     default:
@@ -227,7 +226,7 @@ const RecordViewPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
     const form = document.createElement("form");
     form.method = "post";
     form.action = window.location.pathname;
-    
+
     formData.forEach((value, key) => {
       const input = document.createElement("input");
       input.type = "hidden";
@@ -235,7 +234,7 @@ const RecordViewPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
       input.value = value.toString();
       form.appendChild(input);
     });
-    
+
     document.body.appendChild(form);
     form.submit();
   };
@@ -244,11 +243,8 @@ const RecordViewPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
     <RequireAuth requireHousehold={true}>
       <PageLayout>
         <Navigation currentView="categories" member={currentMember} />
-        
-        <PageHeader
-          title="View Record"
-          subtitle={`Viewing ${record.title}`}
-        />
+
+        <PageHeader title="View Record" subtitle={`Viewing ${record.title}`} />
 
         <ErrorBoundary>
           <RecordDetailView

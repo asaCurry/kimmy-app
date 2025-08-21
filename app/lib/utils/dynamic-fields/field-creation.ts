@@ -1,10 +1,17 @@
-import type { DynamicField, FieldType, FieldValidation } from "../../types/dynamic-fields";
+import type {
+  DynamicField,
+  FieldType,
+  FieldValidation,
+} from "../../types/dynamic-fields";
 
 export const createFieldId = (): string => {
   return `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
 
-export const createDefaultField = (type: FieldType, order: number): DynamicField => {
+export const createDefaultField = (
+  type: FieldType,
+  order: number
+): DynamicField => {
   const config = getFieldTypeConfig(type);
   return {
     id: createFieldId(),
@@ -16,13 +23,16 @@ export const createDefaultField = (type: FieldType, order: number): DynamicField
     helpText: "",
     defaultValue: getDefaultValueForType(type),
     validation: getDefaultValidationForType(type),
-    options: type === "select" ? [
-      { value: "option_1", label: "Option 1" },
-      { value: "option_2", label: "Option 2" },
-      { value: "option_3", label: "Option 3" }
-    ] : undefined,
+    options:
+      type === "select"
+        ? [
+            { value: "option_1", label: "Option 1" },
+            { value: "option_2", label: "Option 2" },
+            { value: "option_3", label: "Option 3" },
+          ]
+        : undefined,
     order,
-    isActive: true
+    isActive: true,
   };
 };
 
@@ -37,9 +47,9 @@ export const getFieldTypeConfig = (type: FieldType) => {
     email: { label: "Email", icon: "📧", hasOptions: false },
     url: { label: "URL", icon: "🔗", hasOptions: false },
     phone: { label: "Phone", icon: "📞", hasOptions: false },
-    file: { label: "File Upload", icon: "📎", hasOptions: false }
+    file: { label: "File Upload", icon: "📎", hasOptions: false },
   };
-  
+
   // Return default config if type is not found
   return configs[type] || { label: "Unknown", icon: "❓", hasOptions: false };
 };
@@ -53,13 +63,15 @@ export const getDefaultValueForType = (type: FieldType): any => {
     case "select":
       return "";
     case "date":
-      return new Date().toISOString().split('T')[0];
+      return new Date().toISOString().split("T")[0];
     default:
       return "";
   }
 };
 
-export const getDefaultValidationForType = (type: FieldType): FieldValidation => {
+export const getDefaultValidationForType = (
+  type: FieldType
+): FieldValidation => {
   switch (type) {
     case "text":
       return { minLength: 1, maxLength: 255 };
@@ -70,7 +82,10 @@ export const getDefaultValidationForType = (type: FieldType): FieldValidation =>
     case "email":
       return { pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$" };
     case "url":
-      return { pattern: "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$" };
+      return {
+        pattern:
+          "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$",
+      };
     case "phone":
       return { pattern: "^[+]?[\\d\\s\\-\\(\\)]+$" };
     case "file":

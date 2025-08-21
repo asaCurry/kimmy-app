@@ -7,9 +7,19 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { createTrackerSchema, updateTrackerSchema } from "~/lib/schemas";
-import type { CreateTrackerInput, UpdateTrackerInput, Tracker } from "~/lib/schemas";
+import type {
+  CreateTrackerInput,
+  UpdateTrackerInput,
+  Tracker,
+} from "~/lib/schemas";
 import { toast } from "react-toastify";
 
 interface CreateTrackerFormProps {
@@ -19,8 +29,16 @@ interface CreateTrackerFormProps {
 }
 
 const TRACKER_TYPES = [
-  { value: "time", label: "Time Tracking", description: "Start/stop timer for activities" },
-  { value: "cumulative", label: "Cumulative Log", description: "Sum of multiple entries" },
+  {
+    value: "time",
+    label: "Time Tracking",
+    description: "Start/stop timer for activities",
+  },
+  {
+    value: "cumulative",
+    label: "Cumulative Log",
+    description: "Sum of multiple entries",
+  },
 ];
 
 const UNITS = [
@@ -35,13 +53,25 @@ const UNITS = [
 ];
 
 const COLORS = [
-  "#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", 
-  "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1"
+  "#3b82f6",
+  "#ef4444",
+  "#10b981",
+  "#f59e0b",
+  "#8b5cf6",
+  "#ec4899",
+  "#06b6d4",
+  "#84cc16",
+  "#f97316",
+  "#6366f1",
 ];
 
 const ICONS = ["⏱️", "🏃‍♂️", "📚", "💪", "🧘‍♀️", "🎯", "📝", "🎨", "🎵", "🍳"];
 
-export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTrackerFormProps) {
+export function CreateTrackerForm({
+  tracker,
+  onSuccess,
+  onCancel,
+}: CreateTrackerFormProps) {
   const fetcher = useFetcher();
   const [customUnit, setCustomUnit] = React.useState(tracker?.unit || "");
   const [customIcon, setCustomIcon] = React.useState(tracker?.icon || "⏱️");
@@ -54,21 +84,23 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
     watch,
   } = useForm<CreateTrackerInput>({
     resolver: zodResolver(tracker ? updateTrackerSchema : createTrackerSchema),
-    defaultValues: tracker ? {
-      name: tracker.name,
-      description: tracker.description || "",
-      type: tracker.type,
-      unit: tracker.unit,
-      color: tracker.color || "#3b82f6",
-      icon: tracker.icon || "⏱️",
-    } : {
-      name: "",
-      description: "",
-      type: "time",
-      unit: "minutes",
-      color: "#3b82f6",
-      icon: "⏱️",
-    },
+    defaultValues: tracker
+      ? {
+          name: tracker.name,
+          description: tracker.description || "",
+          type: tracker.type,
+          unit: tracker.unit,
+          color: tracker.color || "#3b82f6",
+          icon: tracker.icon || "⏱️",
+        }
+      : {
+          name: "",
+          description: "",
+          type: "time",
+          unit: "minutes",
+          color: "#3b82f6",
+          icon: "⏱️",
+        },
   });
 
   const selectedType = watch("type");
@@ -78,13 +110,17 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
     if (fetcher.data) {
       if (fetcher.data.success) {
         toast.success(
-          tracker ? "Tracker updated successfully!" : "Tracker created successfully!",
+          tracker
+            ? "Tracker updated successfully!"
+            : "Tracker created successfully!",
           { position: "top-right" }
         );
         onSuccess?.();
       } else {
         console.error("Tracker creation failed:", fetcher.data.error);
-        toast.error(fetcher.data.error || "Failed to save tracker", { position: "top-right" });
+        toast.error(fetcher.data.error || "Failed to save tracker", {
+          position: "top-right",
+        });
       }
     }
   }, [fetcher.data, tracker, onSuccess]);
@@ -92,11 +128,11 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
   const onSubmit = (data: CreateTrackerInput) => {
     const formData = new FormData();
     formData.append("_action", tracker ? "update" : "create");
-    
+
     if (tracker) {
       formData.append("id", tracker.id.toString());
     }
-    
+
     formData.append("name", data.name);
     formData.append("description", data.description || "");
     formData.append("type", data.type);
@@ -110,7 +146,9 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
   return (
     <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
       <CardHeader>
-        <CardTitle className="text-slate-100">{tracker ? "Edit Tracker" : "Create New Tracker"}</CardTitle>
+        <CardTitle className="text-slate-100">
+          {tracker ? "Edit Tracker" : "Create New Tracker"}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -135,7 +173,9 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
               rows={2}
             />
             {errors.description && (
-              <p className="text-sm text-destructive">{errors.description.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.description.message}
+              </p>
             )}
           </div>
 
@@ -143,17 +183,21 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
             <Label htmlFor="type">Type *</Label>
             <Select
               value={selectedType}
-              onValueChange={(value) => setValue("type", value as "time" | "cumulative")}
+              onValueChange={value =>
+                setValue("type", value as "time" | "cumulative")
+              }
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {TRACKER_TYPES.map((type) => (
+                {TRACKER_TYPES.map(type => (
                   <SelectItem key={type.value} value={type.value}>
                     <div>
                       <div className="font-medium">{type.label}</div>
-                      <div className="text-sm text-muted-foreground">{type.description}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {type.description}
+                      </div>
                     </div>
                   </SelectItem>
                 ))}
@@ -168,13 +212,13 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
             <Label htmlFor="unit">Unit *</Label>
             <Select
               value={selectedUnit}
-              onValueChange={(value) => setValue("unit", value)}
+              onValueChange={value => setValue("unit", value)}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {UNITS.map((unit) => (
+                {UNITS.map(unit => (
                   <SelectItem key={unit.value} value={unit.value}>
                     {unit.label}
                   </SelectItem>
@@ -185,7 +229,7 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
               <Input
                 placeholder="Enter custom unit (e.g., chapters, sets)"
                 value={customUnit}
-                onChange={(e) => setCustomUnit(e.target.value)}
+                onChange={e => setCustomUnit(e.target.value)}
                 className="mt-2"
               />
             )}
@@ -197,7 +241,7 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
           <div className="space-y-2">
             <Label>Icon</Label>
             <div className="grid grid-cols-5 gap-2">
-              {ICONS.map((icon) => (
+              {ICONS.map(icon => (
                 <button
                   key={icon}
                   type="button"
@@ -223,13 +267,15 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
           <div className="space-y-2">
             <Label>Color</Label>
             <div className="grid grid-cols-5 gap-2">
-              {COLORS.map((color) => (
+              {COLORS.map(color => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => setValue("color", color)}
                   className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 ${
-                    watch("color") === color ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-900" : "border-slate-600"
+                    watch("color") === color
+                      ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-900"
+                      : "border-slate-600"
                   }`}
                   style={{ backgroundColor: color }}
                 />
@@ -246,10 +292,19 @@ export function CreateTrackerForm({ tracker, onSuccess, onCancel }: CreateTracke
               disabled={isSubmitting || fetcher.state !== "idle"}
               className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
             >
-              {isSubmitting || fetcher.state !== "idle" ? "Saving..." : (tracker ? "Update" : "Create")}
+              {isSubmitting || fetcher.state !== "idle"
+                ? "Saving..."
+                : tracker
+                  ? "Update"
+                  : "Create"}
             </Button>
             {onCancel && (
-              <Button type="button" variant="outline" onClick={onCancel} className="border-slate-600 text-slate-400 hover:text-slate-300 hover:bg-slate-700/50">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                className="border-slate-600 text-slate-400 hover:text-slate-300 hover:bg-slate-700/50"
+              >
                 Cancel
               </Button>
             )}

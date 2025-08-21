@@ -7,7 +7,10 @@ import { Textarea } from "./textarea";
 import { Eye, EyeOff, Copy, Trash2, GripVertical } from "lucide-react";
 import type { DynamicField } from "~/lib/types/dynamic-fields";
 import { getFieldTypeConfig } from "~/lib/utils/dynamic-fields/field-creation";
-import { createSelectOption, validateSelectOptions } from "~/lib/utils/dynamic-fields/select-options";
+import {
+  createSelectOption,
+  validateSelectOptions,
+} from "~/lib/utils/dynamic-fields/select-options";
 
 interface DynamicFieldEditorProps {
   field: DynamicField;
@@ -28,16 +31,17 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
   onToggleActive,
   onReorder,
   index,
-  totalFields
+  totalFields,
 }) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const fieldConfig = getFieldTypeConfig(field.type);
-  
-
 
   // Safety check for fieldConfig
   if (!fieldConfig) {
-    console.error("DynamicFieldEditor - No field config found for type:", field.type);
+    console.error(
+      "DynamicFieldEditor - No field config found for type:",
+      field.type
+    );
     return (
       <div className="border border-red-600 rounded-lg bg-red-900/20 p-4">
         <p className="text-red-400">Error: Unknown field type "{field.type}"</p>
@@ -78,7 +82,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
               <GripVertical className="w-4 h-4" />
             </Button>
           )}
-          
+
           <div className="flex items-center space-x-2">
             <span className="text-2xl">{fieldConfig.icon}</span>
             <div>
@@ -95,9 +99,13 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
             onClick={() => setIsExpanded(!isExpanded)}
             className="text-slate-400 hover:text-slate-300"
           >
-            {isExpanded ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {isExpanded ? (
+              <EyeOff className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
+            )}
           </Button>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -106,7 +114,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
           >
             <Copy className="w-4 h-4" />
           </Button>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -128,18 +136,18 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
               <Input
                 id={`label-${field.id}`}
                 value={field.label}
-                onChange={(e) => handleUpdate({ label: e.target.value })}
+                onChange={e => handleUpdate({ label: e.target.value })}
                 placeholder="Field label"
                 className="bg-slate-700 border-slate-600 text-slate-200"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor={`name-${field.id}`}>Name</Label>
               <Input
                 id={`name-${field.id}`}
                 value={field.name}
-                onChange={(e) => handleUpdate({ name: e.target.value })}
+                onChange={e => handleUpdate({ name: e.target.value })}
                 placeholder="Field name"
                 className="bg-slate-700 border-slate-600 text-slate-200"
               />
@@ -154,13 +162,15 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                 {fieldConfig.label}
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label>Required</Label>
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={field.required}
-                  onCheckedChange={(checked) => handleUpdate({ required: checked })}
+                  onCheckedChange={checked =>
+                    handleUpdate({ required: checked })
+                  }
                 />
                 <span className="text-sm text-slate-400">
                   {field.required ? "Required" : "Optional"}
@@ -176,18 +186,18 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
               <Input
                 id={`placeholder-${field.id}`}
                 value={field.placeholder || ""}
-                onChange={(e) => handleUpdate({ placeholder: e.target.value })}
+                onChange={e => handleUpdate({ placeholder: e.target.value })}
                 placeholder="Placeholder text"
                 className="bg-slate-700 border-slate-600 text-slate-200"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor={`helpText-${field.id}`}>Help Text</Label>
               <Input
                 id={`helpText-${field.id}`}
                 value={field.helpText || ""}
-                onChange={(e) => handleUpdate({ helpText: e.target.value })}
+                onChange={e => handleUpdate({ helpText: e.target.value })}
                 placeholder="Help text"
                 className="bg-slate-700 border-slate-600 text-slate-200"
               />
@@ -203,29 +213,37 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   id={`min-${field.id}`}
                   type="number"
                   value={field.validation?.min || ""}
-                  onChange={(e) => handleUpdate({
-                    validation: {
-                      ...field.validation,
-                      min: e.target.value ? Number(e.target.value) : undefined
-                    }
-                  })}
+                  onChange={e =>
+                    handleUpdate({
+                      validation: {
+                        ...field.validation,
+                        min: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                      },
+                    })
+                  }
                   placeholder="No minimum"
                   className="bg-slate-700 border-slate-600 text-slate-200"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor={`max-${field.id}`}>Maximum Value</Label>
                 <Input
                   id={`max-${field.id}`}
                   type="number"
                   value={field.validation?.max || ""}
-                  onChange={(e) => handleUpdate({
-                    validation: {
-                      ...field.validation,
-                      max: e.target.value ? Number(e.target.value) : undefined
-                    }
-                  })}
+                  onChange={e =>
+                    handleUpdate({
+                      validation: {
+                        ...field.validation,
+                        max: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                      },
+                    })
+                  }
                   placeholder="No maximum"
                   className="bg-slate-700 border-slate-600 text-slate-200"
                 />
@@ -234,7 +252,11 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
           )}
 
           {/* Text Length Validation */}
-          {(field.type === "text" || field.type === "textarea" || field.type === "email" || field.type === "url" || field.type === "phone") && (
+          {(field.type === "text" ||
+            field.type === "textarea" ||
+            field.type === "email" ||
+            field.type === "url" ||
+            field.type === "phone") && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor={`minLength-${field.id}`}>Minimum Length</Label>
@@ -242,29 +264,37 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   id={`minLength-${field.id}`}
                   type="number"
                   value={field.validation?.minLength || ""}
-                  onChange={(e) => handleUpdate({
-                    validation: {
-                      ...field.validation,
-                      minLength: e.target.value ? Number(e.target.value) : undefined
-                    }
-                  })}
+                  onChange={e =>
+                    handleUpdate({
+                      validation: {
+                        ...field.validation,
+                        minLength: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                      },
+                    })
+                  }
                   placeholder="No minimum"
                   className="bg-slate-700 border-slate-600 text-slate-200"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor={`maxLength-${field.id}`}>Maximum Length</Label>
                 <Input
                   id={`maxLength-${field.id}`}
                   type="number"
                   value={field.validation?.maxLength || ""}
-                  onChange={(e) => handleUpdate({
-                    validation: {
-                      ...field.validation,
-                      maxLength: e.target.value ? Number(e.target.value) : undefined
-                    }
-                  })}
+                  onChange={e =>
+                    handleUpdate({
+                      validation: {
+                        ...field.validation,
+                        maxLength: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                      },
+                    })
+                  }
                   placeholder="No maximum"
                   className="bg-slate-700 border-slate-600 text-slate-200"
                 />
@@ -280,10 +310,14 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                 <div className="flex items-center space-x-2">
                   <Switch
                     checked={field.defaultValue === true}
-                    onCheckedChange={(checked) => handleUpdate({ defaultValue: checked })}
+                    onCheckedChange={checked =>
+                      handleUpdate({ defaultValue: checked })
+                    }
                   />
                   <span className="text-sm text-slate-400">
-                    {field.defaultValue === true ? "Checked by default" : "Unchecked by default"}
+                    {field.defaultValue === true
+                      ? "Checked by default"
+                      : "Unchecked by default"}
                   </span>
                 </div>
               ) : field.type === "number" ? (
@@ -291,7 +325,13 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   id={`defaultValue-${field.id}`}
                   type="number"
                   value={field.defaultValue || ""}
-                  onChange={(e) => handleUpdate({ defaultValue: e.target.value ? Number(e.target.value) : undefined })}
+                  onChange={e =>
+                    handleUpdate({
+                      defaultValue: e.target.value
+                        ? Number(e.target.value)
+                        : undefined,
+                    })
+                  }
                   placeholder="Default number value"
                   className="bg-slate-700 border-slate-600 text-slate-200"
                 />
@@ -299,7 +339,9 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                 <Input
                   id={`defaultValue-${field.id}`}
                   value={field.defaultValue || ""}
-                  onChange={(e) => handleUpdate({ defaultValue: e.target.value || undefined })}
+                  onChange={e =>
+                    handleUpdate({ defaultValue: e.target.value || undefined })
+                  }
                   placeholder="Default value"
                   className="bg-slate-700 border-slate-600 text-slate-200"
                 />
@@ -315,7 +357,8 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   <Label>Options</Label>
                   {field.options && field.options.length > 0 && (
                     <span className="text-xs text-slate-400 bg-slate-700 px-2 py-1 rounded">
-                      {field.options.length} option{field.options.length !== 1 ? 's' : ''}
+                      {field.options.length} option
+                      {field.options.length !== 1 ? "s" : ""}
                     </span>
                   )}
                 </div>
@@ -325,9 +368,14 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      const input = prompt("Enter options separated by commas:");
+                      const input = prompt(
+                        "Enter options separated by commas:"
+                      );
                       if (input) {
-                        const options = input.split(",").map(opt => createSelectOption(opt.trim())).filter(opt => opt.label);
+                        const options = input
+                          .split(",")
+                          .map(opt => createSelectOption(opt.trim()))
+                          .filter(opt => opt.label);
                         if (options.length > 0) {
                           handleUpdate({ options });
                         }
@@ -343,7 +391,9 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      const newOption = createSelectOption(`Option ${(field.options?.length || 0) + 1}`);
+                      const newOption = createSelectOption(
+                        `Option ${(field.options?.length || 0) + 1}`
+                      );
                       const newOptions = [...(field.options || []), newOption];
                       handleUpdate({ options: newOptions });
                     }}
@@ -358,7 +408,9 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        if (confirm("Are you sure you want to clear all options?")) {
+                        if (
+                          confirm("Are you sure you want to clear all options?")
+                        ) {
                           handleUpdate({ options: [] });
                         }
                       }}
@@ -374,8 +426,8 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const sortedOptions = [...(field.options || [])].sort((a, b) => 
-                          a.label.localeCompare(b.label)
+                        const sortedOptions = [...(field.options || [])].sort(
+                          (a, b) => a.label.localeCompare(b.label)
                         );
                         handleUpdate({ options: sortedOptions });
                       }}
@@ -391,7 +443,9 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const optionsText = (field.options || []).map(opt => opt.label).join(", ");
+                        const optionsText = (field.options || [])
+                          .map(opt => opt.label)
+                          .join(", ");
                         navigator.clipboard.writeText(optionsText).then(() => {
                           alert("Options copied to clipboard!");
                         });
@@ -404,11 +458,16 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   )}
                 </div>
               </div>
-              
+
               <div className="space-y-2 max-h-48 overflow-y-auto">
-                {field.options && Array.isArray(field.options) && field.options.length > 0 ? (
+                {field.options &&
+                Array.isArray(field.options) &&
+                field.options.length > 0 ? (
                   field.options.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2 p-2 border border-slate-600 rounded-md bg-slate-700/50">
+                    <div
+                      key={index}
+                      className="flex items-center space-x-2 p-2 border border-slate-600 rounded-md bg-slate-700/50"
+                    >
                       <div className="flex flex-col space-y-1">
                         <Button
                           type="button"
@@ -417,7 +476,10 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                           onClick={() => {
                             if (index > 0) {
                               const newOptions = [...(field.options || [])];
-                              [newOptions[index], newOptions[index - 1]] = [newOptions[index - 1], newOptions[index]];
+                              [newOptions[index], newOptions[index - 1]] = [
+                                newOptions[index - 1],
+                                newOptions[index],
+                              ];
                               handleUpdate({ options: newOptions });
                             }
                           }}
@@ -434,7 +496,10 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                           onClick={() => {
                             if (index < (field.options?.length || 0) - 1) {
                               const newOptions = [...(field.options || [])];
-                              [newOptions[index], newOptions[index + 1]] = [newOptions[index + 1], newOptions[index]];
+                              [newOptions[index], newOptions[index + 1]] = [
+                                newOptions[index + 1],
+                                newOptions[index],
+                              ];
                               handleUpdate({ options: newOptions });
                             }
                           }}
@@ -447,12 +512,17 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                       </div>
                       <Input
                         value={option.label || ""}
-                        onChange={(e) => {
+                        onChange={e => {
                           const newOptions = [...(field.options || [])];
                           const newLabel = e.target.value;
                           const newValue = createSelectOption(newLabel).value;
-                          newOptions[index] = { ...newOptions[index], label: newLabel, value: newValue };
-                          const validatedOptions = validateSelectOptions(newOptions);
+                          newOptions[index] = {
+                            ...newOptions[index],
+                            label: newLabel,
+                            value: newValue,
+                          };
+                          const validatedOptions =
+                            validateSelectOptions(newOptions);
                           handleUpdate({ options: validatedOptions });
                         }}
                         placeholder="Option label"
@@ -460,10 +530,14 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                       />
                       <Input
                         value={option.value || ""}
-                        onChange={(e) => {
+                        onChange={e => {
                           const newOptions = [...(field.options || [])];
-                          newOptions[index] = { ...newOptions[index], value: e.target.value };
-                          const validatedOptions = validateSelectOptions(newOptions);
+                          newOptions[index] = {
+                            ...newOptions[index],
+                            value: e.target.value,
+                          };
+                          const validatedOptions =
+                            validateSelectOptions(newOptions);
                           handleUpdate({ options: validatedOptions });
                         }}
                         placeholder="option_value"
@@ -477,9 +551,12 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                           const newOptions = [...(field.options || [])];
                           const duplicatedOption = { ...newOptions[index] };
                           duplicatedOption.label = `${duplicatedOption.label} (Copy)`;
-                          duplicatedOption.value = createSelectOption(duplicatedOption.label).value;
+                          duplicatedOption.value = createSelectOption(
+                            duplicatedOption.label
+                          ).value;
                           newOptions.splice(index + 1, 0, duplicatedOption);
-                          const validatedOptions = validateSelectOptions(newOptions);
+                          const validatedOptions =
+                            validateSelectOptions(newOptions);
                           handleUpdate({ options: validatedOptions });
                         }}
                         className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 p-1 h-6 w-6"
@@ -492,8 +569,10 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          const newOptions = field.options?.filter((_, i) => i !== index) || [];
-                          const validatedOptions = validateSelectOptions(newOptions);
+                          const newOptions =
+                            field.options?.filter((_, i) => i !== index) || [];
+                          const validatedOptions =
+                            validateSelectOptions(newOptions);
                           handleUpdate({ options: validatedOptions });
                         }}
                         className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-1 h-6 w-6"
@@ -509,15 +588,21 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   </div>
                 )}
               </div>
-              
+
               {/* Default Value for Select */}
               {field.options && field.options.length > 0 && (
                 <div className="space-y-2">
-                  <Label htmlFor={`defaultValue-${field.id}`}>Default Value</Label>
+                  <Label htmlFor={`defaultValue-${field.id}`}>
+                    Default Value
+                  </Label>
                   <select
                     id={`defaultValue-${field.id}`}
                     value={field.defaultValue || ""}
-                    onChange={(e) => handleUpdate({ defaultValue: e.target.value || undefined })}
+                    onChange={e =>
+                      handleUpdate({
+                        defaultValue: e.target.value || undefined,
+                      })
+                    }
                     className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-slate-200 text-sm"
                   >
                     <option value="">No default value</option>
@@ -529,14 +614,16 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   </select>
                 </div>
               )}
-              
+
               {/* Preview */}
               {field.options && field.options.length > 0 && (
                 <div className="space-y-2">
                   <Label>Preview</Label>
                   <div className="p-3 bg-slate-900 border border-slate-600 rounded-md">
                     <select className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-slate-200 text-sm">
-                      <option value="">Select {field.label.toLowerCase()}</option>
+                      <option value="">
+                        Select {field.label.toLowerCase()}
+                      </option>
                       {field.options.map((option, index) => (
                         <option key={index} value={option.value}>
                           {option.label}
@@ -549,28 +636,41 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   </div>
                 </div>
               )}
-              
+
               {field.options && field.options.length > 0 && (
                 <div className="text-xs text-slate-400 space-y-1">
-                  <p>• <strong>Label:</strong> What users see in the dropdown</p>
-                  <p>• <strong>Value:</strong> What gets stored (auto-generated from label)</p>
-                  <p>• <strong>Order:</strong> Use ↑↓ buttons to reorder options</p>
-                  <p>• <strong>Import:</strong> Paste comma-separated options to add multiple at once</p>
-                  
+                  <p>
+                    • <strong>Label:</strong> What users see in the dropdown
+                  </p>
+                  <p>
+                    • <strong>Value:</strong> What gets stored (auto-generated
+                    from label)
+                  </p>
+                  <p>
+                    • <strong>Order:</strong> Use ↑↓ buttons to reorder options
+                  </p>
+                  <p>
+                    • <strong>Import:</strong> Paste comma-separated options to
+                    add multiple at once
+                  </p>
+
                   {/* Validation Status */}
                   {(() => {
                     const values = field.options.map(opt => opt.value);
-                    const duplicates = values.filter((value, index) => values.indexOf(value) !== index);
+                    const duplicates = values.filter(
+                      (value, index) => values.indexOf(value) !== index
+                    );
                     const hasDuplicates = duplicates.length > 0;
-                    
+
                     if (hasDuplicates) {
                       return (
                         <div className="mt-2 p-2 bg-red-900/20 border border-red-600 rounded text-red-400">
-                          ⚠️ Warning: Duplicate values detected. This may cause issues.
+                          ⚠️ Warning: Duplicate values detected. This may cause
+                          issues.
                         </div>
                       );
                     }
-                    
+
                     return (
                       <div className="mt-2 p-2 bg-green-900/20 border border-green-600 rounded text-green-400">
                         ✓ All options are valid
@@ -593,7 +693,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                 {field.isActive ? "Field is active" : "Field is inactive"}
               </span>
             </div>
-            
+
             <div className="text-sm text-slate-500">
               Order: {index + 1} of {totalFields}
             </div>

@@ -27,29 +27,39 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   });
 }
 
-
 export default function TrackersPage() {
-  const { trackers, activeEntries, trackerEntries } = useLoaderData<typeof loader>();
+  const { trackers, activeEntries, trackerEntries } =
+    useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
   const [showCreateForm, setShowCreateForm] = React.useState(false);
-  const [editingTracker, setEditingTracker] = React.useState<Tracker | null>(null);
+  const [editingTracker, setEditingTracker] = React.useState<Tracker | null>(
+    null
+  );
 
   React.useEffect(() => {
     if (fetcher.data) {
       if (fetcher.data.success) {
         if (fetcher.data.action === "delete") {
-          toast.success("Tracker deleted successfully!", { position: "top-right" });
+          toast.success("Tracker deleted successfully!", {
+            position: "top-right",
+          });
           revalidator.revalidate();
         }
       } else {
-        toast.error(fetcher.data.error || "Action failed", { position: "top-right" });
+        toast.error(fetcher.data.error || "Action failed", {
+          position: "top-right",
+        });
       }
     }
   }, [fetcher.data]); // Remove revalidator from dependency array
 
   const handleDeleteTracker = (tracker: Tracker) => {
-    if (!confirm(`Are you sure you want to delete "${tracker.name}"? This will also delete all associated entries.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${tracker.name}"? This will also delete all associated entries.`
+      )
+    ) {
       return;
     }
 
@@ -80,8 +90,10 @@ export default function TrackersPage() {
   };
 
   const getTrackerStats = (tracker: Tracker) => {
-    const entries = trackerEntries.filter(entry => entry.trackerId === tracker.id);
-    
+    const entries = trackerEntries.filter(
+      entry => entry.trackerId === tracker.id
+    );
+
     if (entries.length === 0) {
       return {
         totalValue: 0,
@@ -90,7 +102,10 @@ export default function TrackersPage() {
       };
     }
 
-    const totalValue = entries.reduce((sum, entry) => sum + (entry.value || 0), 0);
+    const totalValue = entries.reduce(
+      (sum, entry) => sum + (entry.value || 0),
+      0
+    );
     const entryCount = entries.length;
     const averageValue = entryCount > 0 ? totalValue / entryCount : 0;
 
@@ -105,7 +120,8 @@ export default function TrackersPage() {
     const totalTrackers = trackers?.length || 0;
     const activeTrackers = activeEntries?.length || 0;
     const timeTrackers = trackers?.filter(t => t.type === "time").length || 0;
-    const cumulativeTrackers = trackers?.filter(t => t.type === "cumulative").length || 0;
+    const cumulativeTrackers =
+      trackers?.filter(t => t.type === "cumulative").length || 0;
 
     return {
       totalTrackers,
@@ -121,7 +137,10 @@ export default function TrackersPage() {
     return (
       <RequireAuth>
         <PageLayout>
-          <PageHeader title="Trackers" subtitle="Manage your household's activity trackers" />
+          <PageHeader
+            title="Trackers"
+            subtitle="Manage your household's activity trackers"
+          />
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
@@ -137,9 +156,9 @@ export default function TrackersPage() {
     <RequireAuth>
       <PageLayout>
         <Navigation currentView="home" />
-        <PageHeader 
-          title="Trackers" 
-          subtitle="Monitor activities, track time, and log progress across your household" 
+        <PageHeader
+          title="Trackers"
+          subtitle="Monitor activities, track time, and log progress across your household"
         />
 
         {/* Stats Overview */}
@@ -149,7 +168,9 @@ export default function TrackersPage() {
               <div className="flex items-center space-x-2">
                 <BarChart3 className="h-5 w-5 text-blue-400" />
                 <div>
-                  <p className="text-2xl font-bold text-blue-400">{stats.totalTrackers}</p>
+                  <p className="text-2xl font-bold text-blue-400">
+                    {stats.totalTrackers}
+                  </p>
                   <p className="text-sm text-slate-400">Total Trackers</p>
                 </div>
               </div>
@@ -161,7 +182,9 @@ export default function TrackersPage() {
               <div className="flex items-center space-x-2">
                 <TrendingUp className="h-5 w-5 text-green-400" />
                 <div>
-                  <p className="text-2xl font-bold text-green-400">{stats.activeTrackers}</p>
+                  <p className="text-2xl font-bold text-green-400">
+                    {stats.activeTrackers}
+                  </p>
                   <p className="text-sm text-slate-400">Active Sessions</p>
                 </div>
               </div>
@@ -173,7 +196,9 @@ export default function TrackersPage() {
               <div className="flex items-center space-x-2">
                 <Timer className="h-5 w-5 text-purple-400" />
                 <div>
-                  <p className="text-2xl font-bold text-purple-400">{stats.timeTrackers}</p>
+                  <p className="text-2xl font-bold text-purple-400">
+                    {stats.timeTrackers}
+                  </p>
                   <p className="text-sm text-slate-400">Time Trackers</p>
                 </div>
               </div>
@@ -185,7 +210,9 @@ export default function TrackersPage() {
               <div className="flex items-center space-x-2">
                 <Clock className="h-5 w-5 text-orange-400" />
                 <div>
-                  <p className="text-2xl font-bold text-orange-400">{stats.cumulativeTrackers}</p>
+                  <p className="text-2xl font-bold text-orange-400">
+                    {stats.cumulativeTrackers}
+                  </p>
                   <p className="text-sm text-slate-400">Log Trackers</p>
                 </div>
               </div>
@@ -209,9 +236,12 @@ export default function TrackersPage() {
           <Card className="text-center py-12 bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
             <CardContent>
               <BarChart3 className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-200 mb-2">No Trackers Yet</h3>
+              <h3 className="text-lg font-semibold text-slate-200 mb-2">
+                No Trackers Yet
+              </h3>
               <p className="text-slate-400 mb-4">
-                Create your first tracker to start monitoring activities and progress.
+                Create your first tracker to start monitoring activities and
+                progress.
               </p>
               <Button
                 onClick={() => setShowCreateForm(true)}
@@ -224,7 +254,7 @@ export default function TrackersPage() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {trackers.map((tracker) => (
+            {trackers.map(tracker => (
               <TrackerCard
                 key={tracker.id}
                 tracker={tracker}

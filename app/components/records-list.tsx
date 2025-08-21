@@ -283,8 +283,6 @@ const RecordsCards: React.FC<RecordsCardsProps> = ({
           <CardContent className="p-4 pt-0">
             {/* Record Content */}
             <div className="mb-4">
-
-
               <RecordContentDisplay
                 content={record.content}
                 recordType={parsedRecordType}

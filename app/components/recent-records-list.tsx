@@ -57,8 +57,10 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    );
+
     if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours}h ago`;
     if (diffInHours < 48) return "Yesterday";
@@ -76,8 +78,10 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
       Travel: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
       Home: "bg-stone-500/20 text-stone-400 border-stone-500/30",
     };
-    
-    return colors[category] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
+
+    return (
+      colors[category] || "bg-slate-500/20 text-slate-400 border-slate-500/30"
+    );
   };
 
   return (
@@ -89,7 +93,7 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {records.map((record) => (
+        {records.map(record => (
           <div
             key={record.id}
             className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-slate-600 transition-colors"
@@ -112,7 +116,7 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
 
               {/* Record Type and Member */}
               <div className="flex items-center gap-2 mb-2 text-sm">
-                <span 
+                <span
                   className={cn(
                     "px-2 py-1 text-xs rounded-full border",
                     getCategoryColor(record.recordTypeCategory)
@@ -134,14 +138,17 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
                 <div className="flex items-center gap-1 mb-2">
                   <Tag className="w-3 h-3 text-slate-500" />
                   <div className="flex flex-wrap gap-1">
-                    {record.tags.split(",").slice(0, 3).map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-slate-700/50 text-slate-300 text-xs rounded-full border border-slate-600"
-                      >
-                        {tag.trim()}
-                      </span>
-                    ))}
+                    {record.tags
+                      .split(",")
+                      .slice(0, 3)
+                      .map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-slate-700/50 text-slate-300 text-xs rounded-full border border-slate-600"
+                        >
+                          {tag.trim()}
+                        </span>
+                      ))}
                   </div>
                 </div>
               )}
@@ -177,7 +184,7 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
                     createdBy: null,
                     createdAt: "",
                   };
-                  
+
                   // Create a mock record object for the context
                   const mockRecord = {
                     id: record.id,
@@ -194,7 +201,7 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
                     createdAt: record.createdAt || "",
                     updatedAt: null,
                   };
-                  
+
                   openRecord(mockRecord, mockRecordType);
                 }}
                 className="flex items-center gap-1 px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
@@ -202,7 +209,7 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
                 <Eye className="w-3 h-3" />
                 View
               </button>
-              
+
               <Link
                 to={`/member/${record.memberId}/category/${encodeURIComponent(record.recordTypeCategory)}/record/${record.recordTypeId}/edit/${record.id}`}
                 className="flex items-center gap-1 px-3 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"

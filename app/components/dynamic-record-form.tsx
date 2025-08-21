@@ -184,10 +184,6 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
     );
   };
 
-
-
-
-
   // Form validation status
   const getFormStatus = () => {
     const hasErrors = Object.keys(errors).length > 0;
@@ -308,7 +304,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
           pauseOnHover: true,
           draggable: true,
         });
-        
+
         // Navigate back to the member's category view
         if (onBack) {
           onBack();
@@ -376,8 +372,6 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
 
             {/* Error Summary */}
             {getErrorSummary()}
-
-
 
             {/* Title Field */}
             <div className="space-y-2">

@@ -5,8 +5,22 @@ import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { Clock, Calendar, User, Tag, Trash2, Edit, BarChart3 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import {
+  Clock,
+  Calendar,
+  User,
+  Tag,
+  Trash2,
+  Edit,
+  BarChart3,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import type { Tracker, TrackerEntry } from "~/db/schema";
 
@@ -17,14 +31,15 @@ interface TrackerHistoryProps {
   onEditEntry?: (entry: TrackerEntry) => void;
 }
 
-export function TrackerHistory({ 
-  tracker, 
-  entries, 
-  onRefresh, 
-  onEditEntry 
+export function TrackerHistory({
+  tracker,
+  entries,
+  onRefresh,
+  onEditEntry,
 }: TrackerHistoryProps) {
   const fetcher = useFetcher();
-  const [filteredEntries, setFilteredEntries] = React.useState<TrackerEntry[]>(entries);
+  const [filteredEntries, setFilteredEntries] =
+    React.useState<TrackerEntry[]>(entries);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [timeRange, setTimeRange] = React.useState("7");
   const [sortBy, setSortBy] = React.useState("newest");
@@ -33,11 +48,15 @@ export function TrackerHistory({
     if (fetcher.data) {
       if (fetcher.data.success) {
         if (fetcher.data.action === "delete-entry") {
-          toast.success("Entry deleted successfully!", { position: "top-right" });
+          toast.success("Entry deleted successfully!", {
+            position: "top-right",
+          });
           onRefresh?.();
         }
       } else {
-        toast.error(fetcher.data.error || "Action failed", { position: "top-right" });
+        toast.error(fetcher.data.error || "Action failed", {
+          position: "top-right",
+        });
       }
     }
   }, [fetcher.data, onRefresh]);
@@ -47,9 +66,10 @@ export function TrackerHistory({
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(entry => 
-        entry.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.tags?.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        entry =>
+          entry.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          entry.tags?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -58,17 +78,21 @@ export function TrackerHistory({
       const days = parseInt(timeRange);
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - days);
-      filtered = filtered.filter(entry => 
-        new Date(entry.createdAt) >= cutoffDate
+      filtered = filtered.filter(
+        entry => new Date(entry.createdAt) >= cutoffDate
       );
     }
 
     // Sort entries
     filtered.sort((a, b) => {
       if (sortBy === "newest") {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       } else if (sortBy === "oldest") {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
       } else if (sortBy === "value-high") {
         return b.value - a.value;
       } else if (sortBy === "value-low") {
@@ -88,7 +112,10 @@ export function TrackerHistory({
     const formData = new FormData();
     formData.append("action", "delete-entry");
     formData.append("id", entry.id.toString());
-    fetcher.submit(formData, { method: "post", action: "/api/tracker-entries" });
+    fetcher.submit(formData, {
+      method: "post",
+      action: "/api/tracker-entries",
+    });
   };
 
   const formatDuration = (minutes: number) => {
@@ -140,8 +167,12 @@ export function TrackerHistory({
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-blue-500" />
               <div>
-                <p className="text-sm text-muted-foreground">Total {tracker.unit}</p>
-                <p className="text-2xl font-bold">{formatValue(getTotalValue())}</p>
+                <p className="text-sm text-muted-foreground">
+                  Total {tracker.unit}
+                </p>
+                <p className="text-2xl font-bold">
+                  {formatValue(getTotalValue())}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -163,7 +194,9 @@ export function TrackerHistory({
               <Calendar className="w-5 h-5 text-purple-500" />
               <div>
                 <p className="text-sm text-muted-foreground">Average</p>
-                <p className="text-2xl font-bold">{formatValue(getAverageValue())}</p>
+                <p className="text-2xl font-bold">
+                  {formatValue(getAverageValue())}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -183,7 +216,7 @@ export function TrackerHistory({
                 id="search"
                 placeholder="Search notes or tags..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -246,7 +279,7 @@ export function TrackerHistory({
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredEntries.map((entry) => (
+              {filteredEntries.map(entry => (
                 <div
                   key={entry.id}
                   className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
@@ -271,7 +304,11 @@ export function TrackerHistory({
                     {entry.tags && (
                       <div className="flex gap-1">
                         {entry.tags.split(",").map((tag, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="text-xs"
+                          >
                             {tag.trim()}
                           </Badge>
                         ))}

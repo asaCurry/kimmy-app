@@ -179,7 +179,8 @@ const Welcome: React.FC<Route.ComponentProps> = () => {
               Activity Trackers
             </h3>
             <p className="text-slate-400">
-              Monitor time, track progress, and log activities across your household.
+              Monitor time, track progress, and log activities across your
+              household.
             </p>
           </div>
         </div>

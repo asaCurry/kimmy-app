@@ -18,9 +18,11 @@ dynamic-fields/
 ## Modules
 
 ### field-creation.ts
+
 Handles the creation of new dynamic fields with appropriate defaults.
 
 **Exports:**
+
 - `createFieldId()` - Generate unique field IDs
 - `createDefaultField(type, order)` - Create a new field with defaults
 - `getFieldTypeConfig(type)` - Get configuration for field types
@@ -28,16 +30,20 @@ Handles the creation of new dynamic fields with appropriate defaults.
 - `getDefaultValidationForType(type)` - Get default validation rules
 
 ### field-validation.ts
+
 Provides validation logic for individual fields and field collections.
 
 **Exports:**
+
 - `validateFieldValue(field, value)` - Validate a single field value
 - `validateMultipleFields(fields, values)` - Validate multiple fields at once
 
 ### field-manipulation.ts
+
 Handles field ordering, filtering, and manipulation operations.
 
 **Exports:**
+
 - `reorderFields(fields, fromIndex, toIndex)` - Reorder fields
 - `sortFieldsByOrder(fields)` - Sort fields by order property
 - `getActiveFields(fields)` - Get only active fields
@@ -46,9 +52,11 @@ Handles field ordering, filtering, and manipulation operations.
 - `toggleFieldActive(fields, fieldId)` - Toggle field active state
 
 ### field-serialization.ts
+
 Handles serialization, deserialization, and data format conversion.
 
 **Exports:**
+
 - `serializeFields(fields)` - Convert fields to JSON string
 - `deserializeFields(fieldsJson)` - Parse JSON back to fields
 - `parseSelectOptions(optionsString)` - Parse comma-separated options
@@ -57,9 +65,11 @@ Handles serialization, deserialization, and data format conversion.
 - `convertFormDataToFields(fields, formData)` - Convert from form data
 
 ### schema-generation.ts
+
 Generates dynamic Zod schemas based on field configurations.
 
 **Exports:**
+
 - `createRecordSchema(fields)` - Create complete record schema
 - `createFieldValidationSchema(field)` - Create field-specific schema
 - `validateFieldAgainstSchema(field, value)` - Validate using schema
@@ -67,6 +77,7 @@ Generates dynamic Zod schemas based on field configurations.
 ## Hooks
 
 ### useDynamicFields
+
 A React hook for managing dynamic fields state and operations.
 
 ```typescript
@@ -79,14 +90,15 @@ const {
   reorderField,
   validateField,
   serialize,
-  deserialize
+  deserialize,
 } = useDynamicFields({
   initialFields: [],
-  onFieldsChange: (fields) => console.log('Fields changed:', fields)
+  onFieldsChange: fields => console.log("Fields changed:", fields),
 });
 ```
 
 ### useDynamicForm
+
 A React hook for handling forms with dynamic fields, including validation.
 
 ```typescript
@@ -98,18 +110,19 @@ const {
   handleSubmit,
   setFieldValue,
   getFieldValue,
-  validateField
+  validateField,
 } = useDynamicForm({
   fields: dynamicFields,
-  onSubmit: async (data) => {
+  onSubmit: async data => {
     // Handle form submission
-  }
+  },
 });
 ```
 
 ## Components
 
 ### DynamicFieldEditor
+
 A component for editing individual dynamic fields with a collapsible interface.
 
 ```typescript
@@ -127,15 +140,17 @@ A component for editing individual dynamic fields with a collapsible interface.
 ## Usage Examples
 
 ### Creating a new field
-```typescript
-import { createDefaultField } from '~/lib/utils/dynamic-fields';
 
-const newField = createDefaultField('text', 0);
+```typescript
+import { createDefaultField } from "~/lib/utils/dynamic-fields";
+
+const newField = createDefaultField("text", 0);
 ```
 
 ### Validating a field
+
 ```typescript
-import { validateFieldValue } from '~/lib/utils/dynamic-fields';
+import { validateFieldValue } from "~/lib/utils/dynamic-fields";
 
 const result = validateFieldValue(field, userInput);
 if (!result.isValid) {
@@ -144,15 +159,16 @@ if (!result.isValid) {
 ```
 
 ### Using the hook
+
 ```typescript
 import { useDynamicFields } from '~/hooks/use-dynamic-fields';
 
 function MyComponent() {
   const { fields, addField, removeField } = useDynamicFields();
-  
+
   const handleAddText = () => addField('text');
   const handleRemove = (id) => removeField(id);
-  
+
   return (
     <div>
       <button onClick={handleAddText}>Add Text Field</button>
@@ -182,10 +198,10 @@ The original `dynamic-fields.ts` file now re-exports all functions from the new 
 
 ```typescript
 // Old way (still works)
-import { validateFieldValue } from '~/lib/utils/dynamic-fields';
+import { validateFieldValue } from "~/lib/utils/dynamic-fields";
 
 // New way (recommended)
-import { validateFieldValue } from '~/lib/utils/dynamic-fields/field-validation';
+import { validateFieldValue } from "~/lib/utils/dynamic-fields/field-validation";
 ```
 
 ## Future Improvements
