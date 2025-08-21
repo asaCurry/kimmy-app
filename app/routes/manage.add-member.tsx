@@ -105,7 +105,6 @@ export async function action({ request, context }: Route.ActionArgs) {
     try {
       // Actually save to database
       const newMember = await userDb.create(env, memberData);
-      console.log("Successfully created member:", newMember);
 
       return {
         success: true,
@@ -174,10 +173,7 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
   // If we have a household ID but no loader data, redirect to include the household ID in the URL
   if (session?.currentHouseholdId && !householdId) {
     const redirectUrl = `/manage/add-member?householdId=${encodeURIComponent(session.currentHouseholdId)}`;
-    console.log(
-      "🔄 Add member route redirecting to include household ID:",
-      redirectUrl
-    );
+
     window.location.href = redirectUrl;
     return (
       <PageLayout>

@@ -97,7 +97,6 @@ export async function loader({
 
     // If no household data found, redirect to welcome
     if (!householdId) {
-      console.log("❌ No household data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 

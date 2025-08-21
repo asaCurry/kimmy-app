@@ -51,11 +51,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           const formData = await request.formData();
       const action = formData.get("_action") as string;
 
-    console.log("API received action:", action);
-    console.log("API received formData:");
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
+
 
     const trackerDB = new TrackerDB(db);
 
@@ -71,9 +67,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
             icon: formData.get("icon") as string || "⏱️",
           };
 
-          console.log("Data before validation:", data);
           const validatedData = createTrackerSchema.parse(data);
-          console.log("Data after validation:", validatedData);
 
           const tracker = await trackerDB.createTracker(
             validatedData,
@@ -81,7 +75,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
             session.userId
           );
 
-          console.log("Tracker created successfully:", tracker);
+
           return { success: true, tracker };
         } catch (error) {
           console.error("Error creating tracker:", error);

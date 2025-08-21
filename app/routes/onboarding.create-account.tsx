@@ -30,10 +30,7 @@ export function meta({}: Route.MetaArgs) {
 
 export async function action({ request, context }: Route.ActionArgs) {
   try {
-    console.log("🚀 Action triggered for account creation");
-
     const env = (context.cloudflare as any)?.env;
-    console.log("🔧 Environment check:", !!env?.DB);
 
     if (!env?.DB) {
       console.error("❌ Database not available");
@@ -41,14 +38,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     }
 
     const formData = await request.formData();
-    console.log("📝 Form data received:", {
-      firstName: formData.get("firstName"),
-      lastName: formData.get("lastName"),
-      email: formData.get("email"),
-      hasPassword: !!formData.get("password"),
-      hasConfirmPassword: !!formData.get("confirmPassword"),
-      inviteCode: formData.get("inviteCode"),
-    });
+
 
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
@@ -61,22 +51,18 @@ export async function action({ request, context }: Route.ActionArgs) {
 
     // Validation
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      console.log("❌ Validation failed: missing fields");
       return { error: "All fields are required" };
     }
 
     if (password !== confirmPassword) {
-      console.log("❌ Validation failed: passwords do not match");
       return { error: "Passwords do not match" };
     }
 
     if (password.length < 6) {
-      console.log("❌ Validation failed: password too short");
       return { error: "Password must be at least 6 characters long" };
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      console.log("❌ Validation failed: invalid email");
       return { error: "Please enter a valid email address" };
     }
 
@@ -85,25 +71,21 @@ export async function action({ request, context }: Route.ActionArgs) {
 
     // Validate household-specific fields
     if (selectedHouseholdType === "custom" && !householdName?.trim()) {
-      console.log("❌ Validation failed: custom household name required");
       return { error: "Household name is required for custom household" };
     }
 
     if (selectedHouseholdType === "join" && !inviteCode?.trim()) {
-      console.log("❌ Validation failed: invite code required");
       return { error: "Invite code is required to join existing household" };
     }
 
     // For "only me" option, no additional validation needed - household name will be auto-generated
 
-    console.log("✅ Validation passed, creating account...");
-    console.log("🔍 Household type selected:", selectedHouseholdType);
-    console.log("🔍 Household name provided:", householdName);
+
 
     let session;
     if (selectedHouseholdType === "join" && inviteCode && inviteCode.trim()) {
       // Join existing household with invite code
-      console.log("🔑 Joining household with invite code:", inviteCode);
+
       session = await authApi.joinHouseholdWithInviteCode(env, {
         name: `${firstName} ${lastName}`,
         email,
@@ -112,14 +94,10 @@ export async function action({ request, context }: Route.ActionArgs) {
       });
     } else {
       // Create new account and household
-      console.log("🏠 Creating new account and household");
       const householdNameToUse =
         selectedHouseholdType === "custom" && householdName?.trim()
           ? householdName.trim()
           : undefined; // undefined will use the default "Just me" naming
-      
-      console.log("🔍 Household name to use:", householdNameToUse);
-      console.log("🔍 Will create personal household:", !householdNameToUse);
 
       session = await authApi.createAccount(env, {
         name: `${firstName} ${lastName}`,
@@ -133,10 +111,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       return { error: "Account creation failed" };
     }
 
-    console.log("✅ Account created successfully:", {
-      userId: session.userId,
-      email: session.email,
-    });
+
 
     // Return success with session data
     return { success: true, session };
@@ -187,7 +162,6 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
   }, [actionData, updateSession, navigate]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
-    console.log("🔄 Form submission started");
 
     // Clear any previous errors
     setErrors({});
@@ -221,25 +195,7 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
     const householdName = formData.get("householdName") as string;
     const inviteCode = formData.get("inviteCode") as string;
     
-    console.log("🔍 Form data retrieved:", {
-      householdType,
-      householdName,
-      inviteCode
-    });
 
-    console.log("📝 Client-side form data:", {
-      firstName,
-      lastName,
-      email,
-      hasPassword: !!password,
-      hasConfirmPassword: !!confirmPassword,
-      householdType,
-      householdName,
-      inviteCode,
-    });
-    
-    console.log("🔍 Household type value:", householdType);
-    console.log("🔍 Household type type:", typeof householdType);
 
     // Client-side validation
     const newErrors: Record<string, string> = {};
@@ -288,7 +244,6 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
     }
 
     if (Object.keys(newErrors).length > 0) {
-      console.log("❌ Client-side validation failed:", newErrors);
       e.preventDefault();
       setErrors(newErrors);
       
@@ -302,8 +257,6 @@ const CreateAccount: React.FC<Route.ComponentProps> = () => {
       
       return;
     }
-
-    console.log("✅ Client-side validation passed, allowing form submission");
     
     // Restore original required states before form submission
     if (householdNameInput) {

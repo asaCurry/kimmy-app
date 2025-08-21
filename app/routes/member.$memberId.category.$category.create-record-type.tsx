@@ -80,7 +80,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
     // If no household data found, redirect to welcome
     if (!householdId) {
-      console.log("❌ No household data found, redirecting to welcome");
       throw redirect("/welcome");
     }
 
@@ -169,7 +168,6 @@ export async function action({
           message: "Record type created successfully",
         };
 
-        console.log("Action returning:", result);
         return result;
       });
     }

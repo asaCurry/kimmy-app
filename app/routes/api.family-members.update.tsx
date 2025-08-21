@@ -24,14 +24,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     // TODO: Implement actual member update in database
     // For now, this is a placeholder that returns success
-    console.log("Updating member:", {
-      memberId,
-      firstName,
-      lastName,
-      email,
-      relationship,
-      dateOfBirth,
-    });
 
     return { success: true, message: "Member updated successfully" };
   } catch (error) {

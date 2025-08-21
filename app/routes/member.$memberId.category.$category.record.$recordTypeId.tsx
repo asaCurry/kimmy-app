@@ -116,17 +116,10 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       throw new Response("Record type not found", { status: 404 });
     }
 
-    console.log("recordTypeResult[0]:", recordTypeResult[0]);
-    console.log("recordTypeResult[0].fields:", recordTypeResult[0].fields);
-    console.log("recordTypeResult[0].fields type:", typeof recordTypeResult[0].fields);
-    
     let parsedFields = [];
     if (recordTypeResult[0].fields) {
       try {
         const parsed = JSON.parse(recordTypeResult[0].fields);
-        console.log("Parsed fields:", parsed);
-        console.log("Parsed fields type:", typeof parsed);
-        console.log("Parsed fields is array:", Array.isArray(parsed));
         
         // Extract the fields array from the parsed object
         if (parsed && typeof parsed === 'object' && Array.isArray(parsed.fields)) {
@@ -138,8 +131,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
           console.warn("Unexpected fields structure:", parsed);
           parsedFields = [];
         }
-        
-        console.log("Final parsedFields:", parsedFields);
       } catch (error) {
         console.error("Error parsing fields:", error);
         parsedFields = [];

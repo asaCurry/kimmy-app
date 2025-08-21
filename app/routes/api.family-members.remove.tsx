@@ -19,7 +19,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     // TODO: Implement actual member removal from database
     // For now, this is a placeholder that returns success
-    console.log("Removing member:", memberId);
 
     return { success: true, message: "Member removed successfully" };
   } catch (error) {

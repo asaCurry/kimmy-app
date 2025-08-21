@@ -56,7 +56,6 @@ export const RecordsList: React.FC<RecordsListProps> = ({
   ) => {
     // Record updates are now handled by the edit route's server action
     // This function is kept for compatibility but doesn't do client-side updates
-    console.log("Update requested for record:", recordId, updates);
   };
 
   // Parse the fields JSON for each record type
@@ -284,18 +283,7 @@ const RecordsCards: React.FC<RecordsCardsProps> = ({
           <CardContent className="p-4 pt-0">
             {/* Record Content */}
             <div className="mb-4">
-              {/* Debug logging for record content */}
-              {(() => {
-                console.log(
-                  `RecordsList - Record ${record.id} content:`,
-                  record.content
-                );
-                console.log(
-                  `RecordsList - Record ${record.id} parsedRecordType:`,
-                  parsedRecordType
-                );
-                return null;
-              })()}
+
 
               <RecordContentDisplay
                 content={record.content}

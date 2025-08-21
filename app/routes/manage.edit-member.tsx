@@ -100,16 +100,6 @@ export async function action({ request, context }: Route.ActionArgs) {
     }
 
     // TODO: Implement actual member update in database
-    console.log("Updating member:", {
-      memberId,
-      firstName,
-      lastName,
-      email,
-      memberType,
-      relationship,
-      dateOfBirth,
-      currentHouseholdId,
-    });
 
     // For now, return success (this will be implemented when the API is ready)
     return {
@@ -159,10 +149,7 @@ const EditMember: React.FC<Route.ComponentProps> = () => {
   // If we have a household ID but no loader data, redirect to include the household ID in the URL
   if (session?.currentHouseholdId && !householdId) {
     const redirectUrl = `/manage/edit-member?householdId=${encodeURIComponent(session.currentHouseholdId)}`;
-    console.log(
-      "🔄 Edit member route redirecting to include household ID:",
-      redirectUrl
-    );
+
     window.location.href = redirectUrl;
     return (
       <PageLayout>

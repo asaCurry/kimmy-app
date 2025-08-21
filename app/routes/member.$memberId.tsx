@@ -228,7 +228,7 @@ export async function action({
           message: "Record type created successfully",
         };
 
-        console.log("Action returning:", result);
+
         return result;
       });
     }
@@ -382,7 +382,6 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                       key={category}
                       className="block cursor-pointer"
                       onClick={() => {
-                        console.log(`Navigating to category: ${category}`);
                         navigate(`/member/${currentMember.id}/category/${encodeURIComponent(category)}`);
                       }}
                     >
