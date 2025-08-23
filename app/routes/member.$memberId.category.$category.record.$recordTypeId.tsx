@@ -6,7 +6,7 @@ import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
 import { DynamicRecordForm } from "~/components/dynamic-record-form";
 import { loadHouseholdDataWithMember } from "~/lib/loader-helpers";
-import { withDatabaseAndSession, getDatabase } from "~/lib/db-utils";
+import { withDatabaseAndSessionRedirect, getDatabase } from "~/lib/db-utils";
 import { recordTypes, records } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import type { FormField } from "~/lib/utils";
@@ -191,7 +191,7 @@ export async function action({
         throw new Response("Missing required fields", { status: 400 });
       }
 
-      return withDatabaseAndSession(request, context, async (db, session) => {
+      return withDatabaseAndSessionRedirect(request, context, async (db, session) => {
         try {
           // Parse dynamic fields from form data
           const recordType = await db

@@ -9,13 +9,13 @@ import { TrackerCard } from "~/components/tracker-card";
 import { CreateTrackerForm } from "~/components/create-tracker-form";
 import { Plus, BarChart3, Timer, Clock, TrendingUp } from "lucide-react";
 import { toast } from "react-toastify";
-import { withDatabaseAndSession } from "~/lib/db-utils";
+import { withDatabaseAndSessionRedirect } from "~/lib/db-utils";
 import { TrackerDB } from "~/lib/tracker-db";
 import type { Tracker } from "~/db/schema";
 import { Navigation } from "~/components/navigation";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  return withDatabaseAndSession(request, context, async (db, session) => {
+  return withDatabaseAndSessionRedirect(request, context, async (db, session) => {
     const trackerDB = new TrackerDB(db);
     const [trackers, activeEntries, trackerEntries] = await Promise.all([
       trackerDB.getTrackers(session.currentHouseholdId),

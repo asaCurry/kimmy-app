@@ -6,12 +6,12 @@ import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { MemberCard } from "~/components/member-card";
 import type { Householdmember } from "~/lib/utils";
 import { QuickActionButton } from "~/components/ui/quick-action-button";
-import { withDatabaseAndSession } from "~/lib/db-utils";
+import { withDatabaseAndSessionRedirect } from "~/lib/db-utils";
 import { users } from "~/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  return withDatabaseAndSession(request, context, async (db, session) => {
+  return withDatabaseAndSessionRedirect(request, context, async (db, session) => {
     // Load household members directly from database
     const members = await db
       .select()

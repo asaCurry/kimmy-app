@@ -22,12 +22,12 @@ import { TrackerHistory } from "~/components/tracker-history";
 import { CreateTrackerForm } from "~/components/create-tracker-form";
 import { ArrowLeft, Edit, BarChart3, Clock, Plus } from "lucide-react";
 import { toast } from "react-toastify";
-import { withDatabaseAndSession } from "~/lib/db-utils";
+import { withDatabaseAndSessionRedirect } from "~/lib/db-utils";
 import { TrackerDB } from "~/lib/tracker-db";
 import type { Tracker, TrackerEntry } from "~/db/schema";
 
 export async function loader({ request, context, params }: Route.LoaderArgs) {
-  return withDatabaseAndSession(request, context, async (db, session) => {
+  return withDatabaseAndSessionRedirect(request, context, async (db, session) => {
     const { trackerId } = params;
     if (!trackerId) {
       throw new Response("Tracker ID required", { status: 400 });

@@ -89,3 +89,36 @@ export async function withDatabaseAndSession<T>(
     handleError(error, "process authenticated operation");
   }
 }
+
+// Common loader/action wrapper with session validation that redirects instead of throwing 401
+export async function withDatabaseAndSessionRedirect<T>(
+  request: Request,
+  context: any,
+  operation: (
+    db: ReturnType<typeof drizzle>,
+    session: ReturnType<typeof getSession>
+  ) => Promise<T>
+): Promise<T> {
+  try {
+    const db = getDatabase(context.cloudflare?.env);
+    const session = getSession(request);
+    return await operation(db, session);
+  } catch (error) {
+    // If it's a 401 Unauthorized, redirect to login instead of throwing
+    if (error instanceof Response && error.status === 401) {
+      console.log("🔄 Redirecting unauthenticated user to login page");
+      throw new Response("", { 
+        status: 302, 
+        headers: { Location: "/login" } 
+      });
+    }
+    
+    // If it's already a Response, re-throw it directly
+    if (error instanceof Response) {
+      throw error;
+    }
+    
+    // Otherwise, handle it with the error handler
+    handleError(error, "process authenticated operation");
+  }
+}

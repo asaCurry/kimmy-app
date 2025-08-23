@@ -21,12 +21,12 @@ import { TrackerCard } from "~/components/tracker-card";
 import { CreateTrackerForm } from "~/components/create-tracker-form";
 import { Plus, BarChart3, Timer, Clock } from "lucide-react";
 import { toast } from "react-toastify";
-import { withDatabaseAndSession } from "~/lib/db-utils";
+import { withDatabaseAndSessionRedirect } from "~/lib/db-utils";
 import { TrackerDB } from "~/lib/tracker-db";
 import type { Tracker, TrackerEntry } from "~/db/schema";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  return withDatabaseAndSession(request, context, async (db, session) => {
+  return withDatabaseAndSessionRedirect(request, context, async (db, session) => {
     const trackerDB = new TrackerDB(db);
     const [trackers, activeEntries, trackerEntries] = await Promise.all([
       trackerDB.getTrackers(session.currentHouseholdId),
@@ -39,7 +39,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
-  return withDatabaseAndSession(request, context, async (db, session) => {
+  return withDatabaseAndSessionRedirect(request, context, async (db, session) => {
     const formData = await request.formData();
     const action = formData.get("_action") as string;
 
