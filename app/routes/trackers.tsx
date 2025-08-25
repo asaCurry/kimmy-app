@@ -285,3 +285,38 @@ export default function TrackersPage() {
     </RequireAuth>
   );
 }
+
+// Error boundary to handle authentication errors
+export function ErrorBoundary() {
+  return (
+    <PageLayout>
+      <div className="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <h2 className="text-2xl font-bold text-slate-200 mb-4">
+            Authentication Required
+          </h2>
+          <p className="text-slate-400 mb-6">
+            Please sign in to access your trackers.
+          </p>
+          <div className="space-y-3">
+            <a
+              href="/login"
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-md hover:from-blue-600 hover:to-purple-700 transition-colors"
+            >
+              Sign In
+            </a>
+            <div className="text-sm text-slate-500">
+              <p>Don't have an account?</p>
+              <a
+                href="/onboarding"
+                className="text-blue-400 hover:text-blue-300 underline"
+              >
+                Create one here
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </PageLayout>
+  );
+}

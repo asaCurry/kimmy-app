@@ -59,10 +59,11 @@ export async function action({ request, context }: Route.ActionArgs) {
     }
 
     // Set the session cookie and return success
+    const maxAge = 60 * 60 * 24 * 7; // 7 days in seconds
     const response = new Response(JSON.stringify({ success: true, session }), {
       headers: {
         "Content-Type": "application/json",
-        "Set-Cookie": `kimmy_auth_session=${encodeURIComponent(JSON.stringify(session))}; Path=/; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`, // 7 days, no HttpOnly
+        "Set-Cookie": `kimmy_auth_session=${encodeURIComponent(JSON.stringify(session))}; Path=/; SameSite=Lax; Max-Age=${maxAge}`,
       },
     });
 

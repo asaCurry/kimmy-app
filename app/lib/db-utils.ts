@@ -1,6 +1,5 @@
 import { drizzle } from "drizzle-orm/d1";
 import { extractSessionFromCookies } from "~/lib/utils";
-import { redirect } from "react-router";
 
 // Consolidated database connection utility
 export function getDatabase(env: any) {
@@ -14,7 +13,12 @@ export function getDatabase(env: any) {
 export function getSession(request: Request) {
   const session = extractSessionFromCookies(request.headers.get("cookie"));
   if (!session?.userId) {
-    throw redirect("/login");
+    throw new Response("Unauthorized", { 
+      status: 401,
+      headers: {
+        "X-Redirect-To": "/login"
+      }
+    });
   }
   return session;
 }
