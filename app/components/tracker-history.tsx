@@ -79,7 +79,7 @@ export function TrackerHistory({
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - days);
       filtered = filtered.filter(
-        entry => new Date(entry.createdAt) >= cutoffDate
+        entry => entry.createdAt && new Date(entry.createdAt) >= cutoffDate
       );
     }
 
@@ -87,11 +87,11 @@ export function TrackerHistory({
     filtered.sort((a, b) => {
       if (sortBy === "newest") {
         return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
         );
       } else if (sortBy === "oldest") {
         return (
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          new Date(a.createdAt || '').getTime() - new Date(b.createdAt || '').getTime()
         );
       } else if (sortBy === "value-high") {
         return b.value - a.value;
@@ -290,7 +290,7 @@ export function TrackerHistory({
                         {formatValue(entry.value)}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        {formatDate(entry.createdAt)}
+                        {entry.createdAt ? formatDate(entry.createdAt) : 'Unknown date'}
                       </span>
                       {entry.isActive && (
                         <Badge variant="default" className="text-xs">

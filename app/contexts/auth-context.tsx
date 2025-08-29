@@ -10,6 +10,7 @@ import {
   useEffect,
   useCallback,
 } from "react";
+import { useNavigate } from "react-router";
 import { PageLoading } from "~/components/ui/loading";
 import { authApi, type AuthSession, sessionStorage } from "~/lib/auth-db";
 
@@ -169,14 +170,19 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
   requireHousehold = false,
 }) => {
   const { session, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   // Handle unauthenticated users - redirect to login
+  React.useEffect(() => {
+    if (!isLoading && !session) {
+      navigate("/login", { replace: true });
+    }
+  }, [isLoading, session, navigate]);
+
   if (!isLoading && !session) {
     if (fallback) {
       return fallback;
     }
-    // Redirect to login page
-    window.location.href = "/login";
     return <PageLoading message="Redirecting to login..." />;
   }
 

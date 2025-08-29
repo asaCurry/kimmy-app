@@ -55,9 +55,9 @@ export class TrackerDB {
     } catch (error) {
       console.error("Error in TrackerDB.createTracker:", error);
       console.error("Error details:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
+        name: (error as Error).name,
+        message: (error as Error).message,
+        stack: (error as Error).stack,
       });
       throw error;
     }
@@ -348,7 +348,7 @@ export class TrackerDB {
       )
       .orderBy(desc(trackerEntries.createdAt));
 
-    const totalValue = entries.reduce((sum, entry) => sum + entry.value, 0);
+    const totalValue = entries.reduce((sum: number, entry: any) => sum + entry.value, 0);
     const entryCount = entries.length;
     const averageValue = entryCount > 0 ? totalValue / entryCount : 0;
 

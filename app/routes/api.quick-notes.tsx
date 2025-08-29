@@ -36,7 +36,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
         return { error: "Missing required fields" };
       }
 
-      const db = getDatabase();
+      const db = getDatabase(context.cloudflare.env);
 
       const newNote = await db
         .insert(quickNotes)
@@ -64,7 +64,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
         return { error: "Note ID is required" };
       }
 
-      const db = getDatabase();
+      const db = getDatabase(context.cloudflare.env);
 
       // Verify the note belongs to the user's household
       const note = await db
@@ -125,7 +125,7 @@ export async function loader({ request, context }: ActionFunctionArgs) {
       return { error: "Member ID is required" };
     }
 
-    const db = getDatabase();
+    const db = getDatabase(context.cloudflare.env);
 
     // Get quick notes for the specific member and household
     const notes = await db

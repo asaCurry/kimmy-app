@@ -254,7 +254,7 @@ export default function TrackersPage() {
           {showCreateForm ? (
             <div className="flex justify-center">
               <CreateTrackerForm
-                tracker={editingTracker}
+                tracker={editingTracker || undefined}
                 onSuccess={handleFormSuccess}
                 onCancel={handleFormCancel}
               />

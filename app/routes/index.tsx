@@ -26,7 +26,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       id: member.id,
       name: member.name,
       email: member.email,
-      role: member.role || "member",
+      role: (member.role as "admin" | "member") || "member",
       age: member.age || undefined,
       relationshipToAdmin: member.relationshipToAdmin || undefined,
     }));
@@ -113,12 +113,14 @@ function MemberSelection({
                   icon="⏱️"
                   title="All Trackers"
                   description="View household activity trackers"
+                  color="blue"
                 />
                 <QuickActionButton
                   to="/manage"
                   icon="⚙️"
                   title="Manage Household"
                   description="Add members, manage settings"
+                  color="emerald"
                 />
               </div>
             </div>

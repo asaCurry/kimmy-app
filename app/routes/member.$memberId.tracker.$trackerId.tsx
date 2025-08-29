@@ -5,6 +5,7 @@ import {
   useFetcher,
   useRevalidator,
   useNavigate,
+  useParams,
 } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
@@ -57,7 +58,10 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
 
 export default function TrackerDetailPage() {
   const { tracker, entries, activeEntry } = useLoaderData<typeof loader>();
-  const { user } = useAuth();
+  const { session } = useAuth();
+  // Get params from React Router
+  const params = useParams();
+  const memberId = params.memberId;
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
   const navigate = useNavigate();
@@ -121,7 +125,7 @@ export default function TrackerDetailPage() {
         <Navigation
           currentView="categories"
           member={{
-            id: parseInt(memberId!),
+            id: parseInt(memberId || ''),
             name: "Member",
             email: "",
             role: "member" as const,
@@ -215,7 +219,7 @@ export default function TrackerDetailPage() {
                           Created
                         </span>
                         <span className="font-semibold">
-                          {new Date(tracker.createdAt).toLocaleDateString()}
+                          {tracker.createdAt ? new Date(tracker.createdAt).toLocaleDateString() : 'Unknown'}
                         </span>
                       </div>
                     </CardContent>
