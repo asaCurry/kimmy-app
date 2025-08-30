@@ -17,6 +17,7 @@ import {
   validateSession,
   ApiResponse,
 } from "~/lib/validation-utils";
+import { apiLogger } from "~/lib/logger";
 
 export async function action({ request, context }: ActionFunctionArgs) {
   try {
@@ -114,7 +115,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
           return ApiResponse.success({ entry });
         } catch (error) {
-          console.error("Error in complete-tracking:", error);
+          apiLogger.error("Error in complete-tracking", {
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
           return ApiResponse.error(
             error instanceof Error ? error.message : "Failed to complete tracking"
           );
@@ -140,7 +143,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
           return ApiResponse.success({ entry });
         } catch (error) {
-          console.error("Error in quick-log:", error);
+          apiLogger.error("Error in quick-log", {
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
           return ApiResponse.error(
             error instanceof Error ? error.message : "Failed to create quick log"
           );
@@ -168,7 +173,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
           return ApiResponse.success({ entry });
         } catch (error) {
-          console.error("Error in create-entry:", error);
+          apiLogger.error("Error in create-entry", {
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
           return ApiResponse.error(
             error instanceof Error ? error.message : "Failed to create entry"
           );
@@ -190,7 +197,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
           return ApiResponse.success({ deleted: true });
         } catch (error) {
-          console.error("Error in delete-entry:", error);
+          apiLogger.error("Error in delete-entry", {
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
           return ApiResponse.error(
             error instanceof Error ? error.message : "Failed to delete entry"
           );
@@ -201,7 +210,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
         return ApiResponse.error("Invalid action");
     }
   } catch (error) {
-    console.error("Error in tracker entry action:", error);
+    apiLogger.error("Error in tracker entry action", {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     
     // Handle validation errors specifically
     if (error instanceof Error && error.message.includes("required")) {

@@ -12,10 +12,11 @@ import { canAccessAnalytics, getUserRoleInHousehold } from "~/lib/permissions";
 import { households } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "react-router";
+import { analyticsLogger } from "~/lib/logger";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
-    console.log("Insights loader called for household:", session.currentHouseholdId);
+    analyticsLogger.info("Loading insights", { householdId: session.currentHouseholdId });
 
     // Get household data to check analytics access
     const household = await db
@@ -75,7 +76,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       let insights = await analyticsDB.getCachedInsights(session.currentHouseholdId, cacheKey);
 
       if (!insights) {
-        console.log("No cached insights found, generating new ones");
+        analyticsLogger.debug("No cached insights found, generating new ones");
         
         // Generate fresh insights
         const analyticsService = new AnalyticsService(db, session.currentHouseholdId);
@@ -101,9 +102,9 @@ export async function loader({ request, context }: Route.LoaderArgs) {
           ttlMinutes
         );
 
-        console.log("Generated and cached new insights");
+        analyticsLogger.info("Generated and cached new insights");
       } else {
-        console.log("Using cached insights");
+        analyticsLogger.debug("Using cached insights");
       }
 
       // Always fetch fresh recommendations from database
@@ -135,7 +136,9 @@ export async function loader({ request, context }: Route.LoaderArgs) {
         cached: !!insights // true if we used cached data
       };
     } catch (error) {
-      console.error("Error loading insights:", error);
+      analyticsLogger.error("Error loading insights", {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       
       // Return fallback data structure
       return {

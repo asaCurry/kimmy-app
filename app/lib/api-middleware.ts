@@ -5,6 +5,7 @@
 
 import { getDatabase } from "./db-utils";
 import { validateSession, ApiResponse } from "./validation-utils";
+import { apiLogger } from "./logger";
 
 export interface AuthenticatedRequest {
   db: any;
@@ -59,7 +60,9 @@ export function withAuthentication<T>(
       try {
         rawSession = JSON.parse(decodeURIComponent(sessionData));
       } catch (error) {
-        console.error("Invalid session cookie:", error);
+        apiLogger.error("Invalid session cookie", {
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
         return ApiResponse.unauthorized();
       }
 
@@ -76,7 +79,9 @@ export function withAuthentication<T>(
 
       return result;
     } catch (error) {
-      console.error("API middleware error:", error);
+      apiLogger.error("API middleware error", {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       
       // Handle different error types
       if (error instanceof Response) {

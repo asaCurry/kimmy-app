@@ -13,6 +13,7 @@ import type {
   NewRecord,
 } from "../../db/schema";
 import { isDatabaseAvailable } from "./utils";
+import { dbLogger } from "./logger";
 
 /**
  * Database utilities for user, household, and record operations
@@ -23,20 +24,19 @@ import { isDatabaseAvailable } from "./utils";
  * Helper function to ensure database is available and create database instance
  */
 function ensureDatabase(env: any): Database {
-  console.log("🔍 ensureDatabase called with env:", {
+  dbLogger.debug("Database connection check", {
     hasEnv: !!env,
     hasDB: !!env?.DB,
     dbType: typeof env?.DB,
   });
 
   if (!isDatabaseAvailable(env)) {
-    console.error("❌ Database not available");
+    dbLogger.error("Database not available");
     throw new Error("Database not available");
   }
 
-  console.log("✅ Database is available, creating database instance");
+  dbLogger.debug("Database instance created successfully");
   const db = createDatabase(env.DB);
-  console.log("✅ Database instance created successfully");
   return db;
 }
 
@@ -54,16 +54,16 @@ export const userDb = {
       relationshipToAdmin?: string;
     }
   ): Promise<User> {
-    console.log("👤 Starting userDb.create with data:", {
+    dbLogger.info("Creating new user", {
       name: userData.name,
-      email: userData.email,
+      email: userData.email.replace(/(.{2}).*@/, "$1***@"),
       hasPassword: !!userData.password,
       householdId: userData.householdId,
       role: userData.role,
     });
 
     const db = ensureDatabase(env);
-    console.log("✅ Database connection established for user creation");
+    dbLogger.debug("Database connection established for user creation");
 
     // Proper password hashing with bcrypt
     const hashedPassword = userData.password
@@ -79,15 +79,17 @@ export const userDb = {
       age: userData.age,
       relationshipToAdmin: userData.relationshipToAdmin,
     };
-    console.log("📋 Prepared user data:", newUser);
+    dbLogger.debug("Prepared user data for insertion");
 
     try {
-      console.log("💾 Inserting user into database...");
+      dbLogger.info("Inserting user into database");
       const result = await db.insert(schema.users).values(newUser).returning();
-      console.log("✅ User inserted successfully:", result[0]);
+      dbLogger.info("User created successfully", { userId: result[0].id });
       return result[0];
     } catch (error) {
-      console.error("❌ Failed to create user:", error);
+      dbLogger.error("Failed to create user", { 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       throw new Error("Failed to create user account");
     }
   },

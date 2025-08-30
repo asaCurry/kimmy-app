@@ -7,6 +7,8 @@ import { authDb, userDb, householdDb } from "./db";
 import { isDatabaseAvailable } from "./utils";
 import { inviteCodeDb } from "./db";
 import { generateSessionToken } from "./token-utils";
+import { createSecureToken, verifySecureToken, type SecureSessionData } from "./secure-session";
+import { authLogger } from "./logger";
 
 // Session management (unchanged for session storage)
 export interface SessionToken {
@@ -65,14 +67,24 @@ export const sessionStorage = {
 
   setSessionData(session: AuthSession): void {
     if (typeof window !== "undefined") {
-      // Set session in sessionStorage for client-side access
+      // Set session in sessionStorage for client-side access (temporary - will be removed)
       window.sessionStorage.setItem(
         "kimmy_auth_session",
         JSON.stringify(session)
       );
 
-      // Also set as a cookie for server-side access
-      document.cookie = `kimmy_auth_session=${encodeURIComponent(JSON.stringify(session))}; path=/; max-age=${Math.floor((new Date(session.expiresAt).getTime() - Date.now()) / 1000)}`;
+      // Set secure HTTP-only cookie for server-side access
+      const maxAge = Math.floor((new Date(session.expiresAt).getTime() - Date.now()) / 1000);
+      const isSecure = window.location.protocol === 'https:';
+      
+      document.cookie = [
+        `kimmy_auth_session=${encodeURIComponent(JSON.stringify(session))}`,
+        'path=/',
+        `max-age=${maxAge}`,
+        isSecure ? 'Secure' : '', // Only set Secure flag over HTTPS
+        'SameSite=Strict', // CSRF protection
+        // Note: HttpOnly cannot be set from JavaScript, needs server-side implementation
+      ].filter(Boolean).join('; ');
     }
   },
 
@@ -129,42 +141,47 @@ export const authApi = {
     email: string,
     password: string
   ): Promise<AuthSession | null> {
-    console.log("authApi.login called with:", {
-      email,
-      passwordLength: password?.length,
-    });
-    console.log("authApi.login - env.DB available:", !!env?.DB);
+    authLogger.info("Login attempt", { email: email.replace(/(.{2}).*@/, "$1***@") });
 
     if (!isDatabaseAvailable(env)) {
-      console.error("authApi.login - Database not available");
+      authLogger.error("Database not available during login");
       throw new Error("Database not available");
     }
 
     try {
-      console.log("authApi.login - calling authDb.authenticateUser...");
       const user = await authDb.authenticateUser(env, email, password);
-      console.log("authApi.login - authDb.authenticateUser result:", user);
 
       if (!user) {
-        console.log("authApi.login - No user returned from authenticateUser");
+        authLogger.warn("Authentication failed - invalid credentials", { email: email.replace(/(.{2}).*@/, "$1***@") });
         return null;
       }
 
-      // Create session
-      const session: AuthSession = {
-        token: generateSessionToken(),
+      // Create secure session using new token system
+      const sessionSecret = env.SESSION_SECRET || 'dev-secret-change-in-production';
+      const secureToken = await createSecureToken({
         userId: user.id,
         email: user.email,
         name: user.name,
-        currentHouseholdId: user.householdId || undefined, // Only set if user has a household
+        currentHouseholdId: user.householdId || undefined,
+        role: user.role as "admin" | "member"
+      }, { secret: sessionSecret });
+
+      const session: AuthSession = {
+        token: secureToken,
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        currentHouseholdId: user.householdId || undefined,
         role: user.role as "admin" | "member",
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
 
-      console.log("authApi.login - Created session:", session);
+      authLogger.info("Login successful", { userId: user.id, householdId: user.householdId });
       return session;
     } catch (error) {
-      console.error("authApi.login - Login failed:", error);
+      authLogger.error("Login failed", { 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       return null;
     }
   },

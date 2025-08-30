@@ -25,6 +25,11 @@ migrations_dir = "./migrations"
 bucket_name = "kimmy-app-assets"
 binding = "ASSETS"
 
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "1a2e4983299549b8958ec177909526af"
+preview_id = "2a3f0f6f8e1a49d59484e79bbd046965"
+
 # Smart Placement
 # Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
 # placement = { mode = "smart" }
