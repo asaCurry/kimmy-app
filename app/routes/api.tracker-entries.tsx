@@ -7,6 +7,16 @@ import {
   stopTimeTrackingSchema,
   quickLogSchema,
 } from "~/lib/schemas";
+import {
+  safeParseInt,
+  safeParseFloat,
+  safeParseOptionalInt,
+  safeParseDate,
+  safeGetString,
+  validateAction,
+  validateSession,
+  ApiResponse,
+} from "~/lib/validation-utils";
 
 export async function action({ request, context }: ActionFunctionArgs) {
   try {
@@ -52,111 +62,152 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     const formData = await request.formData();
-    const action = formData.get("_action") as string;
-
+    const validActions = ["complete-tracking", "quick-log", "create-entry", "delete-entry"];
+    const action = validateAction(formData.get("_action"), validActions);
+    
+    const validatedSession = validateSession(session);
     const trackerDB = new TrackerDB(db);
 
     switch (action) {
       case "complete-tracking": {
-        const data = {
-          trackerId: parseInt(formData.get("trackerId") as string),
-          memberId: formData.get("memberId")
-            ? parseInt(formData.get("memberId") as string)
-            : undefined,
-          startTime: formData.get("startTime") as string,
-          endTime: formData.get("endTime") as string,
-          notes: (formData.get("notes") as string) || undefined,
-        };
+        try {
+          const trackerId = safeParseInt(formData.get("trackerId"), "trackerId");
+          const memberId = safeParseOptionalInt(formData.get("memberId"));
+          const startTimeStr = formData.get("startTime") as string;
+          const endTimeStr = formData.get("endTime") as string;
+          const notes = safeGetString(formData.get("notes"));
 
-        // Calculate duration in minutes with decimal precision
-        const start = new Date(data.startTime);
-        const end = new Date(data.endTime);
-        const durationMs = end.getTime() - start.getTime();
-        const durationMinutes = durationMs / (1000 * 60); // Keep decimal precision
+          // Validate and parse dates
+          const start = safeParseDate(startTimeStr, "startTime");
+          const end = safeParseDate(endTimeStr, "endTime");
 
-        const entry = await trackerDB.createTrackerEntry(
-          {
-            trackerId: data.trackerId,
-            memberId: data.memberId,
-            value: durationMinutes,
-            startTime: data.startTime,
-            endTime: data.endTime,
-            notes: data.notes,
-            tags: undefined,
-          },
-          session.currentHouseholdId,
-          session.userId
-        );
+          // Validate time range
+          if (end <= start) {
+            return ApiResponse.error("End time must be after start time");
+          }
 
-        return { success: true, entry };
+          // Calculate duration in minutes with decimal precision
+          const durationMs = end.getTime() - start.getTime();
+          const durationMinutes = durationMs / (1000 * 60);
+
+          const data = {
+            trackerId,
+            memberId,
+            startTime: startTimeStr,
+            endTime: endTimeStr,
+            notes,
+          };
+
+          const entry = await trackerDB.createTrackerEntry(
+            {
+              trackerId: data.trackerId,
+              memberId: data.memberId,
+              value: durationMinutes,
+              startTime: data.startTime,
+              endTime: data.endTime,
+              notes: data.notes,
+              tags: undefined,
+            },
+            validatedSession.currentHouseholdId,
+            validatedSession.userId
+          );
+
+          return ApiResponse.success({ entry });
+        } catch (error) {
+          console.error("Error in complete-tracking:", error);
+          return ApiResponse.error(
+            error instanceof Error ? error.message : "Failed to complete tracking"
+          );
+        }
       }
 
       case "quick-log": {
-        const data = {
-          trackerId: parseInt(formData.get("trackerId") as string),
-          memberId: formData.get("memberId")
-            ? parseInt(formData.get("memberId") as string)
-            : undefined,
-          value: parseFloat(formData.get("value") as string),
-          notes: (formData.get("notes") as string) || undefined,
-          tags: (formData.get("tags") as string) || undefined,
-        };
+        try {
+          const data = {
+            trackerId: safeParseInt(formData.get("trackerId"), "trackerId"),
+            memberId: safeParseOptionalInt(formData.get("memberId")),
+            value: safeParseFloat(formData.get("value"), "value"),
+            notes: safeGetString(formData.get("notes")),
+            tags: safeGetString(formData.get("tags")),
+          };
 
-        const validatedData = quickLogSchema.parse(data);
-        const entry = await trackerDB.quickLog(
-          validatedData,
-          session.currentHouseholdId,
-          session.userId
-        );
+          const validatedData = quickLogSchema.parse(data);
+          const entry = await trackerDB.quickLog(
+            validatedData,
+            validatedSession.currentHouseholdId,
+            validatedSession.userId
+          );
 
-        return { success: true, entry };
+          return ApiResponse.success({ entry });
+        } catch (error) {
+          console.error("Error in quick-log:", error);
+          return ApiResponse.error(
+            error instanceof Error ? error.message : "Failed to create quick log"
+          );
+        }
       }
 
       case "create-entry": {
-        const data = {
-          trackerId: parseInt(formData.get("trackerId") as string),
-          memberId: formData.get("memberId")
-            ? parseInt(formData.get("memberId") as string)
-            : undefined,
-          value: parseFloat(formData.get("value") as string),
-          startTime: (formData.get("startTime") as string) || undefined,
-          endTime: (formData.get("endTime") as string) || undefined,
-          notes: (formData.get("notes") as string) || undefined,
-          tags: (formData.get("tags") as string) || undefined,
-        };
+        try {
+          const data = {
+            trackerId: safeParseInt(formData.get("trackerId"), "trackerId"),
+            memberId: safeParseOptionalInt(formData.get("memberId")),
+            value: safeParseFloat(formData.get("value"), "value"),
+            startTime: safeGetString(formData.get("startTime")),
+            endTime: safeGetString(formData.get("endTime")),
+            notes: safeGetString(formData.get("notes")),
+            tags: safeGetString(formData.get("tags")),
+          };
 
-        const validatedData = createTrackerEntrySchema.parse(data);
-        const entry = await trackerDB.createTrackerEntry(
-          validatedData,
-          session.currentHouseholdId,
-          session.userId
-        );
+          const validatedData = createTrackerEntrySchema.parse(data);
+          const entry = await trackerDB.createTrackerEntry(
+            validatedData,
+            validatedSession.currentHouseholdId,
+            validatedSession.userId
+          );
 
-        return { success: true, entry };
+          return ApiResponse.success({ entry });
+        } catch (error) {
+          console.error("Error in create-entry:", error);
+          return ApiResponse.error(
+            error instanceof Error ? error.message : "Failed to create entry"
+          );
+        }
       }
 
       case "delete-entry": {
-        const id = parseInt(formData.get("id") as string);
-        if (isNaN(id)) {
-          return { success: false, error: "Invalid entry ID" };
-        }
+        try {
+          const id = safeParseInt(formData.get("id"), "entry ID");
 
-        const success = await trackerDB.deleteTrackerEntry(
-          id,
-          session.currentHouseholdId
-        );
-        if (!success) {
-          return { success: false, error: "Entry not found" };
-        }
+          const success = await trackerDB.deleteTrackerEntry(
+            id,
+            validatedSession.currentHouseholdId
+          );
+          
+          if (!success) {
+            return ApiResponse.notFound("Entry");
+          }
 
-        return { success: true };
+          return ApiResponse.success({ deleted: true });
+        } catch (error) {
+          console.error("Error in delete-entry:", error);
+          return ApiResponse.error(
+            error instanceof Error ? error.message : "Failed to delete entry"
+          );
+        }
       }
 
       default:
-        return { success: false, error: "Invalid action" };
+        return ApiResponse.error("Invalid action");
     }
   } catch (error) {
     console.error("Error in tracker entry action:", error);
-    return { success: false, error: "Failed to perform action" };
+    
+    // Handle validation errors specifically
+    if (error instanceof Error && error.message.includes("required")) {
+      return ApiResponse.error(error.message, 400);
+    }
+    
+    return ApiResponse.serverError("Failed to perform action");
   }
 }

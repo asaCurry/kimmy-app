@@ -83,12 +83,12 @@ export function CreateTrackerForm({
     setValue,
     watch,
   } = useForm<CreateTrackerInput>({
-    resolver: zodResolver(tracker ? updateTrackerSchema : createTrackerSchema),
+    resolver: zodResolver(createTrackerSchema),
     defaultValues: tracker
       ? {
           name: tracker.name,
           description: tracker.description || "",
-          type: tracker.type,
+          type: (tracker.type as "time" | "cumulative") || "time",
           unit: tracker.unit,
           color: tracker.color || "#3b82f6",
           icon: tracker.icon || "⏱️",

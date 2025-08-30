@@ -6,6 +6,7 @@ export const households = sqliteTable("households", {
   id: text("id").primaryKey(), // UUID string
   name: text("name").notNull(),
   inviteCode: text("invite_code").unique().notNull(),
+  hasAnalyticsAccess: integer("has_analytics_access").default(1), // 0 = no access, 1 = has access (paid feature)
   createdAt: text("created_at").default(sql`(datetime('now'))`),
   updatedAt: text("updated_at").default(sql`(datetime('now'))`),
 });
@@ -123,6 +124,36 @@ export const trackerEntries = sqliteTable("tracker_entries", {
   updatedAt: text("updated_at").default(sql`(datetime('now'))`),
 });
 
+// Analytics cache table (for caching insights with TTL)
+export const analyticsCache = sqliteTable("analytics_cache", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  householdId: text("household_id")
+    .notNull()
+    .references(() => households.id),
+  cacheKey: text("cache_key").notNull(), // e.g., "basic_insights", "health_trends"
+  data: text("data"), // JSON object with analytics results
+  expiresAt: text("expires_at").notNull(), // ISO datetime string
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+});
+
+// AI recommendations table (for storing generated recommendations)
+export const aiRecommendations = sqliteTable("ai_recommendations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  householdId: text("household_id")
+    .notNull()
+    .references(() => households.id),
+  memberId: integer("member_id").references(() => users.id), // Optional: recommendation for specific member
+  type: text("type").notNull(), // 'health', 'activity', 'data_entry', 'growth'
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  priority: text("priority").notNull().default("medium"), // 'low', 'medium', 'high'
+  status: text("status").notNull().default("active"), // 'active', 'dismissed', 'completed'
+  metadata: text("metadata"), // JSON object with additional data
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+});
+
 // Type exports
 export type Household = typeof households.$inferSelect;
 export type NewHousehold = typeof households.$inferInsert;
@@ -140,3 +171,7 @@ export type Tracker = typeof trackers.$inferSelect;
 export type NewTracker = typeof trackers.$inferInsert;
 export type TrackerEntry = typeof trackerEntries.$inferSelect;
 export type NewTrackerEntry = typeof trackerEntries.$inferInsert;
+export type AnalyticsCache = typeof analyticsCache.$inferSelect;
+export type NewAnalyticsCache = typeof analyticsCache.$inferInsert;
+export type AiRecommendation = typeof aiRecommendations.$inferSelect;
+export type NewAiRecommendation = typeof aiRecommendations.$inferInsert;

@@ -2,6 +2,8 @@ import { eq, and } from "drizzle-orm";
 import { createDatabase } from "../../db";
 import type { Database } from "../../db";
 import * as schema from "../../db/schema";
+import { hashPassword, verifyPassword } from "./password-utils";
+import { generateSecureToken, generateInviteCode } from "./token-utils";
 import type {
   User,
   NewUser,
@@ -63,9 +65,9 @@ export const userDb = {
     const db = ensureDatabase(env);
     console.log("✅ Database connection established for user creation");
 
-    // Simple password hashing - in production, use proper bcrypt
+    // Proper password hashing with bcrypt
     const hashedPassword = userData.password
-      ? `hashed_${userData.password}`
+      ? await hashPassword(userData.password)
       : null;
 
     const newUser: NewUser = {
@@ -157,16 +159,50 @@ export const userDb = {
     hashedPassword: string | null
   ): Promise<boolean> {
     if (!hashedPassword) return false;
-    // Simple comparison - in production, use proper bcrypt comparison
-    return hashedPassword === `hashed_${password}`;
+    
+    // Handle legacy hashed passwords (will be migrated during login)
+    if (hashedPassword.startsWith('hashed_')) {
+      return hashedPassword === `hashed_${password}`;
+    }
+    
+    // Use proper PBKDF2 verification for new passwords
+    return verifyPassword(password, hashedPassword);
+  },
+
+  /**
+   * Migrate a user's password to the secure format
+   * Called during login when legacy hash is detected
+   */
+  async migrateUserPassword(
+    env: any,
+    userId: number,
+    plaintextPassword: string
+  ): Promise<boolean> {
+    try {
+      const db = ensureDatabase(env);
+      const secureHash = await hashPassword(plaintextPassword);
+      
+      await db
+        .update(schema.users)
+        .set({ hashedPassword: secureHash })
+        .where(eq(schema.users.id, userId));
+
+      console.log(`🔄 Migrated password for user ${userId} to secure format`);
+      return true;
+    } catch (error) {
+      console.error(`❌ Failed to migrate password for user ${userId}:`, error);
+      return false;
+    }
   },
 };
 
 // Household/Household operations
 export const householdDb = {
   async generateHouseholdId(): Promise<string> {
-    // Generate a unique household ID
-    return `household_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Generate a secure unique household ID
+    const timestamp = Date.now().toString(36);
+    const randomPart = generateSecureToken(16);
+    return `household_${timestamp}_${randomPart}`;
   },
 
   async getMembers(env: any, householdId: string): Promise<User[]> {
@@ -429,15 +465,12 @@ export const inviteCodeDb = {
    * Generate a cryptographically secure invite code
    */
   generateSecureInviteCode(): string {
-    // Generate random string using timestamp and random numbers
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const randomPart = Math.random()
-      .toString(36)
-      .substring(2, 10)
-      .toUpperCase();
+    // Generate cryptographically secure invite code
+    const firstPart = generateInviteCode();
+    const secondPart = generateInviteCode().substring(0, 4);
 
     // Format: XXXXXXXX-XXXX (8 alphanumeric + hyphen + 4 alphanumeric)
-    return `${randomPart}-${timestamp.substring(timestamp.length - 4)}`;
+    return `${firstPart}-${secondPart}`;
   },
 
   /**
@@ -600,7 +633,17 @@ export const authDb = {
       );
       console.log("authenticateUser - verifyPassword result:", isValid);
 
-      return isValid ? user : null;
+      if (!isValid) {
+        return null;
+      }
+
+      // 🔄 GRADUAL MIGRATION: If user has legacy hash, migrate it now
+      if (user.hashedPassword.startsWith('hashed_')) {
+        console.log(`🔄 Migrating legacy password for user ${email}`);
+        await userDb.migrateUserPassword(env, user.id, password);
+      }
+
+      return user;
     } catch (error) {
       console.error("authenticateUser - Authentication error:", error);
       return null;

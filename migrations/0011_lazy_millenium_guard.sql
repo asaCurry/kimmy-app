@@ -1,0 +1,1 @@
+ALTER TABLE households ADD `has_analytics_access` integer DEFAULT 1;

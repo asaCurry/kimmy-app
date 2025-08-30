@@ -71,6 +71,20 @@
       "when": 1755704058708,
       "tag": "0009_good_luke_cage",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1756472987214,
+      "tag": "0010_tense_chameleon",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1756473428075,
+      "tag": "0011_lazy_millenium_guard",
+      "breakpoints": true
     }
   ]
 }

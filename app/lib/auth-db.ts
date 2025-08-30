@@ -6,6 +6,7 @@
 import { authDb, userDb, householdDb } from "./db";
 import { isDatabaseAvailable } from "./utils";
 import { inviteCodeDb } from "./db";
+import { generateSessionToken } from "./token-utils";
 
 // Session management (unchanged for session storage)
 export interface SessionToken {
@@ -151,7 +152,7 @@ export const authApi = {
 
       // Create session
       const session: AuthSession = {
-        token: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        token: generateSessionToken(),
         userId: user.id,
         email: user.email,
         name: user.name,
@@ -189,7 +190,7 @@ export const authApi = {
 
       // Create session
       const session: AuthSession = {
-        token: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        token: generateSessionToken(),
         userId: user.id,
         email: user.email,
         name: user.name,
@@ -244,7 +245,7 @@ export const authApi = {
 
       // Create session
       const session: AuthSession = {
-        token: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        token: generateSessionToken(),
         userId: user.id,
         email: user.email,
         name: user.name,
@@ -276,7 +277,7 @@ export const authApi = {
       // This would need to be implemented in the database layer
       // For now, we'll create a placeholder session
       const session: AuthSession = {
-        token: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        token: generateSessionToken(),
         userId: 1, // Placeholder - would come from actual user creation
         email: "placeholder@email.com", // Placeholder
         name: `${householdData.adminFirstName} ${householdData.adminLastName}`,
