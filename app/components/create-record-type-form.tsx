@@ -187,17 +187,142 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
               <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100">
                 <SelectValue placeholder="Choose an icon" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-700 border-slate-600">
+              <SelectContent className="bg-slate-700 border-slate-600 max-h-64 overflow-y-auto">
+                {/* General & Documents */}
                 <SelectItem value="📝">📝 Note</SelectItem>
+                <SelectItem value="📋">📋 Checklist</SelectItem>
+                <SelectItem value="📄">📄 Document</SelectItem>
+                <SelectItem value="📊">📊 Report</SelectItem>
+                <SelectItem value="📈">📈 Progress</SelectItem>
+                <SelectItem value="📅">📅 Schedule</SelectItem>
+                <SelectItem value="⏰">⏰ Reminder</SelectItem>
+                <SelectItem value="🔖">🔖 Bookmark</SelectItem>
+                
+                {/* Health & Wellness */}
                 <SelectItem value="🏥">🏥 Health</SelectItem>
-                <SelectItem value="🎓">🎓 Education</SelectItem>
-                <SelectItem value="⭐">⭐ Achievement</SelectItem>
-                <SelectItem value="🎯">🎯 Goal</SelectItem>
                 <SelectItem value="💊">💊 Medication</SelectItem>
-                <SelectItem value="🏃">🏃 Activity</SelectItem>
-                <SelectItem value="🍽️">🍽️ Meal</SelectItem>
+                <SelectItem value="🩺">🩺 Medical</SelectItem>
+                <SelectItem value="💉">💉 Treatment</SelectItem>
+                <SelectItem value="🦷">🦷 Dental</SelectItem>
+                <SelectItem value="👁️">👁️ Vision</SelectItem>
+                <SelectItem value="🧠">🧠 Mental Health</SelectItem>
+                <SelectItem value="❤️">❤️ Wellness</SelectItem>
                 <SelectItem value="😴">😴 Sleep</SelectItem>
+                <SelectItem value="💤">💤 Rest</SelectItem>
+                
+                {/* Food & Nutrition */}
+                <SelectItem value="🍽️">🍽️ Meal</SelectItem>
+                <SelectItem value="🍎">🍎 Nutrition</SelectItem>
+                <SelectItem value="🥗">🥗 Healthy Food</SelectItem>
+                <SelectItem value="🍕">🍕 Food</SelectItem>
+                <SelectItem value="☕">☕ Beverage</SelectItem>
+                <SelectItem value="💧">💧 Hydration</SelectItem>
+                <SelectItem value="🧊">🧊 Water</SelectItem>
+                
+                {/* Activities & Exercise */}
+                <SelectItem value="🏃">🏃 Activity</SelectItem>
+                <SelectItem value="💪">💪 Exercise</SelectItem>
+                <SelectItem value="🚴">🚴 Cycling</SelectItem>
+                <SelectItem value="🏊">🏊 Swimming</SelectItem>
+                <SelectItem value="🧘">🧘 Meditation</SelectItem>
+                <SelectItem value="🚶">🚶 Walking</SelectItem>
+                <SelectItem value="⚽">⚽ Sports</SelectItem>
+                <SelectItem value="🏋️">🏋️ Strength</SelectItem>
+                <SelectItem value="🤸">🤸 Flexibility</SelectItem>
+                
+                {/* Education & Learning */}
+                <SelectItem value="🎓">🎓 Education</SelectItem>
+                <SelectItem value="📚">📚 Study</SelectItem>
+                <SelectItem value="✏️">✏️ Writing</SelectItem>
+                <SelectItem value="🔬">🔬 Science</SelectItem>
+                <SelectItem value="🧮">🧮 Math</SelectItem>
+                <SelectItem value="📖">📖 Reading</SelectItem>
+                <SelectItem value="🎭">🎭 Arts</SelectItem>
+                <SelectItem value="🎵">🎵 Music</SelectItem>
+                <SelectItem value="🎤">🎤 Practice</SelectItem>
+                
+                {/* Work & Career */}
+                <SelectItem value="💼">💼 Work</SelectItem>
+                <SelectItem value="💻">💻 Computer</SelectItem>
+                <SelectItem value="📞">📞 Call</SelectItem>
+                <SelectItem value="📧">📧 Email</SelectItem>
+                <SelectItem value="📝">📝 Meeting</SelectItem>
+                <SelectItem value="🎯">🎯 Goal</SelectItem>
+                <SelectItem value="📊">📊 Analysis</SelectItem>
+                <SelectItem value="🔍">🔍 Research</SelectItem>
+                
+                {/* Finance & Money */}
+                <SelectItem value="💰">💰 Money</SelectItem>
+                <SelectItem value="💳">💳 Payment</SelectItem>
+                <SelectItem value="🏦">🏦 Banking</SelectItem>
+                <SelectItem value="📈">📈 Investment</SelectItem>
+                <SelectItem value="💵">💵 Budget</SelectItem>
+                <SelectItem value="🧾">🧾 Receipt</SelectItem>
+                
+                {/* Home & Family */}
+                <SelectItem value="🏠">🏠 Home</SelectItem>
+                <SelectItem value="👨‍👩‍👧‍👦">👨‍👩‍👧‍👦 Family</SelectItem>
+                <SelectItem value="🧹">🧹 Cleaning</SelectItem>
+                <SelectItem value="🍳">🍳 Cooking</SelectItem>
+                <SelectItem value="🛒">🛒 Shopping</SelectItem>
+                <SelectItem value="📦">📦 Package</SelectItem>
+                <SelectItem value="🔧">🔧 Maintenance</SelectItem>
+                <SelectItem value="🌱">🌱 Gardening</SelectItem>
+                
+                {/* Travel & Transportation */}
+                <SelectItem value="✈️">✈️ Travel</SelectItem>
+                <SelectItem value="🚗">🚗 Car</SelectItem>
+                <SelectItem value="🚌">🚌 Transit</SelectItem>
+                <SelectItem value="🚲">🚲 Bike</SelectItem>
+                <SelectItem value="🗺️">🗺️ Navigation</SelectItem>
+                <SelectItem value="🏨">🏨 Hotel</SelectItem>
+                <SelectItem value="🎒">🎒 Trip</SelectItem>
+                
+                {/* Entertainment & Hobbies */}
                 <SelectItem value="🎨">🎨 Creative</SelectItem>
+                <SelectItem value="🎮">🎮 Gaming</SelectItem>
+                <SelectItem value="📺">📺 Entertainment</SelectItem>
+                <SelectItem value="🎬">🎬 Movies</SelectItem>
+                <SelectItem value="📷">📷 Photography</SelectItem>
+                <SelectItem value="🎪">🎪 Events</SelectItem>
+                <SelectItem value="🎁">🎁 Gifts</SelectItem>
+                <SelectItem value="🎉">🎉 Celebration</SelectItem>
+                
+                {/* Nature & Weather */}
+                <SelectItem value="🌞">🌞 Sunny</SelectItem>
+                <SelectItem value="🌧️">🌧️ Rainy</SelectItem>
+                <SelectItem value="❄️">❄️ Cold</SelectItem>
+                <SelectItem value="🌿">🌿 Nature</SelectItem>
+                <SelectItem value="🌸">🌸 Seasonal</SelectItem>
+                <SelectItem value="🌊">🌊 Water</SelectItem>
+                <SelectItem value="🏔️">🏔️ Mountain</SelectItem>
+                
+                {/* Achievements & Goals */}
+                <SelectItem value="⭐">⭐ Achievement</SelectItem>
+                <SelectItem value="🏆">🏆 Trophy</SelectItem>
+                <SelectItem value="🎖️">🎖️ Medal</SelectItem>
+                <SelectItem value="🔥">🔥 Streak</SelectItem>
+                <SelectItem value="💯">💯 Perfect</SelectItem>
+                <SelectItem value="✅">✅ Complete</SelectItem>
+                <SelectItem value="🎊">🎊 Success</SelectItem>
+                
+                {/* Emotions & Mood */}
+                <SelectItem value="😊">😊 Happy</SelectItem>
+                <SelectItem value="😌">😌 Calm</SelectItem>
+                <SelectItem value="😔">😔 Sad</SelectItem>
+                <SelectItem value="😤">😤 Frustrated</SelectItem>
+                <SelectItem value="🤗">🤗 Grateful</SelectItem>
+                <SelectItem value="😴">😴 Tired</SelectItem>
+                <SelectItem value="⚡">⚡ Energetic</SelectItem>
+                
+                {/* Misc & Symbols */}
+                <SelectItem value="🔔">🔔 Notification</SelectItem>
+                <SelectItem value="⚠️">⚠️ Important</SelectItem>
+                <SelectItem value="❓">❓ Question</SelectItem>
+                <SelectItem value="💡">💡 Idea</SelectItem>
+                <SelectItem value="🔑">🔑 Key</SelectItem>
+                <SelectItem value="🎲">🎲 Random</SelectItem>
+                <SelectItem value="🌟">🌟 Special</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -60,20 +60,16 @@
   "scripts": {
     "build": "react-router build",
     "cf-typegen": "wrangler types",
-    
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply kimmy-app-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply kimmy-app-db --remote",
     "db:studio": "drizzle-kit studio",
     "db:check": "drizzle-kit check",
-    
     "db:reset:local": "rm -rf .wrangler/state/v3/d1/ && npm run db:migrate:local",
     "db:reset:remote": "echo '⚠️  Remote database reset not implemented for safety. Use Cloudflare dashboard or manual commands.'",
-    
     "db:status:local": "wrangler d1 execute kimmy-app-db --local --command='SELECT name FROM sqlite_master WHERE type=\"table\" ORDER BY name;'",
     "db:status:remote": "wrangler d1 execute kimmy-app-db --remote --command='SELECT name FROM sqlite_master WHERE type=\"table\" ORDER BY name;'",
     "db:info": "wrangler d1 info kimmy-app-db",
-    
     "deploy": "npm run build && wrangler deploy",
     "dev": "react-router dev",
     "dev:local": "wrangler dev --local",

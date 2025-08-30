@@ -291,48 +291,6 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
           title={`${currentMember.name}'s Records`}
           subtitle="Choose a category to view or add records"
         />
-
-        {/* Quick Access to Trackers */}
-        <div className="mb-6">
-          <Card className="bg-gradient-to-br from-blue-500/10 to-purple-600/10 border-blue-500/20">
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">⏱️</span>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-200">
-                      Activity Trackers
-                    </h3>
-                    <p className="text-slate-400">
-                      Monitor time, progress, and activities
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Link
-                    to={`/member/${currentMember.id}/trackers`}
-                    className="inline-block"
-                  >
-                    <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                      ⏱️ Member Trackers
-                    </Button>
-                  </Link>
-                  <Link to="/trackers" className="inline-block">
-                    <Button
-                      variant="outline"
-                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                    >
-                      📊 All Trackers
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         <div className="space-y-6">
           {currentCategories.length === 0 ? (
             <div className="text-center py-12">
@@ -509,6 +467,46 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
               </Card>
             </>
           )}
+        </div>
+        {/* Quick Access to Trackers */}
+        <div className="mb-6">
+          <Card className="bg-gradient-to-br from-blue-500/10 to-purple-600/10 border-blue-500/20">
+            <CardContent className="p-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <span className="text-2xl">⏱️</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-200">
+                      Activity Trackers
+                    </h3>
+                    <p className="text-slate-400">
+                      Monitor time, progress, and activities
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Link
+                    to={`/member/${currentMember.id}/trackers`}
+                    className="inline-block"
+                  >
+                    <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                      ⏱️ Member Trackers
+                    </Button>
+                  </Link>
+                  <Link to="/trackers" className="inline-block">
+                    <Button
+                      variant="outline"
+                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                    >
+                      📊 All Trackers
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </PageLayout>
     </RequireAuth>
