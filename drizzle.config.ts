@@ -4,9 +4,9 @@ export default defineConfig({
   schema: "./db/schema.ts",
   out: "./migrations",
   dialect: "sqlite",
-  driver: "d1",
+  driver: "d1-http",
   dbCredentials: {
     wranglerConfigPath: "wrangler.toml",
-    dbName: "kimmy-app-db",
+    databaseName: "kimmy-app-db",
   },
 });

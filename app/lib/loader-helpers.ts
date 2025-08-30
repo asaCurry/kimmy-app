@@ -12,6 +12,7 @@ export interface HouseholdData {
     name: string;
     email: string;
     role: string;
+    admin?: number;
     age?: number;
     relationshipToAdmin?: string;
   }>;
@@ -44,6 +45,7 @@ export async function loadHouseholdData(
         name: member.name,
         email: member.email,
         role: member.role || "member",
+        admin: member.admin || 0,
         age: member.age || undefined,
         relationshipToAdmin: member.relationshipToAdmin || undefined,
       })),

@@ -206,7 +206,7 @@ export default function InsightsPage() {
           )}
 
           {/* Debug info in development */}
-          {process.env.NODE_ENV === 'development' && (
+          {import.meta.env?.DEV && (
             <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 text-xs text-slate-400">
               <details>
                 <summary className="cursor-pointer hover:text-slate-300">

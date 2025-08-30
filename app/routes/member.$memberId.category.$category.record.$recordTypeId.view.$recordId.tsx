@@ -128,6 +128,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       hashedPassword: null,
       householdId: householdId,
       role: member.role,
+      admin: member.admin || 0,
       age: member.age || null,
       relationshipToAdmin: member.relationshipToAdmin || null,
       createdAt: null,

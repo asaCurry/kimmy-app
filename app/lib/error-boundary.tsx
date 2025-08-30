@@ -49,8 +49,8 @@ export class ProductionErrorBoundary extends React.Component<
   private checkIsDevelopment(): boolean {
     try {
       return (
-        typeof process !== 'undefined' && 
-        process.env?.NODE_ENV === 'development'
+        typeof globalThis !== 'undefined' && 
+        import.meta.env?.DEV === true
       ) || (
         typeof location !== 'undefined' && 
         (location.hostname === 'localhost' || location.hostname.includes('.dev'))

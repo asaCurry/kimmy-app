@@ -82,6 +82,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
           hashedPassword: null,
           householdId,
           role: "admin",
+          admin: 0,
           age: null,
           relationshipToAdmin: "self",
           createdAt: new Date().toISOString(),
@@ -116,6 +117,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
           hashedPassword: null,
           householdId,
           role: "member",
+          admin: 0,
           age: memberData.dateOfBirth
             ? calculateAge(memberData.dateOfBirth)
             : null,

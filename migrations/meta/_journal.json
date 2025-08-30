@@ -1,89 +1,12 @@
 {
-  "version": "5",
+  "version": "7",
   "dialect": "sqlite",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1754744350182,
-      "tag": "0000_marvelous_pretty_boy",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1754783724288,
-      "tag": "0001_nice_quasimodo",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1754923326532,
-      "tag": "0002_cold_the_anarchist",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1754938362535,
-      "tag": "0003_amusing_owl",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1754938362536,
-      "tag": "0004_add_member_id_to_records",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1755099476607,
-      "tag": "0005_flashy_wallflower",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1755102115945,
-      "tag": "0006_warm_cardiac",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1755109952376,
-      "tag": "0007_past_kylun",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "5",
-      "when": 1755522673033,
-      "tag": "0008_dry_boom_boom",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "5",
-      "when": 1755704058708,
-      "tag": "0009_good_luke_cage",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "5",
-      "when": 1756472987214,
-      "tag": "0010_tense_chameleon",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "5",
-      "when": 1756473428075,
-      "tag": "0011_lazy_millenium_guard",
+      "version": "6",
+      "when": 1756551927207,
+      "tag": "0000_foamy_dark_beast",
       "breakpoints": true
     }
   ]

@@ -24,6 +24,7 @@ export interface AuthSession {
   name: string;
   currentHouseholdId?: string; // Optional - users might not have a household yet
   role: "admin" | "member";
+  admin: number; // Database field for admin debug privileges (0 = false, 1 = true)
   expiresAt: Date;
 }
 
@@ -173,6 +174,7 @@ export const authApi = {
         name: user.name,
         currentHouseholdId: user.householdId || undefined,
         role: user.role as "admin" | "member",
+        admin: user.admin || 0,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
 
@@ -213,6 +215,7 @@ export const authApi = {
         name: user.name,
         currentHouseholdId: householdId,
         role: "admin",
+        admin: user.admin || 0,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
 
@@ -268,6 +271,7 @@ export const authApi = {
         name: user.name,
         currentHouseholdId: household.id,
         role: "member",
+        admin: user.admin || 0,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
 
@@ -300,6 +304,7 @@ export const authApi = {
         name: `${householdData.adminFirstName} ${householdData.adminLastName}`,
         currentHouseholdId: `household_${Date.now()}`, // Placeholder
         role: "admin",
+        admin: 0, // Default admin to 0 for placeholder
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
 
@@ -339,6 +344,7 @@ export const authApi = {
         name: user.name,
         currentHouseholdId: user.householdId,
         role: user.role as "admin" | "member",
+        admin: user.admin || 0,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Extend session
       };
     } catch (error) {

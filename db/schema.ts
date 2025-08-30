@@ -21,6 +21,7 @@ export const users = sqliteTable("users", {
     .notNull()
     .references(() => households.id),
   role: text("role").default("member"), // 'admin', 'member'
+  admin: integer("admin").default(0), // 0 = regular user, 1 = system admin (shows debug UI)
   age: integer("age"), // for children
   relationshipToAdmin: text("relationship_to_admin"), // 'self', 'spouse', 'child', etc.
   createdAt: text("created_at").default(sql`(datetime('now'))`),

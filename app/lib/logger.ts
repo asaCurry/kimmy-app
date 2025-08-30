@@ -28,7 +28,7 @@ class Logger {
     // Note: NODE_ENV might not be available in Workers, so we use multiple checks
     try {
       // Check for common development indicators
-      const isNodeDev = typeof process !== 'undefined' && process.env?.NODE_ENV === 'development';
+      const isNodeDev = import.meta.env?.DEV === true;
       const isLocalhost = typeof location !== 'undefined' && location.hostname === 'localhost';
       const isDevDomain = typeof location !== 'undefined' && location.hostname.includes('.dev');
       

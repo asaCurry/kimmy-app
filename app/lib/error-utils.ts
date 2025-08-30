@@ -34,7 +34,7 @@ export const logError = (
   };
 
   // In development, log to console
-  if (process.env.NODE_ENV === "development") {
+  if (import.meta.env?.DEV) {
     console.group(`🚨 ${level.toUpperCase()}: ${errorMessage}`);
     console.error("Context:", context);
     if (errorStack) {
@@ -45,7 +45,7 @@ export const logError = (
 
   // In production, you could send to an error tracking service
   // e.g., Sentry, LogRocket, etc.
-  if (process.env.NODE_ENV === "production") {
+  if (import.meta.env?.PROD) {
     // TODO: Implement production error tracking
     console.error("Production error:", logData);
   }
