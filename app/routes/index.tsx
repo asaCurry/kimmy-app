@@ -124,18 +124,25 @@ function MemberSelection({
               </p>
               <div className="flex flex-wrap gap-3 justify-center lg:justify-center xl:flex-nowrap">
                 <QuickActionButton
+                  to="/household-records"
+                  icon="📋"
+                  title="Manage Records"
+                  description="Manage all household records & types"
+                  color="emerald"
+                />
+                <QuickActionButton
                   to={`/member/${householdMembers[0]?.id || 1}`}
                   icon="📝"
-                  title="Records"
-                  description="View and manage household records"
-                  color="emerald"
+                  title="Member Records"
+                  description="View individual member records"
+                  color="blue"
                 />
                 <QuickActionButton
                   to="/trackers"
                   icon="⏱️"
-                  title="All Trackers"
+                  title="Activity Trackers"
                   description="View household activity trackers"
-                  color="blue"
+                  color="purple"
                 />
                 {canViewAnalytics && (
                   <QuickActionButton

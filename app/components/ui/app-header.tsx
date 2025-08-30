@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   BarChart3,
+  FileText,
 } from "lucide-react";
 import { Button } from "./button";
 import { useAuth } from "~/contexts/auth-context";
@@ -68,7 +69,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
                 Home
               </Button>
             </Link>
-
+            <Link to="/household-records">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-300 hover:text-white hover:bg-slate-800"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Records
+              </Button>
+            </Link>
             <Link to="/trackers">
               <Button
                 variant="ghost"
@@ -87,16 +97,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
               >
                 <Users className="mr-2 h-4 w-4" />
                 Manage
-              </Button>
-            </Link>
-            <Link to="/manage/add-member">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-slate-300 hover:text-white hover:bg-slate-800"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Member
               </Button>
             </Link>
           </nav>

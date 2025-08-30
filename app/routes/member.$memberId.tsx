@@ -373,12 +373,6 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                         {currentMember.name}
                       </CardDescription>
                     </div>
-                    <Button
-                      onClick={() => setShowCreateForm(true)}
-                      className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 px-4 py-2 text-white"
-                    >
-                      + Create Record Type
-                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -429,44 +423,6 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
               </Card>
             </>
           )}
-        </div>
-        {/* Quick Access to Records & Record Types */}
-        <div className="mb-6">
-          <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-600/10 border-emerald-500/20">
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">📝</span>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-200">
-                      Manage Records & Types
-                    </h3>
-                    <p className="text-slate-400">
-                      Create record types and organize categories
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => setShowCreateForm(!showCreateForm)}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white"
-                  >
-                    + Create Record Type
-                  </Button>
-                  <Link
-                    to={`/member/${currentMember.id}/manage-categories`}
-                    className="inline-block"
-                  >
-                    <Button variant="outline" className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10">
-                      Manage Categories
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Smaller Tracker Access */}

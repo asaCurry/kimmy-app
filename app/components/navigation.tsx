@@ -28,7 +28,7 @@ import {
 import type { Householdmember, RecordType } from "~/lib/utils";
 
 interface NavigationProps {
-  currentView: "home" | "categories" | "record-types" | "form";
+  currentView: "home" | "categories" | "record-types" | "form" | "household-records" | "records";
   member?: Householdmember;
   category?: string;
   recordType?: RecordType;
@@ -49,6 +49,10 @@ export const Navigation: React.FC<NavigationProps> = ({
       case "record-types":
         return <FolderOpen className="h-4 w-4" />;
       case "form":
+        return <FileText className="h-4 w-4" />;
+      case "household-records":
+        return <FileText className="h-4 w-4" />;
+      case "records":
         return <FileText className="h-4 w-4" />;
       default:
         return null;

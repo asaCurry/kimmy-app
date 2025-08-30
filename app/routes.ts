@@ -25,6 +25,9 @@ export default [
   // Insights route (analytics and patterns)
   route("insights", "routes/insights.tsx"),
 
+  // Household records management
+  route("household-records", "routes/household-records.tsx"),
+
   // API routes
   route(
     "api/invite-codes/regenerate",
@@ -34,6 +37,7 @@ export default [
 
   // Member record routes
   route("member/:memberId", "routes/member.$memberId.tsx"),
+  route("member/:memberId/records", "routes/member.$memberId.records.tsx"),
   route(
     "member/:memberId/category/:category",
     "routes/member.$memberId.category.$category.tsx"
