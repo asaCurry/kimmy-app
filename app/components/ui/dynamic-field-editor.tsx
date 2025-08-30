@@ -4,7 +4,7 @@ import { Input } from "./input";
 import { Label } from "./label";
 import { Switch } from "./switch";
 import { Textarea } from "./textarea";
-import { Eye, EyeOff, Copy, Trash2, GripVertical } from "lucide-react";
+import { Pencil, PencilOff, Copy, Trash2, GripVertical } from "lucide-react";
 import type { DynamicField } from "~/lib/types/dynamic-fields";
 import { getFieldTypeConfig } from "~/lib/utils/dynamic-fields/field-creation";
 import {
@@ -74,6 +74,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
         <div className="flex items-center space-x-3">
           {onReorder && (
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               className="cursor-grab hover:cursor-grabbing text-slate-400 hover:text-slate-300"
@@ -94,19 +95,21 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
 
         <div className="flex items-center space-x-2">
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
             className="text-slate-400 hover:text-slate-300"
           >
             {isExpanded ? (
-              <EyeOff className="w-4 h-4" />
+              <PencilOff className="w-4 h-4" />
             ) : (
-              <Eye className="w-4 h-4" />
+              <Pencil className="w-4 h-4" />
             )}
           </Button>
 
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             onClick={handleDuplicate}
@@ -116,6 +119,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
           </Button>
 
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             onClick={handleDelete}

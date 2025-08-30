@@ -217,25 +217,8 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
     const hasErrors = Object.keys(errors).length > 0;
     const hasTouchedFields = Object.keys(touchedFields).length > 0;
 
-    if (hasTouchedFields && hasErrors) {
-      toast.error(`${Object.keys(errors).length} field(s) have errors`, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    } else if (hasTouchedFields && isValid) {
-      toast.success("Form is valid and ready to submit!", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    }
+    // Form validation is handled visually through field styling
+    // No need for intrusive toast notifications during form interaction
   }, [errors, touchedFields, isValid]);
 
   const formStatus = getFormStatus();

@@ -22,8 +22,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return { error: "Required fields are missing" };
     }
 
-    // TODO: Implement actual member update in database
-    // For now, this is a placeholder that returns success
+    // Database member update implementation needed
 
     return { success: true, message: "Member updated successfully" };
   } catch (error) {

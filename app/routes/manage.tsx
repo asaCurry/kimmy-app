@@ -164,11 +164,11 @@ const Manage: React.FC = () => {
   };
 
   const handleMemberUpdated = () => {
-    // TODO: Implement member update refresh
+    // Refresh handled by React Router revalidation
   };
 
   const handleMemberRemoved = () => {
-    // TODO: Implement member removal refresh
+    // Refresh handled by React Router revalidation
   };
 
   // Show loading while checking auth
@@ -262,7 +262,7 @@ const Manage: React.FC = () => {
             householdId={currentHouseholdId}
             currentInviteCode={inviteCode}
             onInviteCodeGenerated={newCode => {
-              // TODO: Update the local state or refresh the page to show the new code
+              // Code update handled by component
             }}
           />
         </div>

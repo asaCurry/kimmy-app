@@ -1,5 +1,6 @@
 /**
- * Database-backed household data context for managing household members
+ * Household context for managing household members state.
+ * Note: Database operations should happen in route actions - this is for local state only.
  */
 
 import React, { createContext, useContext, useState, useCallback } from "react";
@@ -73,8 +74,6 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
       userData: { firstName: string; lastName: string; email: string }
     ): Promise<User> => {
       try {
-        // Note: In the new architecture, database operations should happen in route actions
-        // This is just for local state management
         const adminMember: User = {
           id: userId,
           name: `${userData.firstName} ${userData.lastName}`,
@@ -108,10 +107,8 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
   const addMember = useCallback(
     async (householdId: string, memberData: AddMemberData): Promise<User> => {
       try {
-        // Note: In the new architecture, database operations should happen in route actions
-        // This is just for local state management
         const newMember: User = {
-          id: Date.now(), // Temporary ID - should come from database
+          id: Date.now(),
           name: `${memberData.firstName} ${memberData.lastName}`,
           email: memberData.email || "",
           hashedPassword: null,
@@ -136,13 +133,11 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
   );
 
   const removeMember = useCallback(async (memberId: number): Promise<void> => {
-    // TODO: In the new architecture, this should be handled by route actions
     setHouseholdMembers(prev => prev.filter(m => m.id !== memberId));
   }, []);
 
   const updateMember = useCallback(
     async (memberId: number, updates: Partial<User>): Promise<void> => {
-      // TODO: In the new architecture, this should be handled by route actions
       setHouseholdMembers(prev =>
         prev.map(m => (m.id === memberId ? { ...m, ...updates } : m))
       );
@@ -161,8 +156,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
 
   const refreshMembers = useCallback(
     async (householdId: string): Promise<void> => {
-      // TODO: In the new architecture, this should be handled by route loaders
-      // For now, just do nothing - the loader will handle member fetching
+      // Member fetching handled by route loaders
     },
     []
   );

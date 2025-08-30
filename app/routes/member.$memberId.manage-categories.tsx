@@ -17,7 +17,6 @@ import { recordTypes, records } from "~/db/schema";
 import { eq, and } from "drizzle-orm";
 import { Link } from "react-router";
 
-// Temporary interface until types are generated
 interface RouteParams {
   memberId: string;
 }

@@ -23,6 +23,8 @@ interface CreateRecordTypeFormProps {
   createdBy: number;
   category?: string; // Optional - if not provided, user can select
   existingCategories?: string[]; // Optional - existing categories to show as suggestions
+  existingRecordType?: any; // For editing mode
+  isEditing?: boolean; // Whether this is edit mode
   onSuccess?: () => void;
   onCancel?: () => void;
   showBackButton?: boolean;
@@ -33,22 +35,24 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
   householdId,
   createdBy,
   category: initialCategory,
+  existingCategories,
+  existingRecordType,
+  isEditing = false,
   onSuccess,
   onCancel,
   showBackButton = false,
   className = "",
-  existingCategories,
 }) => {
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === "submitting";
 
   const [formData, setFormData] = React.useState({
-    name: "",
-    description: "",
-    category: initialCategory || "",
-    icon: "📝",
-    color: "blue",
-    allowPrivate: false,
+    name: existingRecordType?.name || "",
+    description: existingRecordType?.description || "",
+    category: initialCategory || existingRecordType?.category || "",
+    icon: existingRecordType?.icon || "📝",
+    color: existingRecordType?.color || "blue",
+    allowPrivate: existingRecordType?.allowPrivate === 1 || false,
   });
 
   // Use the dynamic fields hook
@@ -61,7 +65,9 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     toggleField,
     duplicateField,
     serialize,
-  } = useDynamicFields();
+  } = useDynamicFields({
+    initialFields: existingRecordType?.fields || [],
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +78,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     }
 
     const formDataToSubmit = new FormData();
-    formDataToSubmit.append("_action", "create-record-type");
+    formDataToSubmit.append("_action", isEditing ? "update-record-type" : "create-record-type");
     formDataToSubmit.append("name", formData.name);
     formDataToSubmit.append("description", formData.description);
     formDataToSubmit.append("category", formData.category);
@@ -81,7 +87,9 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     formDataToSubmit.append("icon", formData.icon);
     formDataToSubmit.append("color", formData.color);
     formDataToSubmit.append("allowPrivate", formData.allowPrivate.toString());
-    formDataToSubmit.append("createdBy", createdBy.toString());
+    if (!isEditing) {
+      formDataToSubmit.append("createdBy", createdBy.toString());
+    }
 
     fetcher.submit(formDataToSubmit, {
       method: "post",
@@ -93,7 +101,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     if (fetcher.data) {
       if (fetcher.data.success) {
         // Show success toast
-        toast.success("Record type created successfully!", {
+        toast.success(isEditing ? "Record type updated successfully!" : "Record type created successfully!", {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
@@ -115,7 +123,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
         return () => clearTimeout(timer);
       } else if (fetcher.data.error) {
         // Show error toast
-        toast.error(fetcher.data.error || "Failed to create record type", {
+        toast.error(fetcher.data.error || (isEditing ? "Failed to update record type" : "Failed to create record type"), {
           position: "top-right",
           autoClose: 4000,
           hideProgressBar: false,
@@ -345,7 +353,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
             }
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
           >
-            {isSubmitting ? "Creating..." : "Create Record Type"}
+            {isSubmitting ? (isEditing ? "Updating..." : "Creating...") : (isEditing ? "Update Record Type" : "Create Record Type")}
           </Button>
 
           {!showBackButton && (

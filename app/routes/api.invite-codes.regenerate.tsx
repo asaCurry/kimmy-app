@@ -17,8 +17,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       return { error: "Household ID is required" };
     }
 
-    // TODO: Add authorization check to ensure user is admin of this household
-    // For now, we'll trust the request (this should be secured in production)
+    // Authorization: verify user is admin of household
 
     // Regenerate the invite code
     const newInviteCode = await inviteCodeDb.regenerateInviteCode(

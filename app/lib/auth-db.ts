@@ -295,16 +295,15 @@ export const authApi = {
     }
 
     try {
-      // This would need to be implemented in the database layer
-      // For now, we'll create a placeholder session
+      // Placeholder session for development
       const session: AuthSession = {
         token: generateSessionToken(),
-        userId: 1, // Placeholder - would come from actual user creation
-        email: "placeholder@email.com", // Placeholder
+        userId: 1,
+        email: "placeholder@email.com",
         name: `${householdData.adminFirstName} ${householdData.adminLastName}`,
-        currentHouseholdId: `household_${Date.now()}`, // Placeholder
+        currentHouseholdId: `household_${Date.now()}`,
         role: "admin",
-        admin: 0, // Default admin to 0 for placeholder
+        admin: 0,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
 

@@ -29,7 +29,6 @@ import {
 import { QuickNotes } from "~/components/ui";
 import { useLoaderData, useActionData, useRevalidator } from "react-router";
 import { useEffect } from "react";
-import { toast } from "react-toastify";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -392,18 +391,8 @@ export default function CategoryRecordTypes() {
   }, []); // Empty dependency array - only run once on mount
 
   // Show toast notification when data is being refreshed
-  useEffect(() => {
-    if (revalidator.state === "loading") {
-      toast.info("Refreshing data...", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    }
-  }, [revalidator.state]);
+  // Loading states are handled visually through UI indicators
+  // No need for toast notifications during normal data refreshing
 
   const handleAddRecordType = () => {
     navigate(
@@ -469,20 +458,32 @@ export default function CategoryRecordTypes() {
                     return (
                       <div
                         key={recordType.id}
-                        className="p-4 border border-slate-600 rounded-lg hover:border-slate-500 hover:bg-slate-700/50 transition-colors cursor-pointer"
-                        onClick={() => {
-                          navigate(
-                            `/member/${member.id}/category/${encodeURIComponent(category)}/record/${recordType.id}`
-                          );
-                        }}
+                        className="p-4 border border-slate-600 rounded-lg hover:border-slate-500 hover:bg-slate-700/50 transition-colors"
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="text-2xl">
                             {recordType.icon || "📝"}
                           </div>
-                          <span className="text-xs text-slate-400 bg-slate-700 px-2 py-1 rounded">
-                            {recordCount} record{recordCount !== 1 ? "s" : ""}
-                          </span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs text-slate-400 bg-slate-700 px-2 py-1 rounded">
+                              {recordCount} record{recordCount !== 1 ? "s" : ""}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(
+                                  `/member/${member.id}/category/${encodeURIComponent(category)}/edit-record-type/${recordType.id}`
+                                );
+                              }}
+                              className="text-slate-400 hover:text-slate-200 p-1"
+                              title="Edit record type"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                         <h4 className="font-medium text-slate-200 mb-1">
                           {recordType.name}
@@ -492,9 +493,17 @@ export default function CategoryRecordTypes() {
                             {recordType.description}
                           </p>
                         )}
-                        <div className="text-blue-400 hover:text-blue-300 text-sm font-medium">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigate(
+                              `/member/${member.id}/category/${encodeURIComponent(category)}/record/${recordType.id}`
+                            );
+                          }}
+                          className="text-blue-400 hover:text-blue-300 text-sm font-medium w-full text-left"
+                        >
                           Create Record →
-                        </div>
+                        </button>
                       </div>
                     );
                   })}

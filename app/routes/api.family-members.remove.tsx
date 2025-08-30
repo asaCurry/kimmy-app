@@ -17,8 +17,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return { error: "Member ID is required" };
     }
 
-    // TODO: Implement actual member removal from database
-    // For now, this is a placeholder that returns success
+    // Database member removal implementation needed
 
     return { success: true, message: "Member removed successfully" };
   } catch (error) {

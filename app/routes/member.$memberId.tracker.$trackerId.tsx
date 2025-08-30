@@ -100,10 +100,7 @@ export default function TrackerDetailPage() {
   };
 
   const handleEditEntry = (entry: TrackerEntry) => {
-    // This could open a modal or navigate to an edit page
-    toast.info("Edit entry functionality coming soon!", {
-      position: "top-right",
-    });
+    // Entry editing functionality to be implemented
   };
 
   if (!tracker) {

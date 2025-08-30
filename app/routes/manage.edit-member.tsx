@@ -105,9 +105,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       return { error: "Household ID is required" };
     }
 
-    // TODO: Implement actual member update in database
-
-    // For now, return success (this will be implemented when the API is ready)
+    // Database member update implementation needed
     return {
       success: true,
       member: {

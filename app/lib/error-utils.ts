@@ -43,10 +43,8 @@ export const logError = (
     console.groupEnd();
   }
 
-  // In production, you could send to an error tracking service
-  // e.g., Sentry, LogRocket, etc.
+  // In production, send to error tracking service (Sentry, LogRocket, etc.)
   if (import.meta.env?.PROD) {
-    // TODO: Implement production error tracking
     console.error("Production error:", logData);
   }
 

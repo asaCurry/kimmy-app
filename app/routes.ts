@@ -64,4 +64,8 @@ export default [
     "member/:memberId/category/:category/create-record-type",
     "routes/member.$memberId.category.$category.create-record-type.tsx"
   ),
+  route(
+    "member/:memberId/category/:category/edit-record-type/:recordTypeId",
+    "routes/member.$memberId.category.$category.edit-record-type.$recordTypeId.tsx"
+  ),
 ] satisfies RouteConfig;
