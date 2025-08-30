@@ -5,6 +5,7 @@ import { Label } from "./label";
 import { Switch } from "./switch";
 import { Textarea } from "./textarea";
 import { Pencil, PencilOff, Copy, Trash2, GripVertical } from "lucide-react";
+import { createUniqueFieldName } from "~/lib/utils/field-name-generator";
 import type { DynamicField } from "~/lib/types/dynamic-fields";
 import { getFieldTypeConfig } from "~/lib/utils/dynamic-fields/field-creation";
 import {
@@ -21,6 +22,7 @@ interface DynamicFieldEditorProps {
   onReorder?: (fromIndex: number, toIndex: number) => void;
   index: number;
   totalFields: number;
+  existingFieldNames: string[];
 }
 
 export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
@@ -32,6 +34,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
   onReorder,
   index,
   totalFields,
+  existingFieldNames,
 }) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const fieldConfig = getFieldTypeConfig(field.type);
@@ -50,6 +53,11 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
   }
 
   const handleUpdate = (updates: Partial<DynamicField>) => {
+    // Auto-generate field name if label changes
+    if (updates.label && updates.label !== field.label) {
+      const newFieldName = createUniqueFieldName(updates.label, existingFieldNames.filter(name => name !== field.name));
+      updates.name = newFieldName;
+    }
     onUpdate(field.id, updates);
   };
 
@@ -134,7 +142,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
       {isExpanded && (
         <div className="p-4 space-y-4">
           {/* Basic Settings */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor={`label-${field.id}`}>Label</Label>
               <Input
@@ -144,17 +152,9 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                 placeholder="Field label"
                 className="bg-slate-700 border-slate-600 text-slate-200"
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor={`name-${field.id}`}>Name</Label>
-              <Input
-                id={`name-${field.id}`}
-                value={field.name}
-                onChange={e => handleUpdate({ name: e.target.value })}
-                placeholder="Field name"
-                className="bg-slate-700 border-slate-600 text-slate-200"
-              />
+              <p className="text-xs text-slate-500">
+                Field name: <code className="text-slate-400 bg-slate-800 px-1 py-0.5 rounded">{field.name}</code> (auto-generated)
+              </p>
             </div>
           </div>
 

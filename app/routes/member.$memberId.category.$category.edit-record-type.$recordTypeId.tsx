@@ -72,7 +72,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     // Load household data from URL params
-    const { householdId, currentMember } = await loadHouseholdDataWithMember(
+    const { householdId, currentMember, householdMembers } = await loadHouseholdDataWithMember(
       request,
       env,
       memberId
@@ -135,6 +135,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         fields: parsedFields,
       },
       existingCategories,
+      householdMembers,
     };
   } catch (error) {
     console.error("Edit record type route loader error:", error);
@@ -171,6 +172,7 @@ export async function action({
       const icon = formData.get("icon") as string;
       const color = formData.get("color") as string;
       const allowPrivate = formData.get("allowPrivate") === "true";
+      const visibleToMembers = formData.get("visibleToMembers") as string;
       const recordTypeId = parseInt(params.recordTypeId);
 
       if (!name || !category || !householdId || !recordTypeId) {
@@ -188,6 +190,7 @@ export async function action({
             icon,
             color,
             allowPrivate: allowPrivate ? 1 : 0,
+            visibleToMembers,
           })
           .where(
             and(
@@ -216,7 +219,7 @@ const EditRecordType: React.FC<Route.ComponentProps> = ({
   loaderData,
   params,
 }) => {
-  const { member, category, householdId, recordType } = loaderData;
+  const { member, category, householdId, recordType, householdMembers } = loaderData;
   const { session } = useAuth();
   const navigate = useNavigate();
 
@@ -270,6 +273,7 @@ const EditRecordType: React.FC<Route.ComponentProps> = ({
           category={category}
           existingCategories={loaderData.existingCategories}
           existingRecordType={recordType}
+          householdMembers={householdMembers}
           isEditing={true}
           onSuccess={() => {
             // Navigate back to the category page

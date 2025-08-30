@@ -1,0 +1,1 @@
+ALTER TABLE `record_types` ADD `visible_to_members` text;

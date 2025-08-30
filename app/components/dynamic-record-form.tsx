@@ -370,7 +370,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
                   type="text"
                   id="title"
                   defaultValue={recordType.name}
-                  className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm min-h-[44px]"
                   placeholder="Enter record title"
                 />
                 {watchedTitle && (
@@ -429,7 +429,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
                 {...register("datetime")}
                 type="datetime-local"
                 id="datetime"
-                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm min-h-[44px]"
               />
               <p className="text-xs text-slate-400">
                 Leave empty to use current date and time
@@ -452,7 +452,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
               <textarea
                 {...register("content")}
                 id="content"
-                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm"
                 placeholder="Enter record description"
                 rows={4}
               />
@@ -506,7 +506,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
                 {...register("tags")}
                 type="text"
                 id="tags"
-                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm min-h-[44px]"
                 placeholder="Enter tags separated by commas"
               />
               {errors.tags && (
@@ -536,14 +536,14 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
                 type="button"
                 variant="outline"
                 onClick={mode === "edit" && onCancel ? onCancel : onBack}
-                className="border-slate-600 text-slate-300 hover:bg-slate-800 w-full sm:w-auto"
+                className="border-slate-600 text-slate-300 hover:bg-slate-800 w-full sm:w-auto min-h-[44px] text-base sm:text-sm"
                 disabled={isSubmitting}
               >
                 {mode === "edit" ? "Cancel" : "Back"}
               </Button>
               <Button
                 type="submit"
-                className="bg-gradient-to-r from-blue-500 to-purple-700 hover:from-blue-600 hover:to-purple-700 w-full sm:w-auto"
+                className="bg-gradient-to-r from-blue-500 to-purple-700 hover:from-blue-600 hover:to-purple-700 w-full sm:w-auto min-h-[44px] text-base sm:text-sm"
                 disabled={
                   isSubmitting || (mode === "edit" ? !isDirty : !isValid)
                 }

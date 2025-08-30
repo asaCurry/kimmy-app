@@ -451,7 +451,7 @@ export default function CategoryRecordTypes() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {recordTypes.map(recordType => {
                     const recordCount =
                       recordsByType[recordType.id]?.length || 0;
@@ -476,7 +476,7 @@ export default function CategoryRecordTypes() {
                                   `/member/${member.id}/category/${encodeURIComponent(category)}/edit-record-type/${recordType.id}`
                                 );
                               }}
-                              className="text-slate-400 hover:text-slate-200 p-1"
+                              className="text-slate-400 hover:text-slate-200 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md hover:bg-slate-700/50"
                               title="Edit record type"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -500,7 +500,7 @@ export default function CategoryRecordTypes() {
                               `/member/${member.id}/category/${encodeURIComponent(category)}/record/${recordType.id}`
                             );
                           }}
-                          className="text-blue-400 hover:text-blue-300 text-sm font-medium w-full text-left"
+                          className="text-blue-400 hover:text-blue-300 text-base sm:text-sm font-medium w-full text-left py-2 px-3 rounded-md hover:bg-slate-700/30 min-h-[44px] flex items-center"
                         >
                           Create Record →
                         </button>

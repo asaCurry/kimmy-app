@@ -73,7 +73,7 @@ export const QuickActionButton: React.FC<QuickActionButtonProps> = ({
   return (
     <button
       onClick={() => navigate(to)}
-      className={`p-6 bg-gradient-to-br ${colors.from} ${colors.to} ${colors.hoverFrom} ${colors.hoverTo} rounded-lg border ${colors.border} transition-all hover:shadow-lg ${colors.shadow} text-left`}
+      className={`p-6 bg-gradient-to-br ${colors.from} ${colors.to} ${colors.hoverFrom} ${colors.hoverTo} rounded-lg border ${colors.border} transition-all hover:shadow-lg ${colors.shadow} text-left w-full sm:w-auto sm:min-w-[200px] xl:flex-1 xl:max-w-[280px]`}
     >
       <div className="text-2xl mb-3">{icon}</div>
       <h3 className="font-semibold text-white mb-2">{title}</h3>

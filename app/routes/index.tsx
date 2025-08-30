@@ -122,7 +122,14 @@ function MemberSelection({
               <p className="text-slate-400 mb-4">
                 Access household-wide features and management tools
               </p>
-              <div className="flex flex-wrap gap-3 justify-center">
+              <div className="flex flex-wrap gap-3 justify-center lg:justify-center xl:flex-nowrap">
+                <QuickActionButton
+                  to={`/member/${householdMembers[0]?.id || 1}`}
+                  icon="📝"
+                  title="Records"
+                  description="View and manage household records"
+                  color="emerald"
+                />
                 <QuickActionButton
                   to="/trackers"
                   icon="⏱️"
@@ -148,13 +155,6 @@ function MemberSelection({
                     color="orange"
                   />
                 )}
-                <QuickActionButton
-                  to="/manage"
-                  icon="⚙️"
-                  title="Manage Household"
-                  description="Add members, manage settings"
-                  color="emerald"
-                />
               </div>
             </div>
           </div>

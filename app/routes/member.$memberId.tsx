@@ -200,6 +200,7 @@ export async function action({
       const icon = formData.get("icon") as string;
       const color = formData.get("color") as string;
       const allowPrivate = formData.get("allowPrivate") === "true";
+      const visibleToMembers = formData.get("visibleToMembers") as string;
       const createdBy = parseInt(formData.get("createdBy") as string);
 
       if (!name || !category || !householdId || !createdBy) {
@@ -218,6 +219,7 @@ export async function action({
             icon,
             color,
             allowPrivate: allowPrivate ? 1 : 0,
+            visibleToMembers,
             createdBy,
           })
           .returning();
@@ -323,6 +325,7 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                     householdId={loaderData.householdId}
                     createdBy={currentMember.id}
                     existingCategories={currentCategories}
+                    householdMembers={loaderData.householdMembers}
                     onCancel={() => setShowCreateForm(false)}
                     className="space-y-4"
                   />
@@ -370,32 +373,16 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                         {currentMember.name}
                       </CardDescription>
                     </div>
-                    <div className="flex gap-2">
-                      <Link
-                        to={`/member/${currentMember.id}/trackers`}
-                        className="py-2 px-4 border-2 border-dashed border-slate-600 rounded-lg hover:border-slate-500 hover:bg-slate-800 transition-colors group"
-                      >
-                        <div className="text-center">
-                          <div className="text-slate-400 group-hover:text-slate-300">
-                            ⏱️ Trackers
-                          </div>
-                        </div>
-                      </Link>
-                      <Link
-                        to={`/member/${currentMember.id}/manage-categories`}
-                        className="py-2 px-4 border-2 border-dashed border-slate-600 rounded-lg hover:border-slate-500 hover:bg-slate-800 transition-colors group"
-                      >
-                        <div className="text-center">
-                          <div className="text-slate-400 group-hover:text-slate-300">
-                            ➕ Manage Categories
-                          </div>
-                        </div>
-                      </Link>
-                    </div>
+                    <Button
+                      onClick={() => setShowCreateForm(true)}
+                      className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 px-4 py-2 text-white"
+                    >
+                      + Create Record Type
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-3">
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div className="p-4 border border-slate-600 rounded-lg">
                       <h4 className="font-medium text-slate-200 mb-2">
                         Create Record Type
@@ -405,49 +392,23 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                       </p>
                       <Button
                         onClick={() => setShowCreateForm(true)}
-                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                        className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
                       >
                         + Create Record Type
                       </Button>
                     </div>
                     <div className="p-4 border border-slate-600 rounded-lg">
                       <h4 className="font-medium text-slate-200 mb-2">
-                        Manage Trackers
+                        Browse All Records
                       </h4>
                       <p className="text-sm text-slate-400 mb-3">
-                        Create and manage activity trackers
-                      </p>
-                      <div className="flex flex-col gap-2">
-                        <Link
-                          to={`/member/${currentMember.id}/trackers`}
-                          className="inline-block"
-                        >
-                          <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
-                            ⏱️ Member Trackers
-                          </Button>
-                        </Link>
-                        <Link to="/trackers" className="inline-block">
-                          <Button
-                            variant="outline"
-                            className="w-full border-slate-600 text-slate-300 hover:bg-slate-700"
-                          >
-                            📊 All Household Trackers
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                    <div className="p-4 border border-slate-600 rounded-lg">
-                      <h4 className="font-medium text-slate-200 mb-2">
-                        Manage Categories
-                      </h4>
-                      <p className="text-sm text-slate-400 mb-3">
-                        Organize and manage your record categories
+                        View and search all records across categories
                       </p>
                       <Link
-                        to={`/member/${currentMember.id}/manage-categories`}
+                        to={`/member/${currentMember.id}/records`}
                         className="inline-flex items-center px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors"
                       >
-                        Manage →
+                        View All Records →
                       </Link>
                     </div>
                   </div>
@@ -458,6 +419,7 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                         householdId={loaderData.householdId}
                         createdBy={currentMember.id}
                         existingCategories={currentCategories}
+                        householdMembers={loaderData.householdMembers}
                         onCancel={() => setShowCreateForm(false)}
                         className="space-y-4"
                       />
@@ -468,42 +430,65 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
             </>
           )}
         </div>
-        {/* Quick Access to Trackers */}
+        {/* Quick Access to Records & Record Types */}
         <div className="mb-6">
-          <Card className="bg-gradient-to-br from-blue-500/10 to-purple-600/10 border-blue-500/20">
+          <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-600/10 border-emerald-500/20">
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">⏱️</span>
+                  <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+                    <span className="text-2xl">📝</span>
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-slate-200">
-                      Activity Trackers
+                      Manage Records & Types
                     </h3>
                     <p className="text-slate-400">
-                      Monitor time, progress, and activities
+                      Create record types and organize categories
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <Button
+                    onClick={() => setShowCreateForm(!showCreateForm)}
+                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white"
+                  >
+                    + Create Record Type
+                  </Button>
                   <Link
-                    to={`/member/${currentMember.id}/trackers`}
+                    to={`/member/${currentMember.id}/manage-categories`}
                     className="inline-block"
                   >
-                    <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                      ⏱️ Member Trackers
-                    </Button>
-                  </Link>
-                  <Link to="/trackers" className="inline-block">
-                    <Button
-                      variant="outline"
-                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                    >
-                      📊 All Trackers
+                    <Button variant="outline" className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10">
+                      Manage Categories
                     </Button>
                   </Link>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Smaller Tracker Access */}
+        <div className="mb-6">
+          <Card className="border-slate-700">
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg">⏱️</span>
+                  <div>
+                    <h4 className="text-sm font-medium text-slate-200">Activity Trackers</h4>
+                    <p className="text-xs text-slate-500">Monitor time and activities</p>
+                  </div>
+                </div>
+                <Link
+                  to={`/member/${currentMember.id}/trackers`}
+                  className="inline-block"
+                >
+                  <Button size="sm" variant="outline" className="border-slate-600 text-slate-400 hover:bg-slate-700">
+                    View Trackers
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>

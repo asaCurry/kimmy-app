@@ -40,6 +40,7 @@ export const recordTypes = sqliteTable("record_types", {
   icon: text("icon"), // Icon name or emoji
   color: text("color"), // Color for the record type
   allowPrivate: integer("allow_private").default(0), // 0 = no privacy option, 1 = privacy option available
+  visibleToMembers: text("visible_to_members"), // JSON array of member IDs, null = all members
   createdBy: integer("created_by").references(() => users.id),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
 });

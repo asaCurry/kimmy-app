@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useHousehold } from "~/contexts/household-context"; 
+import type { User } from "~/db/schema";
 
 interface CreateRecordTypeFormProps {
   householdId: string;
@@ -29,6 +31,7 @@ interface CreateRecordTypeFormProps {
   onCancel?: () => void;
   showBackButton?: boolean;
   className?: string;
+  householdMembers?: User[]; // Optional - will use hook if not provided
 }
 
 export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
@@ -42,8 +45,14 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
   onCancel,
   showBackButton = false,
   className = "",
+  householdMembers: propHouseholdMembers,
 }) => {
   const fetcher = useFetcher();
+  
+  // Get household members from context if not provided as prop
+  const { householdMembers: contextHouseholdMembers } = useHousehold();
+  const householdMembers = propHouseholdMembers || contextHouseholdMembers;
+  
   const isSubmitting = fetcher.state === "submitting";
 
   const [formData, setFormData] = React.useState({
@@ -53,6 +62,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     icon: existingRecordType?.icon || "📝",
     color: existingRecordType?.color || "blue",
     allowPrivate: existingRecordType?.allowPrivate === 1 || false,
+    visibleToMembers: existingRecordType?.visibleToMembers ? JSON.parse(existingRecordType.visibleToMembers) : [] as number[], // member IDs, empty = all members
   });
 
   // Use the dynamic fields hook
@@ -87,6 +97,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     formDataToSubmit.append("icon", formData.icon);
     formDataToSubmit.append("color", formData.color);
     formDataToSubmit.append("allowPrivate", formData.allowPrivate.toString());
+    formDataToSubmit.append("visibleToMembers", JSON.stringify(formData.visibleToMembers));
     if (!isEditing) {
       formDataToSubmit.append("createdBy", createdBy.toString());
     }
@@ -145,7 +156,8 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     <div className={className}>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6 sm:space-y-4">
+          {/* Name field - always full width for better mobile UX */}
           <div className="space-y-2">
             <Label htmlFor="name" className="text-slate-200">
               Record Type Name *
@@ -155,11 +167,12 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g., Meal, Exercise, Medication"
-              className="bg-slate-700 border-slate-600 text-slate-200"
+              className="bg-slate-700 border-slate-600 text-slate-200 text-base sm:text-sm"
               required
             />
           </div>
 
+          {/* Category field - always full width for better mobile UX */}
           <div className="space-y-2">
             <Label htmlFor="category" className="text-slate-200">
               Category *
@@ -176,18 +189,24 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="icon" className="text-slate-200">
-              Icon
-            </Label>
+          {/* Icon and Color - side by side on larger screens */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="icon" className="text-slate-200">
+                Icon
+              </Label>
             <Select
               value={formData.icon}
               onValueChange={value => setFormData({ ...formData, icon: value })}
             >
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100">
-                <SelectValue placeholder="Choose an icon" />
+              <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100 text-base sm:text-sm min-h-[44px] sm:min-h-[36px]">
+                <SelectValue placeholder="Choose an icon">
+                  {formData.icon && (
+                    <span className="text-xl">{formData.icon}</span>
+                  )}
+                </SelectValue>
               </SelectTrigger>
-              <SelectContent className="bg-slate-700 border-slate-600 max-h-64 overflow-y-auto">
+              <SelectContent className="bg-slate-700 border-slate-600 max-h-64 overflow-y-auto text-base sm:text-sm">
                 {/* General & Documents */}
                 <SelectItem value="📝">📝 Note</SelectItem>
                 <SelectItem value="📋">📋 Checklist</SelectItem>
@@ -246,16 +265,16 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                 <SelectItem value="💻">💻 Computer</SelectItem>
                 <SelectItem value="📞">📞 Call</SelectItem>
                 <SelectItem value="📧">📧 Email</SelectItem>
-                <SelectItem value="📝">📝 Meeting</SelectItem>
+                <SelectItem value="🤝">🤝 Meeting</SelectItem>
                 <SelectItem value="🎯">🎯 Goal</SelectItem>
-                <SelectItem value="📊">📊 Analysis</SelectItem>
+                <SelectItem value="🔬">🔬 Analysis</SelectItem>
                 <SelectItem value="🔍">🔍 Research</SelectItem>
                 
                 {/* Finance & Money */}
                 <SelectItem value="💰">💰 Money</SelectItem>
                 <SelectItem value="💳">💳 Payment</SelectItem>
                 <SelectItem value="🏦">🏦 Banking</SelectItem>
-                <SelectItem value="📈">📈 Investment</SelectItem>
+                <SelectItem value="💹">💹 Investment</SelectItem>
                 <SelectItem value="💵">💵 Budget</SelectItem>
                 <SelectItem value="🧾">🧾 Receipt</SelectItem>
                 
@@ -312,7 +331,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                 <SelectItem value="😔">😔 Sad</SelectItem>
                 <SelectItem value="😤">😤 Frustrated</SelectItem>
                 <SelectItem value="🤗">🤗 Grateful</SelectItem>
-                <SelectItem value="😴">😴 Tired</SelectItem>
+                <SelectItem value="🥱">🥱 Tired</SelectItem>
                 <SelectItem value="⚡">⚡ Energetic</SelectItem>
                 
                 {/* Misc & Symbols */}
@@ -337,7 +356,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                 setFormData({ ...formData, color: value })
               }
             >
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100">
+              <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100 text-base sm:text-sm min-h-[44px] sm:min-h-[36px]">
                 <SelectValue placeholder="Choose a color" />
               </SelectTrigger>
               <SelectContent className="bg-slate-700 border-slate-600">
@@ -352,35 +371,127 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
               </SelectContent>
             </Select>
           </div>
+          </div>
+
+          {/* Description field - always full width */}
+          <div className="space-y-2">
+            <Label htmlFor="description" className="text-slate-200">
+              Description
+            </Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={e =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              placeholder="Describe what this record type is for..."
+              rows={3}
+              className="bg-slate-700 border-slate-600 text-slate-200 text-base sm:text-sm"
+            />
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="description" className="text-slate-200">
-            Description
-          </Label>
-          <Textarea
-            id="description"
-            value={formData.description}
-            onChange={e =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            placeholder="Describe what this record type is for..."
-            rows={3}
-            className="bg-slate-700 border-slate-600 text-slate-200"
-          />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="allowPrivate"
-            checked={formData.allowPrivate}
-            onCheckedChange={checked =>
-              setFormData({ ...formData, allowPrivate: checked })
-            }
-          />
-          <Label htmlFor="allowPrivate" className="text-slate-200">
-            Allow private records
-          </Label>
+        {/* Member Visibility Controls */}
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="allowPrivate"
+              checked={formData.allowPrivate}
+              onCheckedChange={checked =>
+                setFormData({ ...formData, allowPrivate: checked })
+              }
+            />
+            <Label htmlFor="allowPrivate" className="text-slate-200">
+              Allow private records
+            </Label>
+          </div>
+          
+          <div className="space-y-2">
+            <Label className="text-slate-200">
+              Available for members
+            </Label>
+            <p className="text-sm text-slate-400 mb-2">
+              Choose which household members can create records of this type. Select "All members" to make it available to everyone.
+            </p>
+            
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="all-members"
+                  checked={formData.visibleToMembers.length === 0}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setFormData({ ...formData, visibleToMembers: [] });
+                    } else {
+                      // When unchecking "all members", start with an empty selection
+                      setFormData({ ...formData, visibleToMembers: [] });
+                    }
+                  }}
+                  className="rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500"
+                />
+                <label htmlFor="all-members" className="text-sm text-slate-300">
+                  All household members
+                </label>
+              </div>
+              
+              <div className="text-xs text-slate-500 ml-6">
+                Or select specific members:
+              </div>
+              
+              {householdMembers && householdMembers.length > 0 && (
+                <div className="ml-6 space-y-2">
+                  {householdMembers.map((member) => (
+                    <div key={member.id} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`member-${member.id}`}
+                        checked={formData.visibleToMembers.length === 0 || formData.visibleToMembers.includes(member.id)}
+                        onChange={(e) => {
+                          if (formData.visibleToMembers.length === 0) {
+                            // If "all members" was selected, start with just this member
+                            if (e.target.checked) {
+                              setFormData({
+                                ...formData,
+                                visibleToMembers: [member.id]
+                              });
+                            }
+                          } else {
+                            // Normal toggle behavior for specific selection
+                            if (e.target.checked) {
+                              setFormData({
+                                ...formData,
+                                visibleToMembers: [...formData.visibleToMembers, member.id]
+                              });
+                            } else {
+                              const newMembers = formData.visibleToMembers.filter(id => id !== member.id);
+                              setFormData({
+                                ...formData,
+                                visibleToMembers: newMembers
+                              });
+                            }
+                          }
+                        }}
+                        className="rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500"
+                      />
+                      <label htmlFor={`member-${member.id}`} className="text-sm text-slate-300">
+                        {member.name}
+                        {member.role === 'admin' && (
+                          <span className="ml-1 text-xs text-blue-400">(Admin)</span>
+                        )}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {formData.visibleToMembers.length > 0 && (
+              <div className="text-xs text-slate-400 mt-2 p-2 bg-slate-800 rounded">
+                This record type will only appear for: {householdMembers?.filter(m => formData.visibleToMembers.includes(m.id)).map(m => m.name).join(', ')}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Dynamic Fields */}
@@ -451,6 +562,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                   onReorder={reorderField}
                   index={index}
                   totalFields={fields.length}
+                  existingFieldNames={fields.map(f => f.name)}
                 />
               ))}
             </div>
@@ -458,13 +570,13 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3 pt-4">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 pt-6">
           {showBackButton && (
             <Button
               type="button"
               variant="outline"
               onClick={handleCancel}
-              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+              className="border-slate-600 text-slate-300 hover:bg-slate-700 min-h-[44px] text-base sm:text-sm"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
@@ -476,7 +588,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
             disabled={
               isSubmitting || !formData.name.trim() || !formData.category.trim()
             }
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 min-h-[44px] text-base sm:text-sm flex-1 sm:flex-initial"
           >
             {isSubmitting ? (isEditing ? "Updating..." : "Creating...") : (isEditing ? "Update Record Type" : "Create Record Type")}
           </Button>
@@ -486,7 +598,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
               type="button"
               variant="outline"
               onClick={handleCancel}
-              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+              className="border-slate-600 text-slate-300 hover:bg-slate-700 min-h-[44px] text-base sm:text-sm"
             >
               Cancel
             </Button>
