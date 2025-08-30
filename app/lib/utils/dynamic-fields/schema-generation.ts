@@ -117,26 +117,28 @@ const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
       }
 
       // Validate that it's a finite number
-      numberSchema = numberSchema.refine(
+      const finalNumberSchema = numberSchema.refine(
         val => Number.isFinite(val),
         `${field.label} must be a valid number`
       );
 
-      return field.required ? numberSchema : numberSchema.optional();
+      return field.required ? finalNumberSchema : finalNumberSchema.optional();
 
     case "date":
       let dateSchema = z.string();
+      
+      if (field.required) {
+        dateSchema = dateSchema.min(1, `${field.label} is required`);
+      }
 
       // Validate date format
-      dateSchema = dateSchema.refine(val => {
+      const finalDateSchema = dateSchema.refine(val => {
         if (!val) return true; // Optional field
         const date = new Date(val);
         return !isNaN(date.getTime());
       }, `${field.label} must be a valid date`);
 
-      return field.required
-        ? dateSchema.min(1, `${field.label} is required`)
-        : dateSchema.optional();
+      return field.required ? finalDateSchema : finalDateSchema.optional();
 
     case "select":
       if (

@@ -7,6 +7,7 @@ import type {
   HouseholdPermissions,
   HouseholdMember,
   AuthSession,
+  Household,
 } from "./types";
 
 /**
@@ -169,35 +170,66 @@ export function canManageHouseholdMember(
  * Get the current user's role in a specific household
  */
 export function getUserRoleInHousehold(
-  session: AuthSession,
+  session: any, // Using any for now since we have mismatched session types
   householdId: string
 ): HouseholdRole | null {
-  const household = session.households.find(h => h.id === householdId);
-  return household?.role || null;
+  // Handle the actual session structure from auth-db.ts
+  if (session.currentHouseholdId === householdId && session.role) {
+    // Convert the simple role to HouseholdRole format
+    return session.role === "admin" ? "ADMIN" : "MEMBER";
+  }
+  
+  // Handle the types.ts session structure if it exists
+  if (session.households) {
+    const household = session.households.find((h: any) => h.id === householdId);
+    return household?.role || null;
+  }
+  
+  return null;
 }
 
 /**
  * Check if a user is a member of a specific household
  */
 export function isUserInHousehold(
-  session: AuthSession,
+  session: any, // Using any for now since we have mismatched session types
   householdId: string
 ): boolean {
-  return session.households.some(h => h.id === householdId);
+  // Handle the actual session structure from auth-db.ts
+  if (session.currentHouseholdId === householdId) {
+    return true;
+  }
+  
+  // Handle the types.ts session structure if it exists
+  if (session.households) {
+    return session.households.some((h: any) => h.id === householdId);
+  }
+  
+  return false;
 }
 
 /**
  * Get all households where user has admin privileges
  */
-export function getAdminHouseholds(session: AuthSession) {
-  return session.households.filter(h => h.role === "ADMIN");
+export function getAdminHouseholds(session: any) {
+  // Handle the actual session structure from auth-db.ts
+  if (session.currentHouseholdId && session.role === "admin") {
+    return [{ id: session.currentHouseholdId, role: "ADMIN" }];
+  }
+  
+  // Handle the types.ts session structure if it exists
+  if (session.households) {
+    return session.households.filter((h: any) => h.role === "ADMIN");
+  }
+  
+  return [];
 }
 
 /**
  * Validate if a user can create a new household
  * (could add limits here like max households per user)
  */
-export function canCreateHousehold(session: AuthSession): boolean {
+export function canCreateHousehold(session: any): boolean {
   // For now, any authenticated user can create a household
   // Could add limits like: max 3 households per user
   return true;
@@ -277,4 +309,79 @@ export function isValidRelationship(
   return ["spouse", "sibling", "parent", "grandparent", "other"].includes(
     relationship
   );
+}
+
+/**
+ * Analytics and Premium Feature Permissions
+ */
+
+/**
+ * Check if a household has access to analytics features (paid feature)
+ */
+export function hasAnalyticsAccess(household: { hasAnalyticsAccess?: number | null }): boolean {
+  // Default to true for development/testing while building UI
+  // In production, this will check the actual subscription status
+  if (household.hasAnalyticsAccess === null || household.hasAnalyticsAccess === undefined) {
+    return true; // Fallback to true while building UI
+  }
+  
+  return Boolean(household.hasAnalyticsAccess);
+}
+
+/**
+ * Check if a user can access analytics for a specific household
+ * Combines household subscription status with user role permissions
+ */
+export function canAccessAnalytics(
+  household: { hasAnalyticsAccess?: number | null },
+  userRole: HouseholdRole
+): { canAccess: boolean; reason?: string } {
+  // First check if user role has permission to view analytics
+  if (userRole === "CHILD") {
+    return {
+      canAccess: false,
+      reason: "Children cannot access analytics features"
+    };
+  }
+
+  // Check if household has analytics access (subscription)
+  const hasAccess = hasAnalyticsAccess(household);
+  if (!hasAccess) {
+    return {
+      canAccess: false,
+      reason: "Analytics is a premium feature. Upgrade your plan to access insights and patterns."
+    };
+  }
+
+  return { canAccess: true };
+}
+
+/**
+ * Get premium features available to household
+ */
+export interface PremiumFeatures {
+  analytics: boolean;
+  // Add other premium features here in the future
+  // aiRecommendations: boolean;
+  // exportData: boolean;
+  // customReports: boolean;
+}
+
+export function getPremiumFeatures(household: { hasAnalyticsAccess?: number | null }): PremiumFeatures {
+  const analyticsAccess = hasAnalyticsAccess(household);
+  
+  return {
+    analytics: analyticsAccess,
+    // Future premium features can be added here
+  };
+}
+
+/**
+ * Check if any premium features require upgrade
+ */
+export function needsUpgradeForFeatures(household: { hasAnalyticsAccess?: number | null }): boolean {
+  const features = getPremiumFeatures(household);
+  
+  // If any premium feature is disabled, user might benefit from upgrade
+  return !features.analytics;
 }

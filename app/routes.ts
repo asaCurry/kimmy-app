@@ -22,6 +22,9 @@ export default [
   // Trackers route (general household view)
   route("trackers", "routes/trackers.tsx"),
 
+  // Insights route (analytics and patterns)
+  route("insights", "routes/insights.tsx"),
+
   // API routes
   route(
     "api/invite-codes/regenerate",

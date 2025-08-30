@@ -7,20 +7,23 @@ import { MemberCard } from "~/components/member-card";
 import type { Householdmember } from "~/lib/utils";
 import { QuickActionButton } from "~/components/ui/quick-action-button";
 import { withDatabaseAndSession } from "~/lib/db-utils";
-import { users } from "~/db/schema";
+import { users, households } from "~/db/schema";
 import { eq } from "drizzle-orm";
+import { hasAnalyticsAccess, getUserRoleInHousehold } from "~/lib/permissions";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
-    // Load household members directly from database
-    const members = await db
-      .select()
-      .from(users)
-      .where(eq(users.householdId, session.currentHouseholdId));
+    // Load household data and members
+    const [householdData, members] = await Promise.all([
+      db.select().from(households).where(eq(households.id, session.currentHouseholdId)).limit(1),
+      db.select().from(users).where(eq(users.householdId, session.currentHouseholdId))
+    ]);
 
     if (!members.length) {
       throw redirect("/welcome");
     }
+
+    const household = householdData[0];
 
     const householdMembers = members.map(member => ({
       id: member.id,
@@ -29,18 +32,28 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       role: (member.role as "admin" | "member") || "member",
       age: member.age || undefined,
       relationshipToAdmin: member.relationshipToAdmin || undefined,
-    }));
+    })) as Array<Householdmember>;
 
     // If only one member, redirect directly to their dashboard
     if (householdMembers.length === 1) {
       throw redirect(`/member/${householdMembers[0].id}`);
     }
 
+    // Check analytics access for UI display
+    const userRole = getUserRoleInHousehold(session, session.currentHouseholdId);
+    const canViewAnalytics = hasAnalyticsAccess(household);
+
     // If multiple members, return them for selection
     return {
       hasValidSession: true,
       householdMembers,
       householdId: session.currentHouseholdId,
+      household: {
+        id: household?.id || session.currentHouseholdId,
+        name: household?.name || "Your Household",
+        hasAnalyticsAccess: canViewAnalytics,
+      },
+      canViewAnalytics,
     };
   });
 }
@@ -49,15 +62,17 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 function MemberSelection({
   householdMembers,
   householdId,
+  canViewAnalytics = false,
+  household,
 }: {
-  householdMembers: Array<{
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    age?: number;
-  }>;
+  householdMembers: Array<Householdmember>;
   householdId: string;
+  canViewAnalytics?: boolean;
+  household?: {
+    id: string;
+    name: string;
+    hasAnalyticsAccess: boolean;
+  };
 }) {
   const navigate = useNavigate();
 
@@ -115,6 +130,24 @@ function MemberSelection({
                   description="View household activity trackers"
                   color="blue"
                 />
+                {canViewAnalytics && (
+                  <QuickActionButton
+                    to="/insights"
+                    icon="📊"
+                    title="Insights"
+                    description="View analytics and patterns"
+                    color="purple"
+                  />
+                )}
+                {!canViewAnalytics && (
+                  <QuickActionButton
+                    to="/insights"
+                    icon="📊"
+                    title="Insights"
+                    description="Analytics (Premium)"
+                    color="orange"
+                  />
+                )}
                 <QuickActionButton
                   to="/manage"
                   icon="⚙️"
@@ -144,6 +177,8 @@ export default function Index() {
       <MemberSelection
         householdMembers={loaderData.householdMembers}
         householdId={loaderData.householdId}
+        canViewAnalytics={loaderData.canViewAnalytics}
+        household={loaderData.household}
       />
     </RequireAuth>
   );
