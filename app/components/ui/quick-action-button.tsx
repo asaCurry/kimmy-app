@@ -18,6 +18,19 @@ export const QuickActionButton: React.FC<QuickActionButtonProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  const handleClick = () => {
+    navigate(to);
+    // On mobile, scroll to top smoothly to show the form
+    if (window.innerWidth < 768) { // md breakpoint
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }, 100); // Small delay to allow navigation to complete
+    }
+  };
+
   // Create a mapping of color variants to ensure Tailwind includes them
   const colorVariants = {
     blue: {
@@ -72,7 +85,7 @@ export const QuickActionButton: React.FC<QuickActionButtonProps> = ({
 
   return (
     <button
-      onClick={() => navigate(to)}
+      onClick={handleClick}
       className={`p-6 bg-gradient-to-br ${colors.from} ${colors.to} ${colors.hoverFrom} ${colors.hoverTo} rounded-lg border ${colors.border} transition-all hover:shadow-lg ${colors.shadow} text-left w-full sm:w-auto sm:min-w-[200px] xl:flex-1 xl:max-w-[280px]`}
     >
       <div className="text-2xl mb-3">{icon}</div>

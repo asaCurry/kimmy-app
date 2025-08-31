@@ -53,19 +53,21 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   // Handle click outside to close dropdown
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        !inputRef.current?.contains(event.target as Node)
+        !dropdownRef.current.contains(target)
       ) {
         setIsOpen(false);
         setSearchQuery("");
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isOpen]);
 
   // Handle escape key to close dropdown
   React.useEffect(() => {
@@ -102,13 +104,21 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     }
   };
 
+  const handleInputClick = () => {
+    setIsOpen(true);
+  };
+
   const handleInputBlur = () => {
     // Delay closing to allow for clicks on suggestions
     setTimeout(() => {
-      setIsOpen(false);
-      setSearchQuery("");
-      onBlur?.();
-    }, 150);
+      // Only close if we're still supposed to be closed
+      // (this gets overridden by clicks within the component)
+      if (!inputRef.current || document.activeElement !== inputRef.current) {
+        setIsOpen(false);
+        setSearchQuery("");
+        onBlur?.();
+      }
+    }, 200);
   };
 
   const handleSelectCategory = (categoryName: string) => {
@@ -163,6 +173,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
           value={inputValue}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
+          onClick={handleInputClick}
           onBlur={handleInputBlur}
           placeholder={placeholder}
           disabled={disabled}
@@ -178,6 +189,9 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
           <button
             type="button"
             onClick={handleClear}
+            onMouseDown={(e) => {
+              e.preventDefault(); // Prevent blur
+            }}
             className="absolute right-8 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 transition-colors"
             disabled={disabled}
           >
@@ -188,7 +202,14 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
         {/* Dropdown arrow */}
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={(e) => {
+            e.preventDefault();
+            setIsOpen(!isOpen);
+            inputRef.current?.focus();
+          }}
+          onMouseDown={(e) => {
+            e.preventDefault(); // Prevent blur
+          }}
           className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 transition-colors"
           disabled={disabled}
         >
@@ -232,6 +253,9 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
                     key={category.name}
                     type="button"
                     onClick={() => handleSelectCategory(category.name)}
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // Prevent blur
+                    }}
                     className={cn(
                       "w-full px-3 py-2 text-left text-sm text-slate-100 hover:bg-slate-700 focus:bg-slate-700 focus:outline-none transition-colors",
                       category.name === value &&
@@ -257,6 +281,9 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
                   <button
                     type="button"
                     onClick={handleCreateCategory}
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // Prevent blur
+                    }}
                     disabled={isCreating}
                     className="w-full px-3 py-2 text-left text-sm text-blue-400 hover:bg-slate-700 focus:bg-slate-700 focus:outline-none transition-colors border-t border-slate-600"
                   >

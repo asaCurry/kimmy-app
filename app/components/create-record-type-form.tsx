@@ -424,13 +424,13 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                     if (e.target.checked) {
                       setFormData({ ...formData, visibleToMembers: [] });
                     } else {
-                      // When unchecking "all members", start with an empty selection
-                      setFormData({ ...formData, visibleToMembers: [] });
+                      // When unchecking "all members", select current user only as fallback
+                      setFormData({ ...formData, visibleToMembers: [createdBy] });
                     }
                   }}
-                  className="rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500 focus:ring-2 cursor-pointer"
                 />
-                <label htmlFor="all-members" className="text-sm text-slate-300">
+                <label htmlFor="all-members" className="text-sm text-slate-300 cursor-pointer">
                   All household members
                 </label>
               </div>
@@ -449,20 +449,35 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                         checked={formData.visibleToMembers.length === 0 || formData.visibleToMembers.includes(member.id)}
                         onChange={(e) => {
                           if (formData.visibleToMembers.length === 0) {
-                            // If "all members" was selected, start with just this member
-                            if (e.target.checked) {
+                            // If "all members" was selected, switching to specific selection
+                            if (!e.target.checked) {
+                              // User is unchecking a member when all were selected
+                              // Select all other members except this one
+                              const allOtherMembers = householdMembers
+                                .filter(m => m.id !== member.id)
+                                .map(m => m.id);
                               setFormData({
                                 ...formData,
-                                visibleToMembers: [member.id]
+                                visibleToMembers: allOtherMembers
                               });
                             }
+                            // If checking when all selected, do nothing (already selected)
                           } else {
                             // Normal toggle behavior for specific selection
                             if (e.target.checked) {
-                              setFormData({
-                                ...formData,
-                                visibleToMembers: [...formData.visibleToMembers, member.id]
-                              });
+                              const newMembers = [...formData.visibleToMembers, member.id];
+                              // If all members are now selected, switch to "all members" mode
+                              if (newMembers.length === householdMembers.length) {
+                                setFormData({
+                                  ...formData,
+                                  visibleToMembers: []
+                                });
+                              } else {
+                                setFormData({
+                                  ...formData,
+                                  visibleToMembers: newMembers
+                                });
+                              }
                             } else {
                               const newMembers = formData.visibleToMembers.filter(id => id !== member.id);
                               setFormData({
@@ -472,9 +487,9 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                             }
                           }
                         }}
-                        className="rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500"
+                        className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500 focus:ring-2 cursor-pointer"
                       />
-                      <label htmlFor={`member-${member.id}`} className="text-sm text-slate-300">
+                      <label htmlFor={`member-${member.id}`} className="text-sm text-slate-300 cursor-pointer">
                         {member.name}
                         {member.role === 'admin' && (
                           <span className="ml-1 text-xs text-blue-400">(Admin)</span>
@@ -498,7 +513,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-slate-200">Fields</h3>
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
                 variant="outline"
