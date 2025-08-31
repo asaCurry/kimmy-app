@@ -20,10 +20,13 @@ import type {
   UpdateTrackerInput,
   Tracker,
 } from "~/lib/schemas";
+import type { User } from "~/db/schema";
 import { toast } from "react-toastify";
+import { useAuth } from "~/contexts/auth-context";
 
 interface CreateTrackerFormProps {
   tracker?: Tracker;
+  householdMembers?: User[];
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -69,12 +72,26 @@ const ICONS = ["⏱️", "🏃‍♂️", "📚", "💪", "🧘‍♀️", "🎯
 
 export function CreateTrackerForm({
   tracker,
+  householdMembers = [],
   onSuccess,
   onCancel,
 }: CreateTrackerFormProps) {
   const fetcher = useFetcher();
+  const { session } = useAuth();
   const [customUnit, setCustomUnit] = React.useState(tracker?.unit || "");
   const [customIcon, setCustomIcon] = React.useState(tracker?.icon || "⏱️");
+  
+  // Member visibility state
+  const [visibleToMembers, setVisibleToMembers] = React.useState<number[]>(() => {
+    if (tracker?.visibleToMembers) {
+      try {
+        return JSON.parse(tracker.visibleToMembers);
+      } catch {
+        return [];
+      }
+    }
+    return []; // Default to all members
+  });
 
   const {
     register,
@@ -139,6 +156,7 @@ export function CreateTrackerForm({
     formData.append("unit", selectedUnit === "custom" ? customUnit : data.unit);
     formData.append("color", data.color);
     formData.append("icon", customIcon);
+    formData.append("visibleToMembers", JSON.stringify(visibleToMembers));
 
     fetcher.submit(formData, { method: "post" });
   };
@@ -236,6 +254,91 @@ export function CreateTrackerForm({
             {errors.unit && (
               <p className="text-sm text-destructive">{errors.unit.message}</p>
             )}
+          </div>
+
+          {/* Member Visibility Section */}
+          <div className="space-y-2">
+            <Label className="text-slate-200">
+              Available for members
+            </Label>
+            <p className="text-sm text-slate-400 mb-2">
+              Choose which household members can use this tracker. Select "All members" to make it available to everyone.
+            </p>
+            
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="all-members-tracker"
+                  checked={visibleToMembers.length === 0}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setVisibleToMembers([]);
+                    } else {
+                      // When unchecking "all members", select current user only as fallback
+                      setVisibleToMembers(session?.userId ? [session.userId] : []);
+                    }
+                  }}
+                  className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 cursor-pointer transition-all duration-200"
+                />
+                <label htmlFor="all-members-tracker" className="text-sm text-slate-300 cursor-pointer">
+                  All household members
+                </label>
+              </div>
+              
+              <div className="text-xs text-slate-500 ml-6">
+                Or select specific members:
+              </div>
+              
+              {householdMembers && householdMembers.length > 0 && (
+                <div className="ml-6 space-y-2">
+                  {householdMembers.map((member) => (
+                    <div key={member.id} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`tracker-member-${member.id}`}
+                        checked={visibleToMembers.length === 0 || visibleToMembers.includes(member.id)}
+                        onChange={(e) => {
+                          if (visibleToMembers.length === 0) {
+                            // If "all members" was selected, switching to specific selection
+                            if (!e.target.checked) {
+                              // User is unchecking a member when all were selected
+                              // Select all other members except this one
+                              const allOtherMembers = householdMembers
+                                .filter(m => m.id !== member.id)
+                                .map(m => m.id);
+                              setVisibleToMembers(allOtherMembers);
+                            }
+                            // If checking when all selected, do nothing (already selected)
+                          } else {
+                            // Normal toggle behavior for specific selection
+                            if (e.target.checked) {
+                              const newMembers = [...visibleToMembers, member.id];
+                              // If all members are now selected, switch to "all members" mode
+                              if (newMembers.length === householdMembers.length) {
+                                setVisibleToMembers([]);
+                              } else {
+                                setVisibleToMembers(newMembers);
+                              }
+                            } else {
+                              const newMembers = visibleToMembers.filter(id => id !== member.id);
+                              setVisibleToMembers(newMembers);
+                            }
+                          }
+                        }}
+                        className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 cursor-pointer transition-all duration-200"
+                      />
+                      <label htmlFor={`tracker-member-${member.id}`} className="text-sm text-slate-300 cursor-pointer">
+                        {member.name}
+                        {member.role === 'admin' && (
+                          <span className="ml-1 text-xs text-blue-400">(Admin)</span>
+                        )}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">

@@ -165,7 +165,7 @@ const Login: React.FC<Route.ComponentProps> = () => {
             <CardTitle className="text-xl text-slate-100">Sign In</CardTitle>
           </CardHeader>
           <CardContent>
-            <form method="post" onSubmit={handleSubmit} className="space-y-6">
+            <form method="post" onSubmit={handleSubmit} className="space-y-6" autoComplete="on">
               {(loginError || actionData?.error) && (
                 <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
@@ -186,7 +186,10 @@ const Login: React.FC<Route.ComponentProps> = () => {
                   value={formData.email}
                   onChange={e => handleInputChange("email", e.target.value)}
                   placeholder="Enter your email address"
-                  autoComplete="email"
+                  autoComplete="username"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck="false"
                 />
                 {errors.email && <FormError>{errors.email}</FormError>}
               </FormField>

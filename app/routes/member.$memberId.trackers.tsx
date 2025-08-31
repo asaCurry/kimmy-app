@@ -28,13 +28,14 @@ import type { Tracker, TrackerEntry } from "~/db/schema";
 export async function loader({ request, context }: Route.LoaderArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
     const trackerDB = new TrackerDB(db);
-    const [trackers, activeEntries, trackerEntries] = await Promise.all([
-      trackerDB.getTrackers(session.currentHouseholdId),
+    const [trackers, activeEntries, trackerEntries, householdMembers] = await Promise.all([
+      trackerDB.getTrackers(session.currentHouseholdId, session.userId),
       trackerDB.getActiveTimeTracking(session.currentHouseholdId),
       trackerDB.getAllTrackerEntries(session.currentHouseholdId),
+      trackerDB.getHouseholdMembers(session.currentHouseholdId),
     ]);
 
-    return { success: true, trackers, activeEntries, trackerEntries };
+    return { success: true, trackers, activeEntries, trackerEntries, householdMembers };
   });
 }
 
@@ -121,7 +122,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function TrackersPage() {
-  const { trackers, activeEntries, trackerEntries } =
+  const { trackers, activeEntries, trackerEntries, householdMembers } =
     useLoaderData<typeof loader>();
   const { session } = useAuth();
   const fetcher = useFetcher();
@@ -255,6 +256,7 @@ export default function TrackersPage() {
             <div className="flex justify-center">
               <CreateTrackerForm
                 tracker={editingTracker || undefined}
+                householdMembers={householdMembers}
                 onSuccess={handleFormSuccess}
                 onCancel={handleFormCancel}
               />

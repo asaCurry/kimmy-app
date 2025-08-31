@@ -63,12 +63,15 @@ export async function action({ request, context }: ActionFunctionArgs) {
             icon: (formData.get("icon") as string) || "⏱️",
           };
 
+          const visibleToMembers = formData.get("visibleToMembers") as string;
+
           const validatedData = createTrackerSchema.parse(data);
 
           const tracker = await trackerDB.createTracker(
             validatedData,
             session.currentHouseholdId,
-            session.userId
+            session.userId,
+            visibleToMembers
           );
 
           return { success: true, tracker };
@@ -96,11 +99,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
           icon: (formData.get("icon") as string) || undefined,
         };
 
+        const visibleToMembers = formData.get("visibleToMembers") as string;
+
         const validatedData = updateTrackerSchema.parse(data);
         const tracker = await trackerDB.updateTracker(
           id,
           validatedData,
-          session.currentHouseholdId
+          session.currentHouseholdId,
+          visibleToMembers
         );
 
         if (!tracker) {

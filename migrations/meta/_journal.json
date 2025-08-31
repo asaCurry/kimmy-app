@@ -15,6 +15,13 @@
       "when": 1756559100238,
       "tag": "0001_new_mister_sinister",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1756645471597,
+      "tag": "0002_fixed_hawkeye",
+      "breakpoints": true
     }
   ]
 }

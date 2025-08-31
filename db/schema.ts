@@ -99,6 +99,7 @@ export const trackers = sqliteTable("trackers", {
   householdId: text("household_id")
     .notNull()
     .references(() => households.id),
+  visibleToMembers: text("visible_to_members"), // JSON array of member IDs, null = all members
   createdBy: integer("created_by").references(() => users.id),
   isActive: integer("is_active").default(1), // 0 = inactive, 1 = active
   createdAt: text("created_at").default(sql`(datetime('now'))`),

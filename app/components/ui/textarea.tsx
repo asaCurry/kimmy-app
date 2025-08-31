@@ -1,17 +1,22 @@
 import * as React from "react";
-import { cn } from "~/lib/utils";
+import { UnifiedTextarea } from "./form-field-unified";
 
+// Legacy Textarea component - now uses UnifiedTextarea under the hood
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
-  React.TextareaHTMLAttributes<HTMLTextAreaElement>
->(({ className, ...props }, ref) => {
+  React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+    onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  }
+>(({ className, onChange, ...props }, ref) => {
+  const handleChange = React.useCallback((value: string) => {
+    onChange?.({ target: { value } } as React.ChangeEvent<HTMLTextAreaElement>);
+  }, [onChange]);
+
   return (
-    <textarea
-      className={cn(
-        "flex min-h-[80px] w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50 resize-none",
-        className
-      )}
+    <UnifiedTextarea
       ref={ref}
+      className={className}
+      onChange={handleChange}
       {...props}
     />
   );
@@ -19,3 +24,6 @@ const Textarea = React.forwardRef<
 Textarea.displayName = "Textarea";
 
 export { Textarea };
+
+// Re-export unified components for new usage
+export { UnifiedTextarea } from "./form-field-unified";

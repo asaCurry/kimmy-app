@@ -20,7 +20,8 @@ export class TrackerDB {
   async createTracker(
     data: CreateTrackerInput,
     householdId: string,
-    createdBy: number
+    createdBy: number,
+    visibleToMembers?: string
   ): Promise<Tracker> {
     console.log("TrackerDB.createTracker called with:", {
       data,
@@ -47,6 +48,7 @@ export class TrackerDB {
           ...data,
           householdId,
           createdBy,
+          visibleToMembers,
         })
         .returning();
 
@@ -63,12 +65,38 @@ export class TrackerDB {
     }
   }
 
-  async getTrackers(householdId: string): Promise<Tracker[]> {
-    return await this.db
+  async getTrackers(householdId: string, userId?: number): Promise<Tracker[]> {
+    const allTrackers = await this.db
       .select()
       .from(trackers)
       .where(eq(trackers.householdId, householdId))
       .orderBy(desc(trackers.createdAt));
+
+    // If no userId provided, return all trackers (admin view)
+    if (!userId) {
+      return allTrackers;
+    }
+
+    // Filter trackers based on member visibility
+    return allTrackers.filter(tracker => {
+      // If visibleToMembers is null or empty, tracker is visible to all members
+      if (!tracker.visibleToMembers) {
+        return true;
+      }
+
+      try {
+        const visibleMemberIds: number[] = JSON.parse(tracker.visibleToMembers);
+        // If array is empty, visible to all members
+        if (visibleMemberIds.length === 0) {
+          return true;
+        }
+        // Check if current user is in the visible members list
+        return visibleMemberIds.includes(userId);
+      } catch {
+        // If JSON parsing fails, assume visible to all members
+        return true;
+      }
+    });
   }
 
   async getTracker(id: number, householdId: string): Promise<Tracker | null> {
@@ -83,14 +111,22 @@ export class TrackerDB {
   async updateTracker(
     id: number,
     data: UpdateTrackerInput,
-    householdId: string
+    householdId: string,
+    visibleToMembers?: string
   ): Promise<Tracker | null> {
+    const updateData = {
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Add visibleToMembers if provided
+    if (visibleToMembers !== undefined) {
+      updateData.visibleToMembers = visibleToMembers;
+    }
+
     const [tracker] = await this.db
       .update(trackers)
-      .set({
-        ...data,
-        updatedAt: new Date().toISOString(),
-      })
+      .set(updateData)
       .where(and(eq(trackers.id, id), eq(trackers.householdId, householdId)))
       .returning();
 

@@ -35,9 +35,11 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   const [inputValue, setInputValue] = React.useState(value);
   const [isCreating, setIsCreating] = React.useState(false);
   const [focusedIndex, setFocusedIndex] = React.useState(-1);
+  const [isInteracting, setIsInteracting] = React.useState(false);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const blurTimeoutRef = React.useRef<NodeJS.Timeout>();
 
   // Load categories when component mounts
   React.useEffect(() => {
@@ -50,6 +52,15 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   React.useEffect(() => {
     setInputValue(value);
   }, [value]);
+
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Handle click outside to close dropdown
   React.useEffect(() => {
@@ -137,16 +148,24 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   };
 
   const handleInputBlur = () => {
-    // Delay closing to allow for clicks on suggestions
-    setTimeout(() => {
-      // Only close if we're still supposed to be closed
-      // (this gets overridden by clicks within the component)
-      if (!inputRef.current || document.activeElement !== inputRef.current) {
+    // Clear any existing timeout
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+    }
+    
+    // On mobile, give more time for interactions
+    const isMobile = window.innerWidth < 768;
+    const delay = isMobile ? 300 : 150;
+    
+    blurTimeoutRef.current = setTimeout(() => {
+      // Don't close if user is still interacting with the component
+      if (!isInteracting) {
         setIsOpen(false);
         setSearchQuery("");
+        setFocusedIndex(-1);
         onBlur?.();
       }
-    }, 200);
+    }, delay);
   };
 
   const handleSelectCategory = (categoryName: string) => {
@@ -154,6 +173,11 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     onChange(categoryName);
     setIsOpen(false);
     setSearchQuery("");
+    setFocusedIndex(-1);
+    setIsInteracting(false);
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+    }
     inputRef.current?.blur();
   };
 
@@ -162,6 +186,11 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     if (!trimmedQuery || !allowCreate) return;
 
     setIsCreating(true);
+    setIsInteracting(false);
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+    }
+    
     try {
       await addCategory(householdId, trimmedQuery);
       handleSelectCategory(trimmedQuery);
@@ -177,6 +206,10 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     onChange("");
     setSearchQuery("");
     setIsOpen(false);
+    setIsInteracting(false);
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+    }
     inputRef.current?.focus();
   };
 
@@ -224,7 +257,11 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
             onClick={handleClear}
             onMouseDown={(e) => {
               e.preventDefault(); // Prevent blur
+              setIsInteracting(true);
             }}
+            onMouseUp={() => setIsInteracting(false)}
+            onTouchStart={() => setIsInteracting(true)}
+            onTouchEnd={() => setIsInteracting(false)}
             className="absolute right-8 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             disabled={disabled}
             aria-label="Clear selection"
@@ -243,7 +280,11 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
           }}
           onMouseDown={(e) => {
             e.preventDefault(); // Prevent blur
+            setIsInteracting(true);
           }}
+          onMouseUp={() => setIsInteracting(false)}
+          onTouchStart={() => setIsInteracting(true)}
+          onTouchEnd={() => setIsInteracting(false)}
           className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           disabled={disabled}
           aria-label={isOpen ? "Close options" : "Open options"}
@@ -264,6 +305,10 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
           className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-md shadow-lg max-h-60 overflow-auto"
           role="listbox"
           aria-label="Category options"
+          onMouseDown={() => setIsInteracting(true)}
+          onMouseUp={() => setIsInteracting(false)}
+          onTouchStart={() => setIsInteracting(true)}
+          onTouchEnd={() => setIsInteracting(false)}
         >
           {/* Search input in dropdown */}
           <div className="sticky top-0 bg-slate-800 p-2 border-b border-slate-600">
@@ -295,7 +340,11 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
                     onClick={() => handleSelectCategory(category.name)}
                     onMouseDown={(e) => {
                       e.preventDefault(); // Prevent blur
+                      setIsInteracting(true);
                     }}
+                    onMouseUp={() => setIsInteracting(false)}
+                    onTouchStart={() => setIsInteracting(true)}
+                    onTouchEnd={() => setIsInteracting(false)}
                     onMouseEnter={() => setFocusedIndex(index)}
                     className={cn(
                       "w-full px-3 py-2 text-left text-sm text-slate-100 hover:bg-slate-700 focus:bg-slate-700 focus:outline-none transition-colors",
@@ -327,7 +376,11 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
                     onClick={handleCreateCategory}
                     onMouseDown={(e) => {
                       e.preventDefault(); // Prevent blur
+                      setIsInteracting(true);
                     }}
+                    onMouseUp={() => setIsInteracting(false)}
+                    onTouchStart={() => setIsInteracting(true)}
+                    onTouchEnd={() => setIsInteracting(false)}
                     onMouseEnter={() => setFocusedIndex(suggestions.length)}
                     disabled={isCreating}
                     className={cn(
