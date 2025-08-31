@@ -244,7 +244,14 @@ const Login: React.FC<Route.ComponentProps> = () => {
               </div>
             </form>
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 text-center space-y-3">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                Forgot your password?
+              </Link>
+              
               <p className="text-slate-400 text-sm">
                 Don't have an account?{" "}
                 <Link

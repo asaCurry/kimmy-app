@@ -157,6 +157,19 @@ export const aiRecommendations = sqliteTable("ai_recommendations", {
   updatedAt: text("updated_at").default(sql`(datetime('now'))`),
 });
 
+// Password reset tokens table (for secure password reset flow)
+export const passwordResetTokens = sqliteTable("password_reset_tokens", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  token: text("token").notNull().unique(), // Secure random token
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  email: text("email").notNull(), // Store email for verification
+  used: integer("used").default(0), // 0 = unused, 1 = used
+  expiresAt: text("expires_at").notNull(), // ISO datetime string (30 minutes from creation)
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+});
+
 // Type exports
 export type Household = typeof households.$inferSelect;
 export type NewHousehold = typeof households.$inferInsert;
@@ -178,3 +191,5 @@ export type AnalyticsCache = typeof analyticsCache.$inferSelect;
 export type NewAnalyticsCache = typeof analyticsCache.$inferInsert;
 export type AiRecommendation = typeof aiRecommendations.$inferSelect;
 export type NewAiRecommendation = typeof aiRecommendations.$inferInsert;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type NewPasswordResetToken = typeof passwordResetTokens.$inferInsert;

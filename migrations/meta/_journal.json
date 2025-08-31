@@ -22,6 +22,13 @@
       "when": 1756645471597,
       "tag": "0002_fixed_hawkeye",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1756649642792,
+      "tag": "0003_late_komodo",
+      "breakpoints": true
     }
   ]
 }
