@@ -34,6 +34,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   const [searchQuery, setSearchQuery] = React.useState("");
   const [inputValue, setInputValue] = React.useState(value);
   const [isCreating, setIsCreating] = React.useState(false);
+  const [focusedIndex, setFocusedIndex] = React.useState(-1);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
@@ -69,19 +70,46 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     }
   }, [isOpen]);
 
-  // Handle escape key to close dropdown
+  // Handle keyboard navigation
   React.useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-        setSearchQuery("");
-        inputRef.current?.blur();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      switch (event.key) {
+        case "Escape":
+          setIsOpen(false);
+          setSearchQuery("");
+          setFocusedIndex(-1);
+          inputRef.current?.blur();
+          break;
+        case "ArrowDown":
+          event.preventDefault();
+          setFocusedIndex(prev => {
+            const maxIndex = suggestions.length + (showCreateOption ? 1 : 0) - 1;
+            return prev < maxIndex ? prev + 1 : 0;
+          });
+          break;
+        case "ArrowUp":
+          event.preventDefault();
+          setFocusedIndex(prev => {
+            const maxIndex = suggestions.length + (showCreateOption ? 1 : 0) - 1;
+            return prev > 0 ? prev - 1 : maxIndex;
+          });
+          break;
+        case "Enter":
+          event.preventDefault();
+          if (focusedIndex >= 0 && focusedIndex < suggestions.length) {
+            handleSelectCategory(suggestions[focusedIndex].name);
+          } else if (focusedIndex === suggestions.length && showCreateOption) {
+            handleCreateCategory();
+          }
+          break;
       }
     };
 
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, []);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, focusedIndex, suggestions, showCreateOption]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -178,8 +206,13 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
           placeholder={placeholder}
           disabled={disabled}
           required={required}
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          aria-autocomplete="list"
+          aria-describedby={`category-typeahead-help`}
           className={cn(
-            "flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50 pr-20",
+            "flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50 pr-20 transition-all duration-200 hover:border-slate-500",
             className
           )}
         />
@@ -192,8 +225,9 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
             onMouseDown={(e) => {
               e.preventDefault(); // Prevent blur
             }}
-            className="absolute right-8 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 transition-colors"
+            className="absolute right-8 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             disabled={disabled}
+            aria-label="Clear selection"
           >
             <X className="h-4 w-4" />
           </button>
@@ -210,12 +244,14 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
           onMouseDown={(e) => {
             e.preventDefault(); // Prevent blur
           }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 transition-colors"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           disabled={disabled}
+          aria-label={isOpen ? "Close options" : "Open options"}
+          aria-expanded={isOpen}
         >
           <ChevronDown
             className={cn(
-              "h-4 w-4 transition-transform",
+              "h-4 w-4 transition-transform duration-200",
               isOpen && "rotate-180"
             )}
           />
@@ -224,7 +260,11 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-md shadow-lg max-h-60 overflow-auto">
+        <div 
+          className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-md shadow-lg max-h-60 overflow-auto"
+          role="listbox"
+          aria-label="Category options"
+        >
           {/* Search input in dropdown */}
           <div className="sticky top-0 bg-slate-800 p-2 border-b border-slate-600">
             <div className="relative">
@@ -248,7 +288,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
               </div>
             ) : (
               <>
-                {suggestions.map(category => (
+                {suggestions.map((category, index) => (
                   <button
                     key={category.name}
                     type="button"
@@ -256,11 +296,15 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
                     onMouseDown={(e) => {
                       e.preventDefault(); // Prevent blur
                     }}
+                    onMouseEnter={() => setFocusedIndex(index)}
                     className={cn(
                       "w-full px-3 py-2 text-left text-sm text-slate-100 hover:bg-slate-700 focus:bg-slate-700 focus:outline-none transition-colors",
                       category.name === value &&
-                        "bg-blue-600 text-white hover:bg-blue-700"
+                        "bg-blue-600 text-white hover:bg-blue-700",
+                      focusedIndex === index && "bg-slate-700"
                     )}
+                    role="option"
+                    aria-selected={category.name === value}
                   >
                     <div className="flex items-center justify-between">
                       <span className="truncate">{category.name}</span>
@@ -284,8 +328,14 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
                     onMouseDown={(e) => {
                       e.preventDefault(); // Prevent blur
                     }}
+                    onMouseEnter={() => setFocusedIndex(suggestions.length)}
                     disabled={isCreating}
-                    className="w-full px-3 py-2 text-left text-sm text-blue-400 hover:bg-slate-700 focus:bg-slate-700 focus:outline-none transition-colors border-t border-slate-600"
+                    className={cn(
+                      "w-full px-3 py-2 text-left text-sm text-blue-400 hover:bg-slate-700 focus:bg-slate-700 focus:outline-none transition-colors border-t border-slate-600",
+                      focusedIndex === suggestions.length && "bg-slate-700"
+                    )}
+                    role="option"
+                    aria-selected={false}
                   >
                     <div className="flex items-center">
                       <Plus className="h-4 w-4 mr-2" />
@@ -300,6 +350,14 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
           </div>
         </div>
       )}
+      
+      {/* Screen reader help text */}
+      <div 
+        id="category-typeahead-help" 
+        className="sr-only"
+      >
+        Use arrow keys to navigate options. Press Enter to select. Press Escape to close.
+      </div>
     </div>
   );
 };

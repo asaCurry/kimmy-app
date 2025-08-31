@@ -156,7 +156,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     <div className={className}>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
-        <div className="space-y-6 sm:space-y-4">
+        <div className="space-y-6">
           {/* Name field - always full width for better mobile UX */}
           <div className="space-y-2">
             <Label htmlFor="name" className="text-slate-200">
@@ -190,7 +190,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
           </div>
 
           {/* Icon and Color - side by side on larger screens */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="icon" className="text-slate-200">
                 Icon
@@ -428,7 +428,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                       setFormData({ ...formData, visibleToMembers: [createdBy] });
                     }
                   }}
-                  className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                  className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 cursor-pointer transition-all duration-200"
                 />
                 <label htmlFor="all-members" className="text-sm text-slate-300 cursor-pointer">
                   All household members
@@ -487,7 +487,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                             }
                           }
                         }}
-                        className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                        className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 cursor-pointer transition-all duration-200"
                       />
                       <label htmlFor={`member-${member.id}`} className="text-sm text-slate-300 cursor-pointer">
                         {member.name}
@@ -585,7 +585,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 pt-6">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-4 pt-8 border-t border-slate-700">
           {showBackButton && (
             <Button
               type="button"

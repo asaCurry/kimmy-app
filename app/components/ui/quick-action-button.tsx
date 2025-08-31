@@ -86,9 +86,11 @@ export const QuickActionButton: React.FC<QuickActionButtonProps> = ({
   return (
     <button
       onClick={handleClick}
-      className={`p-6 bg-gradient-to-br ${colors.from} ${colors.to} ${colors.hoverFrom} ${colors.hoverTo} rounded-lg border ${colors.border} transition-all hover:shadow-lg ${colors.shadow} text-left w-full sm:w-auto sm:min-w-[200px] xl:flex-1 xl:max-w-[280px]`}
+      className={`p-6 bg-gradient-to-br ${colors.from} ${colors.to} ${colors.hoverFrom} ${colors.hoverTo} rounded-lg border ${colors.border} transition-all duration-200 hover:shadow-lg ${colors.shadow} text-left w-full sm:w-auto sm:min-w-[200px] xl:flex-1 xl:max-w-[280px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 active:scale-[0.98]`}
+      role="button"
+      aria-label={`Navigate to ${title}: ${description}`}
     >
-      <div className="text-2xl mb-3">{icon}</div>
+      <div className="text-2xl mb-3" aria-hidden="true">{icon}</div>
       <h3 className="font-semibold text-white mb-2">{title}</h3>
       <p className={`text-sm ${colors.text}`}>{description}</p>
     </button>

@@ -33,11 +33,11 @@ const PageLayout = React.forwardRef<
     >
       {showHeader && <AppHeader />}
 
-      <main className="flex-1 p-3 sm:p-4">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8">
         <div
           className={cn(
-            "mx-auto gap-4 flex flex-col",
-            maxWidth === "2xl" ? "max-w-2xl" : "max-w-4xl"
+            "mx-auto gap-6 sm:gap-8 flex flex-col",
+            maxWidth === "2xl" ? "max-w-2xl" : "max-w-5xl"
           )}
         >
           {children}
@@ -58,14 +58,21 @@ const PageHeader = React.forwardRef<
     subtitle?: string;
   }
 >(({ className, title, subtitle, ...props }, ref) => (
-  <div ref={ref} className={cn("mb-4 sm:mb-6", className)} {...props}>
-    <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+  <header 
+    ref={ref} 
+    className={cn("mb-6 sm:mb-8 lg:mb-10", className)} 
+    {...props}
+    role="banner"
+  >
+    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent leading-tight tracking-tight">
       {title}
     </h1>
     {subtitle && (
-      <p className="text-slate-300 text-sm sm:text-base">{subtitle}</p>
+      <p className="text-slate-300 text-base sm:text-lg mt-2 leading-relaxed">
+        {subtitle}
+      </p>
     )}
-  </div>
+  </header>
 ));
 PageHeader.displayName = "PageHeader";
 
