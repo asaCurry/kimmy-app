@@ -58,9 +58,9 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   // Generate schema based on record type fields
 
   // Ensure fields is always an array
-  const normalizedFields = Array.isArray(recordType.fields)
-    ? recordType.fields
-    : [];
+  const normalizedFields = React.useMemo(() => {
+    return Array.isArray(recordType.fields) ? recordType.fields : [];
+  }, [recordType.fields]);
 
   const schema = createRecordSchema(normalizedFields);
   type FormData = z.infer<typeof schema>;

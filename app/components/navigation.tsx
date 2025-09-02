@@ -1,22 +1,6 @@
-import { Link, useLocation } from "react-router";
+import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
-import {
-  Home,
-  User,
-  Settings,
-  Plus,
-  FolderOpen,
-  Users,
-  FileText,
-  Calendar,
-  BarChart3,
-  Shield,
-  LogOut,
-  Users2,
-} from "lucide-react";
-import { useAuth } from "~/contexts/auth-context";
-import { cn } from "~/lib/utils";
+import { Home, User, FolderOpen, FileText, Users2 } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,

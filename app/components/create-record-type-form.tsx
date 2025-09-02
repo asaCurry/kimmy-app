@@ -38,7 +38,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
   householdId,
   createdBy,
   category: initialCategory,
-  existingCategories,
+  _existingCategories,
   existingRecordType,
   isEditing = false,
   onSuccess,
@@ -163,7 +163,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
         );
       }
     }
-  }, [fetcher.data, onSuccess]);
+  }, [fetcher.data, onSuccess, isEditing]);
 
   const handleCancel = () => {
     if (onCancel) {
