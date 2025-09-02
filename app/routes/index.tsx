@@ -15,8 +15,15 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
     // Load household data and members
     const [householdData, members] = await Promise.all([
-      db.select().from(households).where(eq(households.id, session.currentHouseholdId)).limit(1),
-      db.select().from(users).where(eq(users.householdId, session.currentHouseholdId))
+      db
+        .select()
+        .from(households)
+        .where(eq(households.id, session.currentHouseholdId))
+        .limit(1),
+      db
+        .select()
+        .from(users)
+        .where(eq(users.householdId, session.currentHouseholdId)),
     ]);
 
     if (!members.length) {
@@ -40,7 +47,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     }
 
     // Check analytics access for UI display
-    const userRole = getUserRoleInHousehold(session, session.currentHouseholdId);
+    const userRole = getUserRoleInHousehold(
+      session,
+      session.currentHouseholdId
+    );
     const canViewAnalytics = hasAnalyticsAccess(household);
 
     // If multiple members, return them for selection

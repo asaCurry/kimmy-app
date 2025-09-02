@@ -8,7 +8,7 @@ import { Button } from "~/components/ui/button";
 import { LogIn, UserPlus, Home, ArrowRight } from "lucide-react";
 import { useAuth } from "~/contexts/auth-context";
 
-export function meta({}: Route.MetaArgs) {
+export function meta(_args: Route.MetaArgs) {
   return [
     { title: "Welcome to Hey, Kimmy" },
     {

@@ -72,11 +72,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     // Load household data from URL params
-    const { householdId, currentMember, householdMembers } = await loadHouseholdDataWithMember(
-      request,
-      env,
-      memberId
-    );
+    const { householdId, currentMember, householdMembers } =
+      await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no household data found, redirect to welcome
     if (!householdId) {
@@ -219,7 +216,8 @@ const EditRecordType: React.FC<Route.ComponentProps> = ({
   loaderData,
   params,
 }) => {
-  const { member, category, householdId, recordType, householdMembers } = loaderData;
+  const { member, category, householdId, recordType, householdMembers } =
+    loaderData;
   const { session } = useAuth();
   const navigate = useNavigate();
 
@@ -273,7 +271,7 @@ const EditRecordType: React.FC<Route.ComponentProps> = ({
           category={category}
           existingCategories={loaderData.existingCategories}
           existingRecordType={recordType}
-          householdMembers={householdMembers}
+          householdMembers={householdMembers as any}
           isEditing={true}
           onSuccess={() => {
             // Navigate back to the category page

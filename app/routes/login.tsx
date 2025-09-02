@@ -19,7 +19,7 @@ import { useFormValidation, VALIDATION_RULE_SETS } from "~/lib/validation";
 import { PageLoading, ButtonLoading } from "~/components/ui/loading";
 import { authApi } from "~/lib/auth-db";
 
-export function meta({}: Route.MetaArgs) {
+export function meta(_: Route.MetaArgs) {
   return [
     { title: "Sign In - Hey, Kimmy" },
     { name: "description", content: "Sign in to your Hey, Kimmy account" },
@@ -165,7 +165,12 @@ const Login: React.FC<Route.ComponentProps> = () => {
             <CardTitle className="text-xl text-slate-100">Sign In</CardTitle>
           </CardHeader>
           <CardContent>
-            <form method="post" onSubmit={handleSubmit} className="space-y-6" autoComplete="on">
+            <form
+              method="post"
+              onSubmit={handleSubmit}
+              className="space-y-6"
+              autoComplete="on"
+            >
               {(loginError || actionData?.error) && (
                 <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
@@ -251,7 +256,7 @@ const Login: React.FC<Route.ComponentProps> = () => {
               >
                 Forgot your password?
               </Link>
-              
+
               <p className="text-slate-400 text-sm">
                 Don't have an account?{" "}
                 <Link

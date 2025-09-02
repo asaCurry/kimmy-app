@@ -8,10 +8,10 @@ import { useAuth } from "~/contexts/auth-context";
 
 export function useAdmin() {
   const { session } = useAuth();
-  
+
   // Check admin field from session (database-driven admin privileges)
   const isAdmin = Boolean(session?.admin);
-  
+
   return {
     isAdmin,
     userId: session?.userId,
@@ -24,23 +24,26 @@ export function useAdmin() {
  */
 export function AdminOnly({ children }: { children: React.ReactNode }) {
   const { isAdmin } = useAdmin();
-  
+
   if (!isAdmin) return null;
-  
+
   return <>{children}</>;
 }
 
 /**
  * Debug info component that shows development information
  */
-export function DebugInfo({ data, title = "Debug Info" }: { 
-  data: any; 
-  title?: string; 
+export function DebugInfo({
+  data,
+  title = "Debug Info",
+}: {
+  data: any;
+  title?: string;
 }) {
   const { isAdmin } = useAdmin();
-  
+
   if (!isAdmin) return null;
-  
+
   return (
     <div className="mt-4 p-3 bg-slate-800/50 border border-slate-600 rounded-lg">
       <details>

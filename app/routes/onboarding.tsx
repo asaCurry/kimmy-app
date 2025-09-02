@@ -12,7 +12,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { UserPlus, ArrowRight } from "lucide-react";
 
-export function meta({}: Route.MetaArgs) {
+export function meta(_args: Route.MetaArgs) {
   return [
     { title: "Get Started - Hey, Kimmy" },
     {

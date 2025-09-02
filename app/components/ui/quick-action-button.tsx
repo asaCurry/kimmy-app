@@ -21,11 +21,12 @@ export const QuickActionButton: React.FC<QuickActionButtonProps> = ({
   const handleClick = () => {
     navigate(to);
     // On mobile, scroll to top smoothly to show the form
-    if (window.innerWidth < 768) { // md breakpoint
+    if (window.innerWidth < 768) {
+      // md breakpoint
       setTimeout(() => {
         window.scrollTo({
           top: 0,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       }, 100); // Small delay to allow navigation to complete
     }
@@ -90,7 +91,9 @@ export const QuickActionButton: React.FC<QuickActionButtonProps> = ({
       role="button"
       aria-label={`Navigate to ${title}: ${description}`}
     >
-      <div className="text-2xl mb-3" aria-hidden="true">{icon}</div>
+      <div className="text-2xl mb-3" aria-hidden="true">
+        {icon}
+      </div>
       <h3 className="font-semibold text-white mb-2">{title}</h3>
       <p className={`text-sm ${colors.text}`}>{description}</p>
     </button>

@@ -107,7 +107,7 @@ export class AnalyticsDB {
       }
 
       console.log("Found valid cached insights");
-      return JSON.parse(cached.data || '{}');
+      return JSON.parse(cached.data || "{}");
     } catch (error) {
       console.error("Error in AnalyticsDB.getCachedInsights:", error);
       return null; // Return null on error to trigger fresh generation
@@ -118,7 +118,11 @@ export class AnalyticsDB {
   async saveRecommendations(
     recommendations: Omit<NewAiRecommendation, "createdAt" | "updatedAt">[]
   ): Promise<AiRecommendation[]> {
-    console.log("AnalyticsDB.saveRecommendations called with:", recommendations.length, "recommendations");
+    console.log(
+      "AnalyticsDB.saveRecommendations called with:",
+      recommendations.length,
+      "recommendations"
+    );
 
     try {
       if (recommendations.length === 0) {
@@ -154,7 +158,10 @@ export class AnalyticsDB {
     householdId: string,
     status: string = "active"
   ): Promise<AiRecommendation[]> {
-    console.log("AnalyticsDB.getRecommendations called with:", { householdId, status });
+    console.log("AnalyticsDB.getRecommendations called with:", {
+      householdId,
+      status,
+    });
 
     try {
       const result = await this.db
@@ -183,14 +190,17 @@ export class AnalyticsDB {
     id: number,
     status: "active" | "dismissed" | "completed"
   ): Promise<void> {
-    console.log("AnalyticsDB.updateRecommendationStatus called with:", { id, status });
+    console.log("AnalyticsDB.updateRecommendationStatus called with:", {
+      id,
+      status,
+    });
 
     try {
       await this.db
         .update(aiRecommendations)
-        .set({ 
+        .set({
           status,
-          updatedAt: sql`(datetime('now'))`
+          updatedAt: sql`(datetime('now'))`,
         })
         .where(eq(aiRecommendations.id, id));
 

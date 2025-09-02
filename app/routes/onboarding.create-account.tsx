@@ -18,7 +18,7 @@ import { authApi } from "~/lib/auth-db";
 import { useAuth } from "~/contexts/auth-context";
 import { toast } from "react-toastify";
 
-export function meta({}: Route.MetaArgs) {
+export function meta(_args: Route.MetaArgs) {
   return [
     { title: "Create Account & Household - Hey, Kimmy" },
     {

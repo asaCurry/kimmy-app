@@ -87,8 +87,8 @@ export const userDb = {
       dbLogger.info("User created successfully", { userId: result[0].id });
       return result[0];
     } catch (error) {
-      dbLogger.error("Failed to create user", { 
-        error: error instanceof Error ? error.message : 'Unknown error'
+      dbLogger.error("Failed to create user", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw new Error("Failed to create user account");
     }
@@ -161,12 +161,12 @@ export const userDb = {
     hashedPassword: string | null
   ): Promise<boolean> {
     if (!hashedPassword) return false;
-    
+
     // Handle legacy hashed passwords (will be migrated during login)
-    if (hashedPassword.startsWith('hashed_')) {
+    if (hashedPassword.startsWith("hashed_")) {
       return hashedPassword === `hashed_${password}`;
     }
-    
+
     // Use proper PBKDF2 verification for new passwords
     return verifyPassword(password, hashedPassword);
   },
@@ -183,7 +183,7 @@ export const userDb = {
     try {
       const db = ensureDatabase(env);
       const secureHash = await hashPassword(plaintextPassword);
-      
+
       await db
         .update(schema.users)
         .set({ hashedPassword: secureHash })
@@ -640,7 +640,7 @@ export const authDb = {
       }
 
       // 🔄 GRADUAL MIGRATION: If user has legacy hash, migrate it now
-      if (user.hashedPassword.startsWith('hashed_')) {
+      if (user.hashedPassword.startsWith("hashed_")) {
         console.log(`🔄 Migrating legacy password for user ${email}`);
         await userDb.migrateUserPassword(env, user.id, password);
       }

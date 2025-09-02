@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useHousehold } from "~/contexts/household-context"; 
+import { useHousehold } from "~/contexts/household-context";
 import type { User } from "~/db/schema";
 
 interface CreateRecordTypeFormProps {
@@ -48,11 +48,11 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
   householdMembers: propHouseholdMembers,
 }) => {
   const fetcher = useFetcher();
-  
+
   // Get household members from context if not provided as prop
   const { householdMembers: contextHouseholdMembers } = useHousehold();
   const householdMembers = propHouseholdMembers || contextHouseholdMembers;
-  
+
   const isSubmitting = fetcher.state === "submitting";
 
   const [formData, setFormData] = React.useState({
@@ -62,7 +62,9 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     icon: existingRecordType?.icon || "📝",
     color: existingRecordType?.color || "blue",
     allowPrivate: existingRecordType?.allowPrivate === 1 || false,
-    visibleToMembers: existingRecordType?.visibleToMembers ? JSON.parse(existingRecordType.visibleToMembers) : [] as number[], // member IDs, empty = all members
+    visibleToMembers: existingRecordType?.visibleToMembers
+      ? JSON.parse(existingRecordType.visibleToMembers)
+      : ([] as number[]), // member IDs, empty = all members
   });
 
   // Use the dynamic fields hook
@@ -88,7 +90,10 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     }
 
     const formDataToSubmit = new FormData();
-    formDataToSubmit.append("_action", isEditing ? "update-record-type" : "create-record-type");
+    formDataToSubmit.append(
+      "_action",
+      isEditing ? "update-record-type" : "create-record-type"
+    );
     formDataToSubmit.append("name", formData.name);
     formDataToSubmit.append("description", formData.description);
     formDataToSubmit.append("category", formData.category);
@@ -97,7 +102,10 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     formDataToSubmit.append("icon", formData.icon);
     formDataToSubmit.append("color", formData.color);
     formDataToSubmit.append("allowPrivate", formData.allowPrivate.toString());
-    formDataToSubmit.append("visibleToMembers", JSON.stringify(formData.visibleToMembers));
+    formDataToSubmit.append(
+      "visibleToMembers",
+      JSON.stringify(formData.visibleToMembers)
+    );
     if (!isEditing) {
       formDataToSubmit.append("createdBy", createdBy.toString());
     }
@@ -112,14 +120,19 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     if (fetcher.data) {
       if (fetcher.data.success) {
         // Show success toast
-        toast.success(isEditing ? "Record type updated successfully!" : "Record type created successfully!", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        toast.success(
+          isEditing
+            ? "Record type updated successfully!"
+            : "Record type created successfully!",
+          {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          }
+        );
 
         // Redirect after a brief delay to let user see the toast
         const timer = setTimeout(() => {
@@ -134,14 +147,20 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
         return () => clearTimeout(timer);
       } else if (fetcher.data.error) {
         // Show error toast
-        toast.error(fetcher.data.error || (isEditing ? "Failed to update record type" : "Failed to create record type"), {
-          position: "top-right",
-          autoClose: 4000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        toast.error(
+          fetcher.data.error ||
+            (isEditing
+              ? "Failed to update record type"
+              : "Failed to create record type"),
+          {
+            position: "top-right",
+            autoClose: 4000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          }
+        );
       }
     }
   }, [fetcher.data, onSuccess]);
@@ -195,182 +214,184 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
               <Label htmlFor="icon" className="text-slate-200">
                 Icon
               </Label>
-            <Select
-              value={formData.icon}
-              onValueChange={value => setFormData({ ...formData, icon: value })}
-            >
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100 text-base sm:text-sm min-h-[44px] sm:min-h-[36px]">
-                <SelectValue placeholder="Choose an icon">
-                  {formData.icon && (
-                    <span className="text-xl">{formData.icon}</span>
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="bg-slate-700 border-slate-600 max-h-64 overflow-y-auto text-base sm:text-sm">
-                {/* General & Documents */}
-                <SelectItem value="📝">📝 Note</SelectItem>
-                <SelectItem value="📋">📋 Checklist</SelectItem>
-                <SelectItem value="📄">📄 Document</SelectItem>
-                <SelectItem value="📊">📊 Report</SelectItem>
-                <SelectItem value="📈">📈 Progress</SelectItem>
-                <SelectItem value="📅">📅 Schedule</SelectItem>
-                <SelectItem value="⏰">⏰ Reminder</SelectItem>
-                <SelectItem value="🔖">🔖 Bookmark</SelectItem>
-                
-                {/* Health & Wellness */}
-                <SelectItem value="🏥">🏥 Health</SelectItem>
-                <SelectItem value="💊">💊 Medication</SelectItem>
-                <SelectItem value="🩺">🩺 Medical</SelectItem>
-                <SelectItem value="💉">💉 Treatment</SelectItem>
-                <SelectItem value="🦷">🦷 Dental</SelectItem>
-                <SelectItem value="👁️">👁️ Vision</SelectItem>
-                <SelectItem value="🧠">🧠 Mental Health</SelectItem>
-                <SelectItem value="❤️">❤️ Wellness</SelectItem>
-                <SelectItem value="😴">😴 Sleep</SelectItem>
-                <SelectItem value="💤">💤 Rest</SelectItem>
-                
-                {/* Food & Nutrition */}
-                <SelectItem value="🍽️">🍽️ Meal</SelectItem>
-                <SelectItem value="🍎">🍎 Nutrition</SelectItem>
-                <SelectItem value="🥗">🥗 Healthy Food</SelectItem>
-                <SelectItem value="🍕">🍕 Food</SelectItem>
-                <SelectItem value="☕">☕ Beverage</SelectItem>
-                <SelectItem value="💧">💧 Hydration</SelectItem>
-                <SelectItem value="🧊">🧊 Water</SelectItem>
-                
-                {/* Activities & Exercise */}
-                <SelectItem value="🏃">🏃 Activity</SelectItem>
-                <SelectItem value="💪">💪 Exercise</SelectItem>
-                <SelectItem value="🚴">🚴 Cycling</SelectItem>
-                <SelectItem value="🏊">🏊 Swimming</SelectItem>
-                <SelectItem value="🧘">🧘 Meditation</SelectItem>
-                <SelectItem value="🚶">🚶 Walking</SelectItem>
-                <SelectItem value="⚽">⚽ Sports</SelectItem>
-                <SelectItem value="🏋️">🏋️ Strength</SelectItem>
-                <SelectItem value="🤸">🤸 Flexibility</SelectItem>
-                
-                {/* Education & Learning */}
-                <SelectItem value="🎓">🎓 Education</SelectItem>
-                <SelectItem value="📚">📚 Study</SelectItem>
-                <SelectItem value="✏️">✏️ Writing</SelectItem>
-                <SelectItem value="🔬">🔬 Science</SelectItem>
-                <SelectItem value="🧮">🧮 Math</SelectItem>
-                <SelectItem value="📖">📖 Reading</SelectItem>
-                <SelectItem value="🎭">🎭 Arts</SelectItem>
-                <SelectItem value="🎵">🎵 Music</SelectItem>
-                <SelectItem value="🎤">🎤 Practice</SelectItem>
-                
-                {/* Work & Career */}
-                <SelectItem value="💼">💼 Work</SelectItem>
-                <SelectItem value="💻">💻 Computer</SelectItem>
-                <SelectItem value="📞">📞 Call</SelectItem>
-                <SelectItem value="📧">📧 Email</SelectItem>
-                <SelectItem value="🤝">🤝 Meeting</SelectItem>
-                <SelectItem value="🎯">🎯 Goal</SelectItem>
-                <SelectItem value="🔬">🔬 Analysis</SelectItem>
-                <SelectItem value="🔍">🔍 Research</SelectItem>
-                
-                {/* Finance & Money */}
-                <SelectItem value="💰">💰 Money</SelectItem>
-                <SelectItem value="💳">💳 Payment</SelectItem>
-                <SelectItem value="🏦">🏦 Banking</SelectItem>
-                <SelectItem value="💹">💹 Investment</SelectItem>
-                <SelectItem value="💵">💵 Budget</SelectItem>
-                <SelectItem value="🧾">🧾 Receipt</SelectItem>
-                
-                {/* Home & Family */}
-                <SelectItem value="🏠">🏠 Home</SelectItem>
-                <SelectItem value="👨‍👩‍👧‍👦">👨‍👩‍👧‍👦 Family</SelectItem>
-                <SelectItem value="🧹">🧹 Cleaning</SelectItem>
-                <SelectItem value="🍳">🍳 Cooking</SelectItem>
-                <SelectItem value="🛒">🛒 Shopping</SelectItem>
-                <SelectItem value="📦">📦 Package</SelectItem>
-                <SelectItem value="🔧">🔧 Maintenance</SelectItem>
-                <SelectItem value="🌱">🌱 Gardening</SelectItem>
-                
-                {/* Travel & Transportation */}
-                <SelectItem value="✈️">✈️ Travel</SelectItem>
-                <SelectItem value="🚗">🚗 Car</SelectItem>
-                <SelectItem value="🚌">🚌 Transit</SelectItem>
-                <SelectItem value="🚲">🚲 Bike</SelectItem>
-                <SelectItem value="🗺️">🗺️ Navigation</SelectItem>
-                <SelectItem value="🏨">🏨 Hotel</SelectItem>
-                <SelectItem value="🎒">🎒 Trip</SelectItem>
-                
-                {/* Entertainment & Hobbies */}
-                <SelectItem value="🎨">🎨 Creative</SelectItem>
-                <SelectItem value="🎮">🎮 Gaming</SelectItem>
-                <SelectItem value="📺">📺 Entertainment</SelectItem>
-                <SelectItem value="🎬">🎬 Movies</SelectItem>
-                <SelectItem value="📷">📷 Photography</SelectItem>
-                <SelectItem value="🎪">🎪 Events</SelectItem>
-                <SelectItem value="🎁">🎁 Gifts</SelectItem>
-                <SelectItem value="🎉">🎉 Celebration</SelectItem>
-                
-                {/* Nature & Weather */}
-                <SelectItem value="🌞">🌞 Sunny</SelectItem>
-                <SelectItem value="🌧️">🌧️ Rainy</SelectItem>
-                <SelectItem value="❄️">❄️ Cold</SelectItem>
-                <SelectItem value="🌿">🌿 Nature</SelectItem>
-                <SelectItem value="🌸">🌸 Seasonal</SelectItem>
-                <SelectItem value="🌊">🌊 Water</SelectItem>
-                <SelectItem value="🏔️">🏔️ Mountain</SelectItem>
-                
-                {/* Achievements & Goals */}
-                <SelectItem value="⭐">⭐ Achievement</SelectItem>
-                <SelectItem value="🏆">🏆 Trophy</SelectItem>
-                <SelectItem value="🎖️">🎖️ Medal</SelectItem>
-                <SelectItem value="🔥">🔥 Streak</SelectItem>
-                <SelectItem value="💯">💯 Perfect</SelectItem>
-                <SelectItem value="✅">✅ Complete</SelectItem>
-                <SelectItem value="🎊">🎊 Success</SelectItem>
-                
-                {/* Emotions & Mood */}
-                <SelectItem value="😊">😊 Happy</SelectItem>
-                <SelectItem value="😌">😌 Calm</SelectItem>
-                <SelectItem value="😔">😔 Sad</SelectItem>
-                <SelectItem value="😤">😤 Frustrated</SelectItem>
-                <SelectItem value="🤗">🤗 Grateful</SelectItem>
-                <SelectItem value="🥱">🥱 Tired</SelectItem>
-                <SelectItem value="⚡">⚡ Energetic</SelectItem>
-                
-                {/* Misc & Symbols */}
-                <SelectItem value="🔔">🔔 Notification</SelectItem>
-                <SelectItem value="⚠️">⚠️ Important</SelectItem>
-                <SelectItem value="❓">❓ Question</SelectItem>
-                <SelectItem value="💡">💡 Idea</SelectItem>
-                <SelectItem value="🔑">🔑 Key</SelectItem>
-                <SelectItem value="🎲">🎲 Random</SelectItem>
-                <SelectItem value="🌟">🌟 Special</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              <Select
+                value={formData.icon}
+                onValueChange={value =>
+                  setFormData({ ...formData, icon: value })
+                }
+              >
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100 text-base sm:text-sm min-h-[44px] sm:min-h-[36px]">
+                  <SelectValue placeholder="Choose an icon">
+                    {formData.icon && (
+                      <span className="text-xl">{formData.icon}</span>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-slate-700 border-slate-600 max-h-64 overflow-y-auto text-base sm:text-sm">
+                  {/* General & Documents */}
+                  <SelectItem value="📝">📝 Note</SelectItem>
+                  <SelectItem value="📋">📋 Checklist</SelectItem>
+                  <SelectItem value="📄">📄 Document</SelectItem>
+                  <SelectItem value="📊">📊 Report</SelectItem>
+                  <SelectItem value="📈">📈 Progress</SelectItem>
+                  <SelectItem value="📅">📅 Schedule</SelectItem>
+                  <SelectItem value="⏰">⏰ Reminder</SelectItem>
+                  <SelectItem value="🔖">🔖 Bookmark</SelectItem>
 
-          <div className="space-y-2">
-            <Label htmlFor="color" className="text-slate-200">
-              Color
-            </Label>
-            <Select
-              value={formData.color}
-              onValueChange={value =>
-                setFormData({ ...formData, color: value })
-              }
-            >
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100 text-base sm:text-sm min-h-[44px] sm:min-h-[36px]">
-                <SelectValue placeholder="Choose a color" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-700 border-slate-600">
-                <SelectItem value="blue">Blue</SelectItem>
-                <SelectItem value="green">Green</SelectItem>
-                <SelectItem value="red">Red</SelectItem>
-                <SelectItem value="yellow">Yellow</SelectItem>
-                <SelectItem value="purple">Purple</SelectItem>
-                <SelectItem value="pink">Pink</SelectItem>
-                <SelectItem value="indigo">Indigo</SelectItem>
-                <SelectItem value="gray">Gray</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+                  {/* Health & Wellness */}
+                  <SelectItem value="🏥">🏥 Health</SelectItem>
+                  <SelectItem value="💊">💊 Medication</SelectItem>
+                  <SelectItem value="🩺">🩺 Medical</SelectItem>
+                  <SelectItem value="💉">💉 Treatment</SelectItem>
+                  <SelectItem value="🦷">🦷 Dental</SelectItem>
+                  <SelectItem value="👁️">👁️ Vision</SelectItem>
+                  <SelectItem value="🧠">🧠 Mental Health</SelectItem>
+                  <SelectItem value="❤️">❤️ Wellness</SelectItem>
+                  <SelectItem value="😴">😴 Sleep</SelectItem>
+                  <SelectItem value="💤">💤 Rest</SelectItem>
+
+                  {/* Food & Nutrition */}
+                  <SelectItem value="🍽️">🍽️ Meal</SelectItem>
+                  <SelectItem value="🍎">🍎 Nutrition</SelectItem>
+                  <SelectItem value="🥗">🥗 Healthy Food</SelectItem>
+                  <SelectItem value="🍕">🍕 Food</SelectItem>
+                  <SelectItem value="☕">☕ Beverage</SelectItem>
+                  <SelectItem value="💧">💧 Hydration</SelectItem>
+                  <SelectItem value="🧊">🧊 Water</SelectItem>
+
+                  {/* Activities & Exercise */}
+                  <SelectItem value="🏃">🏃 Activity</SelectItem>
+                  <SelectItem value="💪">💪 Exercise</SelectItem>
+                  <SelectItem value="🚴">🚴 Cycling</SelectItem>
+                  <SelectItem value="🏊">🏊 Swimming</SelectItem>
+                  <SelectItem value="🧘">🧘 Meditation</SelectItem>
+                  <SelectItem value="🚶">🚶 Walking</SelectItem>
+                  <SelectItem value="⚽">⚽ Sports</SelectItem>
+                  <SelectItem value="🏋️">🏋️ Strength</SelectItem>
+                  <SelectItem value="🤸">🤸 Flexibility</SelectItem>
+
+                  {/* Education & Learning */}
+                  <SelectItem value="🎓">🎓 Education</SelectItem>
+                  <SelectItem value="📚">📚 Study</SelectItem>
+                  <SelectItem value="✏️">✏️ Writing</SelectItem>
+                  <SelectItem value="🔬">🔬 Science</SelectItem>
+                  <SelectItem value="🧮">🧮 Math</SelectItem>
+                  <SelectItem value="📖">📖 Reading</SelectItem>
+                  <SelectItem value="🎭">🎭 Arts</SelectItem>
+                  <SelectItem value="🎵">🎵 Music</SelectItem>
+                  <SelectItem value="🎤">🎤 Practice</SelectItem>
+
+                  {/* Work & Career */}
+                  <SelectItem value="💼">💼 Work</SelectItem>
+                  <SelectItem value="💻">💻 Computer</SelectItem>
+                  <SelectItem value="📞">📞 Call</SelectItem>
+                  <SelectItem value="📧">📧 Email</SelectItem>
+                  <SelectItem value="🤝">🤝 Meeting</SelectItem>
+                  <SelectItem value="🎯">🎯 Goal</SelectItem>
+                  <SelectItem value="🔬">🔬 Analysis</SelectItem>
+                  <SelectItem value="🔍">🔍 Research</SelectItem>
+
+                  {/* Finance & Money */}
+                  <SelectItem value="💰">💰 Money</SelectItem>
+                  <SelectItem value="💳">💳 Payment</SelectItem>
+                  <SelectItem value="🏦">🏦 Banking</SelectItem>
+                  <SelectItem value="💹">💹 Investment</SelectItem>
+                  <SelectItem value="💵">💵 Budget</SelectItem>
+                  <SelectItem value="🧾">🧾 Receipt</SelectItem>
+
+                  {/* Home & Family */}
+                  <SelectItem value="🏠">🏠 Home</SelectItem>
+                  <SelectItem value="👨‍👩‍👧‍👦">👨‍👩‍👧‍👦 Family</SelectItem>
+                  <SelectItem value="🧹">🧹 Cleaning</SelectItem>
+                  <SelectItem value="🍳">🍳 Cooking</SelectItem>
+                  <SelectItem value="🛒">🛒 Shopping</SelectItem>
+                  <SelectItem value="📦">📦 Package</SelectItem>
+                  <SelectItem value="🔧">🔧 Maintenance</SelectItem>
+                  <SelectItem value="🌱">🌱 Gardening</SelectItem>
+
+                  {/* Travel & Transportation */}
+                  <SelectItem value="✈️">✈️ Travel</SelectItem>
+                  <SelectItem value="🚗">🚗 Car</SelectItem>
+                  <SelectItem value="🚌">🚌 Transit</SelectItem>
+                  <SelectItem value="🚲">🚲 Bike</SelectItem>
+                  <SelectItem value="🗺️">🗺️ Navigation</SelectItem>
+                  <SelectItem value="🏨">🏨 Hotel</SelectItem>
+                  <SelectItem value="🎒">🎒 Trip</SelectItem>
+
+                  {/* Entertainment & Hobbies */}
+                  <SelectItem value="🎨">🎨 Creative</SelectItem>
+                  <SelectItem value="🎮">🎮 Gaming</SelectItem>
+                  <SelectItem value="📺">📺 Entertainment</SelectItem>
+                  <SelectItem value="🎬">🎬 Movies</SelectItem>
+                  <SelectItem value="📷">📷 Photography</SelectItem>
+                  <SelectItem value="🎪">🎪 Events</SelectItem>
+                  <SelectItem value="🎁">🎁 Gifts</SelectItem>
+                  <SelectItem value="🎉">🎉 Celebration</SelectItem>
+
+                  {/* Nature & Weather */}
+                  <SelectItem value="🌞">🌞 Sunny</SelectItem>
+                  <SelectItem value="🌧️">🌧️ Rainy</SelectItem>
+                  <SelectItem value="❄️">❄️ Cold</SelectItem>
+                  <SelectItem value="🌿">🌿 Nature</SelectItem>
+                  <SelectItem value="🌸">🌸 Seasonal</SelectItem>
+                  <SelectItem value="🌊">🌊 Water</SelectItem>
+                  <SelectItem value="🏔️">🏔️ Mountain</SelectItem>
+
+                  {/* Achievements & Goals */}
+                  <SelectItem value="⭐">⭐ Achievement</SelectItem>
+                  <SelectItem value="🏆">🏆 Trophy</SelectItem>
+                  <SelectItem value="🎖️">🎖️ Medal</SelectItem>
+                  <SelectItem value="🔥">🔥 Streak</SelectItem>
+                  <SelectItem value="💯">💯 Perfect</SelectItem>
+                  <SelectItem value="✅">✅ Complete</SelectItem>
+                  <SelectItem value="🎊">🎊 Success</SelectItem>
+
+                  {/* Emotions & Mood */}
+                  <SelectItem value="😊">😊 Happy</SelectItem>
+                  <SelectItem value="😌">😌 Calm</SelectItem>
+                  <SelectItem value="😔">😔 Sad</SelectItem>
+                  <SelectItem value="😤">😤 Frustrated</SelectItem>
+                  <SelectItem value="🤗">🤗 Grateful</SelectItem>
+                  <SelectItem value="🥱">🥱 Tired</SelectItem>
+                  <SelectItem value="⚡">⚡ Energetic</SelectItem>
+
+                  {/* Misc & Symbols */}
+                  <SelectItem value="🔔">🔔 Notification</SelectItem>
+                  <SelectItem value="⚠️">⚠️ Important</SelectItem>
+                  <SelectItem value="❓">❓ Question</SelectItem>
+                  <SelectItem value="💡">💡 Idea</SelectItem>
+                  <SelectItem value="🔑">🔑 Key</SelectItem>
+                  <SelectItem value="🎲">🎲 Random</SelectItem>
+                  <SelectItem value="🌟">🌟 Special</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="color" className="text-slate-200">
+                Color
+              </Label>
+              <Select
+                value={formData.color}
+                onValueChange={value =>
+                  setFormData({ ...formData, color: value })
+                }
+              >
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-slate-100 text-base sm:text-sm min-h-[44px] sm:min-h-[36px]">
+                  <SelectValue placeholder="Choose a color" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-700 border-slate-600">
+                  <SelectItem value="blue">Blue</SelectItem>
+                  <SelectItem value="green">Green</SelectItem>
+                  <SelectItem value="red">Red</SelectItem>
+                  <SelectItem value="yellow">Yellow</SelectItem>
+                  <SelectItem value="purple">Purple</SelectItem>
+                  <SelectItem value="pink">Pink</SelectItem>
+                  <SelectItem value="indigo">Indigo</SelectItem>
+                  <SelectItem value="gray">Gray</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Description field - always full width */}
@@ -405,49 +426,60 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
               Allow private records
             </Label>
           </div>
-          
+
           <div className="space-y-2">
-            <Label className="text-slate-200">
-              Available for members
-            </Label>
+            <Label className="text-slate-200">Available for members</Label>
             <p className="text-sm text-slate-400 mb-2">
-              Choose which household members can create records of this type. Select "All members" to make it available to everyone.
+              Choose which household members can create records of this type.
+              Select "All members" to make it available to everyone.
             </p>
-            
+
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="all-members"
                   checked={formData.visibleToMembers.length === 0}
-                  onChange={(e) => {
+                  onChange={e => {
                     if (e.target.checked) {
                       setFormData({ ...formData, visibleToMembers: [] });
                     } else {
                       // When unchecking "all members", select current user only as fallback
-                      setFormData({ ...formData, visibleToMembers: [createdBy] });
+                      setFormData({
+                        ...formData,
+                        visibleToMembers: [createdBy],
+                      });
                     }
                   }}
                   className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 cursor-pointer transition-all duration-200"
                 />
-                <label htmlFor="all-members" className="text-sm text-slate-300 cursor-pointer">
+                <label
+                  htmlFor="all-members"
+                  className="text-sm text-slate-300 cursor-pointer"
+                >
                   All household members
                 </label>
               </div>
-              
+
               <div className="text-xs text-slate-500 ml-6">
                 Or select specific members:
               </div>
-              
+
               {householdMembers && householdMembers.length > 0 && (
                 <div className="ml-6 space-y-2">
-                  {householdMembers.map((member) => (
-                    <div key={member.id} className="flex items-center space-x-2">
+                  {householdMembers.map(member => (
+                    <div
+                      key={member.id}
+                      className="flex items-center space-x-2"
+                    >
                       <input
                         type="checkbox"
                         id={`member-${member.id}`}
-                        checked={formData.visibleToMembers.length === 0 || formData.visibleToMembers.includes(member.id)}
-                        onChange={(e) => {
+                        checked={
+                          formData.visibleToMembers.length === 0 ||
+                          formData.visibleToMembers.includes(member.id)
+                        }
+                        onChange={e => {
                           if (formData.visibleToMembers.length === 0) {
                             // If "all members" was selected, switching to specific selection
                             if (!e.target.checked) {
@@ -458,41 +490,54 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                                 .map(m => m.id);
                               setFormData({
                                 ...formData,
-                                visibleToMembers: allOtherMembers
+                                visibleToMembers: allOtherMembers,
                               });
                             }
                             // If checking when all selected, do nothing (already selected)
                           } else {
                             // Normal toggle behavior for specific selection
                             if (e.target.checked) {
-                              const newMembers = [...formData.visibleToMembers, member.id];
+                              const newMembers = [
+                                ...formData.visibleToMembers,
+                                member.id,
+                              ];
                               // If all members are now selected, switch to "all members" mode
-                              if (newMembers.length === householdMembers.length) {
+                              if (
+                                newMembers.length === householdMembers.length
+                              ) {
                                 setFormData({
                                   ...formData,
-                                  visibleToMembers: []
+                                  visibleToMembers: [],
                                 });
                               } else {
                                 setFormData({
                                   ...formData,
-                                  visibleToMembers: newMembers
+                                  visibleToMembers: newMembers,
                                 });
                               }
                             } else {
-                              const newMembers = formData.visibleToMembers.filter(id => id !== member.id);
+                              const newMembers =
+                                formData.visibleToMembers.filter(
+                                  (id: number) => id !== member.id
+                                );
                               setFormData({
                                 ...formData,
-                                visibleToMembers: newMembers
+                                visibleToMembers: newMembers,
                               });
                             }
                           }
                         }}
                         className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 cursor-pointer transition-all duration-200"
                       />
-                      <label htmlFor={`member-${member.id}`} className="text-sm text-slate-300 cursor-pointer">
+                      <label
+                        htmlFor={`member-${member.id}`}
+                        className="text-sm text-slate-300 cursor-pointer"
+                      >
                         {member.name}
-                        {member.role === 'admin' && (
-                          <span className="ml-1 text-xs text-blue-400">(Admin)</span>
+                        {member.role === "admin" && (
+                          <span className="ml-1 text-xs text-blue-400">
+                            (Admin)
+                          </span>
                         )}
                       </label>
                     </div>
@@ -500,10 +545,14 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                 </div>
               )}
             </div>
-            
+
             {formData.visibleToMembers.length > 0 && (
               <div className="text-xs text-slate-400 mt-2 p-2 bg-slate-800 rounded">
-                This record type will only appear for: {householdMembers?.filter(m => formData.visibleToMembers.includes(m.id)).map(m => m.name).join(', ')}
+                This record type will only appear for:{" "}
+                {householdMembers
+                  ?.filter(m => formData.visibleToMembers.includes(m.id))
+                  .map(m => m.name)
+                  .join(", ")}
               </div>
             )}
           </div>
@@ -605,7 +654,13 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
             }
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 min-h-[44px] text-base sm:text-sm flex-1 sm:flex-initial"
           >
-            {isSubmitting ? (isEditing ? "Updating..." : "Creating...") : (isEditing ? "Update Record Type" : "Create Record Type")}
+            {isSubmitting
+              ? isEditing
+                ? "Updating..."
+                : "Creating..."
+              : isEditing
+                ? "Update Record Type"
+                : "Create Record Type"}
           </Button>
 
           {!showBackButton && (

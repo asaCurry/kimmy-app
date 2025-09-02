@@ -9,19 +9,19 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import type { BasicInsights } from "~/lib/analytics-service";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Minus, 
-  Users, 
-  FileText, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Users,
+  FileText,
   Calendar,
   AlertCircle,
   CheckCircle,
   Clock,
   Lightbulb,
   Target,
-  Activity
+  Activity,
 } from "lucide-react";
 
 interface InsightsDashboardProps {
@@ -35,14 +35,20 @@ export const InsightsDashboard: React.FC<InsightsDashboardProps> = ({
   generatedAt,
   cached = false,
 }) => {
-  const { summary, categoryInsights, memberInsights, patterns, recommendations } = insights;
+  const {
+    summary,
+    categoryInsights,
+    memberInsights,
+    patterns,
+    recommendations,
+  } = insights;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
     });
   };
 
@@ -155,22 +161,28 @@ export const InsightsDashboard: React.FC<InsightsDashboardProps> = ({
               <FileText className="w-5 h-5 text-blue-400" />
               Category Insights
             </CardTitle>
-            <CardDescription>
-              Record activity by category
-            </CardDescription>
+            <CardDescription>Record activity by category</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {categoryInsights.length === 0 ? (
-              <p className="text-slate-400 text-sm">No category data available</p>
+              <p className="text-slate-400 text-sm">
+                No category data available
+              </p>
             ) : (
-              categoryInsights.slice(0, 5).map((category) => (
-                <div key={category.category} className="flex items-center justify-between">
+              categoryInsights.slice(0, 5).map(category => (
+                <div
+                  key={category.category}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center gap-3">
                     {getTrendIcon(category.trend)}
                     <div>
-                      <p className="font-medium text-slate-200">{category.category}</p>
+                      <p className="font-medium text-slate-200">
+                        {category.category}
+                      </p>
                       <p className="text-sm text-slate-400">
-                        {category.count} records • {category.averagePerWeek}/week avg
+                        {category.count} records • {category.averagePerWeek}
+                        /week avg
                       </p>
                     </div>
                   </div>
@@ -198,14 +210,20 @@ export const InsightsDashboard: React.FC<InsightsDashboardProps> = ({
             {memberInsights.length === 0 ? (
               <p className="text-slate-400 text-sm">No member data available</p>
             ) : (
-              memberInsights.map((member) => (
-                <div key={member.memberId} className="flex items-center justify-between">
+              memberInsights.map(member => (
+                <div
+                  key={member.memberId}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center gap-3">
                     {getTrendIcon(member.trend)}
                     <div>
-                      <p className="font-medium text-slate-200">{member.memberName}</p>
+                      <p className="font-medium text-slate-200">
+                        {member.memberName}
+                      </p>
                       <p className="text-sm text-slate-400">
-                        {member.recordCount} records • {member.categories.length} categories
+                        {member.recordCount} records •{" "}
+                        {member.categories.length} categories
                       </p>
                     </div>
                   </div>
@@ -233,16 +251,23 @@ export const InsightsDashboard: React.FC<InsightsDashboardProps> = ({
           </CardHeader>
           <CardContent className="space-y-4">
             {patterns.map((pattern, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+              <div
+                key={index}
+                className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700"
+              >
                 {getPatternIcon(pattern.type)}
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <h4 className="font-medium text-slate-200">{pattern.title}</h4>
+                    <h4 className="font-medium text-slate-200">
+                      {pattern.title}
+                    </h4>
                     <Badge variant="outline" className="text-xs">
                       {pattern.confidence} confidence
                     </Badge>
                   </div>
-                  <p className="text-sm text-slate-400">{pattern.description}</p>
+                  <p className="text-sm text-slate-400">
+                    {pattern.description}
+                  </p>
                   {pattern.metadata && (
                     <div className="mt-2 text-xs text-slate-500">
                       <pre>{JSON.stringify(pattern.metadata, null, 2)}</pre>
@@ -268,13 +293,18 @@ export const InsightsDashboard: React.FC<InsightsDashboardProps> = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recommendations.map((rec) => (
-              <div key={rec.id} className="flex items-start gap-3 p-4 bg-slate-800/30 rounded-lg border border-slate-600">
+            {recommendations.map(rec => (
+              <div
+                key={rec.id}
+                className="flex items-start gap-3 p-4 bg-slate-800/30 rounded-lg border border-slate-600"
+              >
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium text-slate-200">{rec.title}</h4>
                     <div className="flex items-center gap-2">
-                      <Badge className={getPriorityColor(rec.priority || "medium")}>
+                      <Badge
+                        className={getPriorityColor(rec.priority || "medium")}
+                      >
                         {rec.priority || "medium"}
                       </Badge>
                       {rec.status === "active" && (
@@ -282,12 +312,18 @@ export const InsightsDashboard: React.FC<InsightsDashboardProps> = ({
                       )}
                     </div>
                   </div>
-                  <p className="text-sm text-slate-400 mb-3">{rec.description}</p>
+                  <p className="text-sm text-slate-400 mb-3">
+                    {rec.description}
+                  </p>
                   <div className="flex items-center gap-2">
                     <Button size="sm" variant="outline" className="text-xs">
                       Mark Complete
                     </Button>
-                    <Button size="sm" variant="ghost" className="text-xs text-slate-400">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-xs text-slate-400"
+                    >
                       Dismiss
                     </Button>
                   </div>
@@ -307,11 +343,10 @@ export const InsightsDashboard: React.FC<InsightsDashboardProps> = ({
               No Data to Analyze
             </h3>
             <p className="text-slate-400 mb-4">
-              Start by adding some records to your household to see insights and patterns.
+              Start by adding some records to your household to see insights and
+              patterns.
             </p>
-            <Button variant="outline">
-              Add Your First Record
-            </Button>
+            <Button variant="outline">Add Your First Record</Button>
           </CardContent>
         </Card>
       )}

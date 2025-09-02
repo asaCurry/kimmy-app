@@ -1,4 +1,3 @@
-import type { Route } from "./+types/forgot-password";
 import * as React from "react";
 import { useState } from "react";
 import { Link, useFetcher } from "react-router";
@@ -10,7 +9,7 @@ import { Label } from "~/components/ui/label";
 import { Mail, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "react-toastify";
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
     { title: "Forgot Password - Hey, Kimmy" },
     { name: "description", content: "Reset your Hey, Kimmy account password" },
@@ -62,14 +61,19 @@ export default function ForgotPasswordPage() {
     return (
       <PageLayout maxWidth="2xl" showFooter={false}>
         <div className="max-w-md mx-auto">
-          <PageHeader title="Check Your Email" subtitle="Password reset instructions sent" />
+          <PageHeader
+            title="Check Your Email"
+            subtitle="Password reset instructions sent"
+          />
 
           <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
             <CardHeader className="text-center">
               <div className="mx-auto w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
                 <CheckCircle className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-xl text-slate-100">Email Sent!</CardTitle>
+              <CardTitle className="text-xl text-slate-100">
+                Email Sent!
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-slate-300">
@@ -86,13 +90,13 @@ export default function ForgotPasswordPage() {
                       Check your spam folder
                     </p>
                     <p className="text-xs text-amber-300/80">
-                      Sometimes our emails end up in spam or promotional folders. 
-                      The reset link expires in 30 minutes.
+                      Sometimes our emails end up in spam or promotional
+                      folders. The reset link expires in 30 minutes.
                     </p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="pt-4 space-y-3">
                 <Button
                   onClick={() => {
@@ -104,7 +108,7 @@ export default function ForgotPasswordPage() {
                 >
                   Send to Different Email
                 </Button>
-                
+
                 <Link
                   to="/login"
                   className="inline-flex items-center justify-center w-full text-sm text-blue-400 hover:text-blue-300 transition-colors"
@@ -123,14 +127,19 @@ export default function ForgotPasswordPage() {
   return (
     <PageLayout maxWidth="2xl" showFooter={false}>
       <div className="max-w-md mx-auto">
-        <PageHeader title="Reset Password" subtitle="Enter your email to get started" />
+        <PageHeader
+          title="Reset Password"
+          subtitle="Enter your email to get started"
+        />
 
         <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
           <CardHeader className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
               <Mail className="h-8 w-8 text-white" />
             </div>
-            <CardTitle className="text-xl text-slate-100">Forgot Password</CardTitle>
+            <CardTitle className="text-xl text-slate-100">
+              Forgot Password
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -142,7 +151,7 @@ export default function ForgotPasswordPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   placeholder="Enter your email address"
                   autoComplete="email"
                   autoCapitalize="off"
@@ -198,7 +207,7 @@ export default function ForgotPasswordPage() {
             Security Notice
           </h4>
           <p className="text-xs text-slate-400 mb-3">
-            For security reasons, we'll send reset instructions to your email 
+            For security reasons, we'll send reset instructions to your email
             regardless of whether an account exists with that address.
           </p>
           <p className="text-xs text-slate-500">

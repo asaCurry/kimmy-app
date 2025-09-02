@@ -1,17 +1,30 @@
-import type { 
-  LoaderFunctionArgs, 
-  ActionFunctionArgs, 
-  MetaArgs 
+import type {
+  LoaderFunctionArgs,
+  ActionFunctionArgs,
+  MetaArgs,
 } from "react-router";
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Link, useSearchParams, useFetcher, useNavigate, useLoaderData } from "react-router";
+import {
+  Link,
+  useSearchParams,
+  useFetcher,
+  useNavigate,
+  useLoaderData,
+} from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Key, Eye, EyeOff, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import {
+  Key,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  XCircle,
+  ArrowLeft,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import { getDatabase } from "~/lib/db-utils";
 import { PasswordResetService } from "~/lib/password-reset";
@@ -19,10 +32,13 @@ import { hashPassword } from "~/lib/password-utils";
 import { users } from "~/db/schema";
 import { eq } from "drizzle-orm";
 
-export function meta({}: MetaArgs) {
+export function meta(_args: MetaArgs) {
   return [
     { title: "Reset Password - Hey, Kimmy" },
-    { name: "description", content: "Set your new Hey, Kimmy account password" },
+    {
+      name: "description",
+      content: "Set your new Hey, Kimmy account password",
+    },
   ];
 }
 
@@ -141,7 +157,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
       success: true,
       message: "Password reset successfully",
     });
-
   } catch (error) {
     console.error("Error resetting password:", error);
     return Response.json({
@@ -173,7 +188,7 @@ export default function ResetPasswordPage() {
         toast.success("Password reset successfully!", {
           position: "top-right",
         });
-        
+
         // Redirect to login after 3 seconds
         setTimeout(() => {
           navigate("/login");
@@ -200,7 +215,9 @@ export default function ResetPasswordPage() {
     }
 
     if (formData.password.length < 8) {
-      toast.error("Password must be at least 8 characters long", { position: "top-right" });
+      toast.error("Password must be at least 8 characters long", {
+        position: "top-right",
+      });
       return;
     }
 
@@ -219,20 +236,25 @@ export default function ResetPasswordPage() {
     return (
       <PageLayout maxWidth="2xl" showFooter={false}>
         <div className="max-w-md mx-auto">
-          <PageHeader title="Invalid Reset Link" subtitle="This link is no longer valid" />
+          <PageHeader
+            title="Invalid Reset Link"
+            subtitle="This link is no longer valid"
+          />
 
           <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
             <CardHeader className="text-center">
               <div className="mx-auto w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mb-4">
                 <XCircle className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-xl text-slate-100">Link Expired</CardTitle>
+              <CardTitle className="text-xl text-slate-100">
+                Link Expired
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-slate-300">
                 {error || "This password reset link is invalid or has expired."}
               </p>
-              
+
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
                 <p className="text-sm text-amber-400">
                   Reset links expire after 30 minutes for security reasons.
@@ -245,7 +267,7 @@ export default function ResetPasswordPage() {
                     Request New Reset Link
                   </Button>
                 </Link>
-                
+
                 <Link
                   to="/login"
                   className="inline-flex items-center justify-center w-full text-sm text-blue-400 hover:text-blue-300 transition-colors"
@@ -266,7 +288,10 @@ export default function ResetPasswordPage() {
     return (
       <PageLayout maxWidth="2xl" showFooter={false}>
         <div className="max-w-md mx-auto">
-          <PageHeader title="Password Reset" subtitle="Your password has been updated" />
+          <PageHeader
+            title="Password Reset"
+            subtitle="Your password has been updated"
+          />
 
           <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
             <CardHeader className="text-center">
@@ -279,7 +304,7 @@ export default function ResetPasswordPage() {
               <p className="text-slate-300">
                 Your password has been reset successfully.
               </p>
-              
+
               <p className="text-sm text-slate-400">
                 You'll be redirected to the sign in page in a few seconds.
               </p>
@@ -300,14 +325,19 @@ export default function ResetPasswordPage() {
   return (
     <PageLayout maxWidth="2xl" showFooter={false}>
       <div className="max-w-md mx-auto">
-        <PageHeader title="Set New Password" subtitle={`Hello, ${user?.name}`} />
+        <PageHeader
+          title="Set New Password"
+          subtitle={`Hello, ${user?.name}`}
+        />
 
         <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
           <CardHeader className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
               <Key className="h-8 w-8 text-white" />
             </div>
-            <CardTitle className="text-xl text-slate-100">Create New Password</CardTitle>
+            <CardTitle className="text-xl text-slate-100">
+              Create New Password
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -320,7 +350,12 @@ export default function ResetPasswordPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
-                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        password: e.target.value,
+                      }))
+                    }
                     placeholder="Enter your new password"
                     autoComplete="new-password"
                     disabled={isLoading}
@@ -331,7 +366,11 @@ export default function ResetPasswordPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -345,7 +384,12 @@ export default function ResetPasswordPage() {
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     value={formData.confirmPassword}
-                    onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        confirmPassword: e.target.value,
+                      }))
+                    }
                     placeholder="Confirm your new password"
                     autoComplete="new-password"
                     disabled={isLoading}
@@ -356,7 +400,11 @@ export default function ResetPasswordPage() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
                   >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 <p className="text-xs text-slate-400">

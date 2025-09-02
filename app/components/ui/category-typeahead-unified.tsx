@@ -52,17 +52,20 @@ export const CategoryTypeaheadUnified: React.FC<CategoryTypeaheadProps> = ({
     }));
   }, [getCategorySuggestions, maxSuggestions]);
 
-  const handleCreateCategory = React.useCallback(async (categoryName: string) => {
-    if (!allowCreate) return;
-    
-    try {
-      await addCategory(householdId, categoryName);
-      onChange(categoryName);
-    } catch (error) {
-      console.error("Failed to create category:", error);
-      throw error; // Re-throw so the select component can handle it
-    }
-  }, [addCategory, householdId, onChange, allowCreate]);
+  const handleCreateCategory = React.useCallback(
+    async (categoryName: string) => {
+      if (!allowCreate) return;
+
+      try {
+        await addCategory(householdId, categoryName);
+        onChange(categoryName);
+      } catch (error) {
+        console.error("Failed to create category:", error);
+        throw error; // Re-throw so the select component can handle it
+      }
+    },
+    [addCategory, householdId, onChange, allowCreate]
+  );
 
   return (
     <UnifiedSelect
@@ -79,7 +82,7 @@ export const CategoryTypeaheadUnified: React.FC<CategoryTypeaheadProps> = ({
       searchable={true}
       creatable={allowCreate}
       onCreateOption={handleCreateCategory}
-      createText={(query) => `Create "${query}"`}
+      createText={query => `Create "${query}"`}
       noOptionsText="No categories found"
     />
   );

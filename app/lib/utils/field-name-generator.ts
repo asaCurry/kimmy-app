@@ -6,10 +6,10 @@
 export function generateFieldName(label: string): string {
   return label
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '') // Remove special characters
-    .replace(/\s+/g, '_') // Replace spaces with underscores
-    .replace(/_+/g, '_') // Replace multiple underscores with single
-    .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
+    .replace(/[^a-z0-9\s]/g, "") // Remove special characters
+    .replace(/\s+/g, "_") // Replace spaces with underscores
+    .replace(/_+/g, "_") // Replace multiple underscores with single
+    .replace(/^_|_$/g, ""); // Remove leading/trailing underscores
 }
 
 /**
@@ -18,15 +18,18 @@ export function generateFieldName(label: string): string {
  * @param existingNames - Array of existing field names to check against
  * @returns unique field name
  */
-export function ensureUniqueFieldName(desiredName: string, existingNames: string[]): string {
+export function ensureUniqueFieldName(
+  desiredName: string,
+  existingNames: string[]
+): string {
   let uniqueName = desiredName;
   let counter = 1;
-  
+
   while (existingNames.includes(uniqueName)) {
     uniqueName = `${desiredName}_${counter}`;
     counter++;
   }
-  
+
   return uniqueName;
 }
 
@@ -36,7 +39,10 @@ export function ensureUniqueFieldName(desiredName: string, existingNames: string
  * @param existingFieldNames - Array of existing field names
  * @returns unique snake_case field name
  */
-export function createUniqueFieldName(label: string, existingFieldNames: string[]): string {
+export function createUniqueFieldName(
+  label: string,
+  existingFieldNames: string[]
+): string {
   const baseName = generateFieldName(label);
   return ensureUniqueFieldName(baseName, existingFieldNames);
 }

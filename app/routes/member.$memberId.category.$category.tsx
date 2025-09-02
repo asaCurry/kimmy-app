@@ -470,7 +470,7 @@ export default function CategoryRecordTypes() {
                             </span>
                             <button
                               type="button"
-                              onClick={(e) => {
+                              onClick={e => {
                                 e.stopPropagation();
                                 navigate(
                                   `/member/${member.id}/category/${encodeURIComponent(category)}/edit-record-type/${recordType.id}`
@@ -479,8 +479,18 @@ export default function CategoryRecordTypes() {
                               className="text-slate-400 hover:text-slate-200 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md hover:bg-slate-700/50"
                               title="Edit record type"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
                               </svg>
                             </button>
                           </div>

@@ -15,7 +15,7 @@ import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { loadHouseholdData } from "~/lib/loader-helpers";
 import { HouseholdmemberForm } from "~/components/manage/household-member-form";
 
-export function meta({}: Route.MetaArgs) {
+export function meta(_: Route.MetaArgs) {
   return [
     { title: "Add Household member - Kimmy" },
     { name: "description", content: "Add a new member to your household" },

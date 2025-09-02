@@ -72,11 +72,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     }
 
     // Load household data from URL params
-    const { householdId, currentMember, householdMembers } = await loadHouseholdDataWithMember(
-      request,
-      env,
-      memberId
-    );
+    const { householdId, currentMember, householdMembers } =
+      await loadHouseholdDataWithMember(request, env, memberId);
 
     // If no household data found, redirect to welcome
     if (!householdId) {
@@ -237,7 +234,7 @@ const CreateRecordType: React.FC<Route.ComponentProps> = ({
           createdBy={currentMember.id}
           category={category}
           existingCategories={loaderData.existingCategories}
-          householdMembers={householdMembers}
+          householdMembers={householdMembers as any}
           onSuccess={() => {
             // Navigate to the category page with the newly created record type
             navigate(

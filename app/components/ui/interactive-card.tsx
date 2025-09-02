@@ -25,34 +25,39 @@ const InteractiveCard = React.forwardRef<
     variant?: "default" | "dashed";
     onClick?: () => void;
   }
->(({ className, variant = "default", onClick, children, onKeyDown, ...props }, ref) => {
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if ((e.key === 'Enter' || e.key === ' ') && onClick) {
-      e.preventDefault();
-      onClick();
-    }
-    onKeyDown?.(e);
-  };
+>(
+  (
+    { className, variant = "default", onClick, children, onKeyDown, ...props },
+    ref
+  ) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if ((e.key === "Enter" || e.key === " ") && onClick) {
+        e.preventDefault();
+        onClick();
+      }
+      onKeyDown?.(e);
+    };
 
-  return (
-    <Card
-      ref={ref}
-      className={cn(
-        variant === "dashed"
-          ? INTERACTIVE_CARD_STYLES.dashed
-          : INTERACTIVE_CARD_STYLES.base,
-        className
-      )}
-      onClick={onClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={onClick ? 0 : undefined}
-      role={onClick ? "button" : undefined}
-      {...props}
-    >
-      {children}
-    </Card>
-  );
-});
+    return (
+      <Card
+        ref={ref}
+        className={cn(
+          variant === "dashed"
+            ? INTERACTIVE_CARD_STYLES.dashed
+            : INTERACTIVE_CARD_STYLES.base,
+          className
+        )}
+        onClick={onClick}
+        onKeyDown={handleKeyDown}
+        tabIndex={onClick ? 0 : undefined}
+        role={onClick ? "button" : undefined}
+        {...props}
+      >
+        {children}
+      </Card>
+    );
+  }
+);
 InteractiveCard.displayName = "InteractiveCard";
 
 // Reusable card with icon, title, description and optional chevron

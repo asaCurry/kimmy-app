@@ -58,9 +58,9 @@ const PageHeader = React.forwardRef<
     subtitle?: string;
   }
 >(({ className, title, subtitle, ...props }, ref) => (
-  <header 
-    ref={ref} 
-    className={cn("mb-6 sm:mb-8 lg:mb-10", className)} 
+  <header
+    ref={ref}
+    className={cn("mb-6 sm:mb-8 lg:mb-10", className)}
     {...props}
     role="banner"
   >

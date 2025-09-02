@@ -181,6 +181,7 @@ export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
                     icon: record.recordTypeIcon,
                     color: record.recordTypeColor,
                     allowPrivate: record.isPrivate ? 1 : 0,
+                    visibleToMembers: null,
                     createdBy: null,
                     createdAt: "",
                   };

@@ -1,11 +1,11 @@
-import { eq, and, gt } from "drizzle-orm";
+import { eq, and, lt, gt } from "drizzle-orm";
 import { users, passwordResetTokens } from "~/db/schema";
-import type { 
-  PasswordResetToken, 
+import type {
+  PasswordResetToken,
   NewPasswordResetToken,
-  User 
+  User,
 } from "~/db/schema";
-import { generateSecureToken } from "./secure-session";
+import { createSecureToken } from "./secure-session";
 
 export class PasswordResetService {
   constructor(private db: any) {}
@@ -17,7 +17,9 @@ export class PasswordResetService {
     // Generate a cryptographically secure random token
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return Array.from(array, byte => byte.toString(16).padStart(2, "0")).join(
+      ""
+    );
   }
 
   /**
@@ -25,7 +27,9 @@ export class PasswordResetService {
    * @param email - User's email address
    * @returns Token data if user exists, null otherwise
    */
-  async createResetToken(email: string): Promise<{ token: string; user: User } | null> {
+  async createResetToken(
+    email: string
+  ): Promise<{ token: string; user: User } | null> {
     // Find user by email
     const [user] = await this.db
       .select()
@@ -39,7 +43,7 @@ export class PasswordResetService {
 
     // Generate secure token
     const token = this.generateResetToken();
-    
+
     // Set expiration time (30 minutes from now)
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 30);
@@ -61,7 +65,9 @@ export class PasswordResetService {
    * @param token - Reset token
    * @returns Token data if valid, null otherwise
    */
-  async validateResetToken(token: string): Promise<{ tokenData: PasswordResetToken; user: User } | null> {
+  async validateResetToken(
+    token: string
+  ): Promise<{ tokenData: PasswordResetToken; user: User } | null> {
     const now = new Date().toISOString();
 
     // Find valid, unused, non-expired token
@@ -113,13 +119,13 @@ export class PasswordResetService {
    */
   async cleanupExpiredTokens(): Promise<number> {
     const now = new Date().toISOString();
-    
+
     const result = await this.db
       .delete(passwordResetTokens)
       .where(
         and(
           eq(passwordResetTokens.used, 0),
-          gt(now, passwordResetTokens.expiresAt)
+          lt(passwordResetTokens.expiresAt, now)
         )
       );
 
@@ -147,14 +153,14 @@ export class PasswordResetService {
  * Email template for password reset
  */
 export function generateResetEmailContent(
-  userName: string, 
-  resetToken: string, 
+  userName: string,
+  resetToken: string,
   baseUrl: string
 ): { subject: string; html: string; text: string } {
   const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
-  
+
   const subject = "Reset Your Password - Hey, Kimmy";
-  
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -200,7 +206,7 @@ export function generateResetEmailContent(
     </body>
     </html>
   `;
-  
+
   const text = `
     Hey, Kimmy - Password Reset
     
@@ -217,6 +223,6 @@ export function generateResetEmailContent(
     
     - The Hey, Kimmy Team
   `;
-  
+
   return { subject, html, text };
 }
