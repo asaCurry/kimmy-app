@@ -2,7 +2,8 @@ import * as React from "react";
 import { cn } from "~/lib/utils";
 import type { UseFormRegisterReturn } from "react-hook-form";
 import { validateFieldValue } from "~/lib/utils/dynamic-fields/schema-generation";
-import { UnifiedInput, UnifiedTextarea, UnifiedSelect } from "./form-field-unified";
+import { UnifiedInput, UnifiedTextarea } from "./form-field-unified";
+import { UnifiedSelect } from "./select-unified";
 import { getInputClasses } from "~/lib/ui/input-styles";
 import type { InputValidation } from "~/hooks/use-input-state";
 
@@ -53,14 +54,22 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({ field }) => {
   };
 
   // Convert options to unified format
-  const selectOptions = field.options?.map((option: any) => {
-    if (typeof option === "string") {
-      return { label: option, value: option };
-    } else if (option && typeof option === "object" && option.value && option.label) {
-      return { label: option.label, value: option.value };
-    }
-    return null;
-  }).filter(Boolean) || [];
+  const selectOptions =
+    (field.options
+      ?.map((option: any) => {
+        if (typeof option === "string") {
+          return { label: option, value: option };
+        } else if (
+          option &&
+          typeof option === "object" &&
+          option.value &&
+          option.label
+        ) {
+          return { label: option.label, value: option.value };
+        }
+        return null;
+      })
+      .filter(Boolean) as { label: string; value: string }[]) || [];
 
   switch (field.type) {
     case "textarea":
@@ -71,10 +80,14 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({ field }) => {
           error={field.error?.message}
           required={field.required}
           validation={validation}
-          placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+          placeholder={
+            field.placeholder || `Enter ${field.label.toLowerCase()}`
+          }
           {...field.register}
-          onChange={(value) => {
-            const syntheticEvent = { target: { value } } as React.ChangeEvent<HTMLTextAreaElement>;
+          onChange={value => {
+            const syntheticEvent = {
+              target: { value },
+            } as React.ChangeEvent<HTMLTextAreaElement>;
             field.register.onChange(syntheticEvent);
           }}
         />
@@ -90,8 +103,10 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({ field }) => {
           options={selectOptions}
           placeholder={`Select ${field.label.toLowerCase()}`}
           {...field.register}
-          onChange={(value) => {
-            const syntheticEvent = { target: { value } } as React.ChangeEvent<HTMLSelectElement>;
+          onChange={(value: string) => {
+            const syntheticEvent = {
+              target: { value },
+            } as React.ChangeEvent<HTMLSelectElement>;
             field.register.onChange(syntheticEvent);
           }}
         />
@@ -104,7 +119,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({ field }) => {
             <input
               type="checkbox"
               {...field.register}
-              className={getInputClasses({ variant: 'checkbox' })}
+              className={getInputClasses({ variant: "checkbox" })}
               aria-describedby={field.helpText ? `${field.id}-help` : undefined}
             />
             <span className="text-sm text-slate-300">
@@ -134,13 +149,17 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({ field }) => {
           error={field.error?.message}
           required={field.required}
           validation={validation}
-          placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+          placeholder={
+            field.placeholder || `Enter ${field.label.toLowerCase()}`
+          }
           min={field.validation?.min}
           max={field.validation?.max}
           step="any"
           {...field.register}
-          onChange={(value) => {
-            const syntheticEvent = { target: { value } } as React.ChangeEvent<HTMLInputElement>;
+          onChange={value => {
+            const syntheticEvent = {
+              target: { value },
+            } as React.ChangeEvent<HTMLInputElement>;
             field.register.onChange(syntheticEvent);
           }}
         />
@@ -155,10 +174,14 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({ field }) => {
           error={field.error?.message}
           required={field.required}
           validation={validation}
-          placeholder={field.placeholder || `Select ${field.label.toLowerCase()}`}
+          placeholder={
+            field.placeholder || `Select ${field.label.toLowerCase()}`
+          }
           {...field.register}
-          onChange={(value) => {
-            const syntheticEvent = { target: { value } } as React.ChangeEvent<HTMLInputElement>;
+          onChange={value => {
+            const syntheticEvent = {
+              target: { value },
+            } as React.ChangeEvent<HTMLInputElement>;
             field.register.onChange(syntheticEvent);
           }}
         />
@@ -174,8 +197,10 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({ field }) => {
           required={field.required}
           accept="image/*,.pdf,.doc,.docx,.txt"
           {...field.register}
-          onChange={(value) => {
-            const syntheticEvent = { target: { value } } as React.ChangeEvent<HTMLInputElement>;
+          onChange={value => {
+            const syntheticEvent = {
+              target: { value },
+            } as React.ChangeEvent<HTMLInputElement>;
             field.register.onChange(syntheticEvent);
           }}
         />
@@ -190,10 +215,14 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({ field }) => {
           error={field.error?.message}
           required={field.required}
           validation={validation}
-          placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+          placeholder={
+            field.placeholder || `Enter ${field.label.toLowerCase()}`
+          }
           {...field.register}
-          onChange={(value) => {
-            const syntheticEvent = { target: { value } } as React.ChangeEvent<HTMLInputElement>;
+          onChange={value => {
+            const syntheticEvent = {
+              target: { value },
+            } as React.ChangeEvent<HTMLInputElement>;
             field.register.onChange(syntheticEvent);
           }}
         />

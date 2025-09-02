@@ -106,14 +106,17 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       .orderBy(desc(records.datetime), desc(records.createdAt));
 
     // Group records by category
-    const recordsByCategory = allRecords.reduce((acc, record) => {
-      const category = record.category || "Uncategorized";
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(record);
-      return acc;
-    }, {} as Record<string, typeof allRecords>);
+    const recordsByCategory = allRecords.reduce(
+      (acc, record) => {
+        const category = record.category || "Uncategorized";
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(record);
+        return acc;
+      },
+      {} as Record<string, typeof allRecords>
+    );
 
     return {
       member: currentMember,
@@ -189,7 +192,8 @@ export default function MemberRecords({ loaderData }: Route.ComponentProps) {
                     <CardTitle className="text-slate-200 flex items-center justify-between">
                       <span>{category}</span>
                       <span className="text-sm font-normal text-slate-400">
-                        {categoryRecords.length} record{categoryRecords.length !== 1 ? 's' : ''}
+                        {categoryRecords.length} record
+                        {categoryRecords.length !== 1 ? "s" : ""}
                       </span>
                     </CardTitle>
                   </CardHeader>
@@ -217,11 +221,19 @@ export default function MemberRecords({ loaderData }: Route.ComponentProps) {
                             <div className="text-right">
                               <p className="text-xs text-slate-400">
                                 {record.datetime
-                                  ? new Date(record.datetime).toLocaleDateString()
-                                  : record.createdAt ? new Date(record.createdAt).toLocaleDateString() : 'No date'}
+                                  ? new Date(
+                                      record.datetime
+                                    ).toLocaleDateString()
+                                  : record.createdAt
+                                    ? new Date(
+                                        record.createdAt
+                                      ).toLocaleDateString()
+                                    : "No date"}
                               </p>
                               {record.isPrivate === 1 && (
-                                <span className="text-xs text-orange-400">🔒 Private</span>
+                                <span className="text-xs text-orange-400">
+                                  🔒 Private
+                                </span>
                               )}
                             </div>
                           </div>
@@ -232,21 +244,32 @@ export default function MemberRecords({ loaderData }: Route.ComponentProps) {
                                   const content = JSON.parse(record.content);
                                   return (
                                     <div className="space-y-1">
-                                      {Object.entries(content).slice(0, 3).map(([key, value]) => (
-                                        <div key={key} className="flex">
-                                          <span className="text-slate-400 capitalize min-w-[80px]">{key.replace(/_/g, ' ')}:</span>
-                                          <span className="text-slate-200">{String(value)}</span>
-                                        </div>
-                                      ))}
+                                      {Object.entries(content)
+                                        .slice(0, 3)
+                                        .map(([key, value]) => (
+                                          <div key={key} className="flex">
+                                            <span className="text-slate-400 capitalize min-w-[80px]">
+                                              {key.replace(/_/g, " ")}:
+                                            </span>
+                                            <span className="text-slate-200">
+                                              {String(value)}
+                                            </span>
+                                          </div>
+                                        ))}
                                       {Object.keys(content).length > 3 && (
                                         <p className="text-xs text-slate-500 italic">
-                                          +{Object.keys(content).length - 3} more fields...
+                                          +{Object.keys(content).length - 3}{" "}
+                                          more fields...
                                         </p>
                                       )}
                                     </div>
                                   );
                                 } catch {
-                                  return <span className="text-slate-300">{record.content}</span>;
+                                  return (
+                                    <span className="text-slate-300">
+                                      {record.content}
+                                    </span>
+                                  );
                                 }
                               })()}
                             </div>
@@ -264,8 +287,8 @@ export default function MemberRecords({ loaderData }: Route.ComponentProps) {
         {categories.length > 0 && (
           <div className="text-center mt-8">
             <Link to={`/member/${member.id}`}>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="border-slate-600 text-slate-400 hover:bg-slate-700"
               >
                 ← Back to Categories

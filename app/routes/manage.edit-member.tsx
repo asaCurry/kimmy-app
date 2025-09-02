@@ -15,7 +15,7 @@ import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { loadHouseholdData } from "~/lib/loader-helpers";
 import { HouseholdmemberEdit } from "~/components/manage/household-member-edit";
 
-export function meta({}: Route.MetaArgs) {
+export function meta(_: Route.MetaArgs) {
   return [
     { title: "Edit Household member - Kimmy" },
     {

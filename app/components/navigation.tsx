@@ -28,7 +28,13 @@ import {
 import type { Householdmember, RecordType } from "~/lib/utils";
 
 interface NavigationProps {
-  currentView: "home" | "categories" | "record-types" | "form" | "household-records" | "records";
+  currentView:
+    | "home"
+    | "categories"
+    | "record-types"
+    | "form"
+    | "household-records"
+    | "records";
   member?: Householdmember;
   category?: string;
   recordType?: RecordType;

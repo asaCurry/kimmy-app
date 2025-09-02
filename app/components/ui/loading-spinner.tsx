@@ -5,6 +5,7 @@ interface LoadingSpinnerProps {
   color?: string;
   text?: string;
   className?: string;
+  "data-testid"?: string;
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
@@ -12,6 +13,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   color = "border-blue-500",
   text,
   className = "",
+  "data-testid": testId,
 }) => {
   const sizeClasses = {
     sm: "h-6 w-6",
@@ -20,10 +22,16 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   };
 
   return (
-    <div className={`flex items-center justify-center ${className}`}>
+    <div
+      className={`flex items-center justify-center ${className}`}
+      role="status"
+      aria-label={text || "Loading"}
+      data-testid={testId}
+    >
       <div className="text-center">
         <div
           className={`animate-spin rounded-full ${sizeClasses[size]} border-b-2 ${color} mx-auto mb-4`}
+          data-testid={testId ? `${testId}-spinner` : undefined}
         ></div>
         {text && <p className="text-slate-300">{text}</p>}
       </div>

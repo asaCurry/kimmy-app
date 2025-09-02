@@ -63,16 +63,24 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     const formData = await request.formData();
-    const validActions = ["complete-tracking", "quick-log", "create-entry", "delete-entry"];
+    const validActions = [
+      "complete-tracking",
+      "quick-log",
+      "create-entry",
+      "delete-entry",
+    ];
     const action = validateAction(formData.get("_action"), validActions);
-    
+
     const validatedSession = validateSession(session);
     const trackerDB = new TrackerDB(db);
 
     switch (action) {
       case "complete-tracking": {
         try {
-          const trackerId = safeParseInt(formData.get("trackerId"), "trackerId");
+          const trackerId = safeParseInt(
+            formData.get("trackerId"),
+            "trackerId"
+          );
           const memberId = safeParseOptionalInt(formData.get("memberId"));
           const startTimeStr = formData.get("startTime") as string;
           const endTimeStr = formData.get("endTime") as string;
@@ -116,10 +124,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
           return ApiResponse.success({ entry });
         } catch (error) {
           apiLogger.error("Error in complete-tracking", {
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: error instanceof Error ? error.message : "Unknown error",
           });
           return ApiResponse.error(
-            error instanceof Error ? error.message : "Failed to complete tracking"
+            error instanceof Error
+              ? error.message
+              : "Failed to complete tracking"
           );
         }
       }
@@ -144,10 +154,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
           return ApiResponse.success({ entry });
         } catch (error) {
           apiLogger.error("Error in quick-log", {
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: error instanceof Error ? error.message : "Unknown error",
           });
           return ApiResponse.error(
-            error instanceof Error ? error.message : "Failed to create quick log"
+            error instanceof Error
+              ? error.message
+              : "Failed to create quick log"
           );
         }
       }
@@ -174,7 +186,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           return ApiResponse.success({ entry });
         } catch (error) {
           apiLogger.error("Error in create-entry", {
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: error instanceof Error ? error.message : "Unknown error",
           });
           return ApiResponse.error(
             error instanceof Error ? error.message : "Failed to create entry"
@@ -190,7 +202,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
             id,
             validatedSession.currentHouseholdId
           );
-          
+
           if (!success) {
             return ApiResponse.notFound("Entry");
           }
@@ -198,7 +210,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           return ApiResponse.success({ deleted: true });
         } catch (error) {
           apiLogger.error("Error in delete-entry", {
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: error instanceof Error ? error.message : "Unknown error",
           });
           return ApiResponse.error(
             error instanceof Error ? error.message : "Failed to delete entry"
@@ -211,14 +223,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
   } catch (error) {
     apiLogger.error("Error in tracker entry action", {
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : "Unknown error",
     });
-    
+
     // Handle validation errors specifically
     if (error instanceof Error && error.message.includes("required")) {
       return ApiResponse.error(error.message, 400);
     }
-    
+
     return ApiResponse.serverError("Failed to perform action");
   }
 }

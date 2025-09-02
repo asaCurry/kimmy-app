@@ -87,11 +87,13 @@ export function TrackerHistory({
     filtered.sort((a, b) => {
       if (sortBy === "newest") {
         return (
-          new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
+          new Date(b.createdAt || "").getTime() -
+          new Date(a.createdAt || "").getTime()
         );
       } else if (sortBy === "oldest") {
         return (
-          new Date(a.createdAt || '').getTime() - new Date(b.createdAt || '').getTime()
+          new Date(a.createdAt || "").getTime() -
+          new Date(b.createdAt || "").getTime()
         );
       } else if (sortBy === "value-high") {
         return b.value - a.value;
@@ -290,7 +292,9 @@ export function TrackerHistory({
                         {formatValue(entry.value)}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        {entry.createdAt ? formatDate(entry.createdAt) : 'Unknown date'}
+                        {entry.createdAt
+                          ? formatDate(entry.createdAt)
+                          : "Unknown date"}
                       </span>
                       {entry.isActive && (
                         <Badge variant="default" className="text-xs">

@@ -47,11 +47,11 @@ export const quickLogSchema = z.object({
 });
 
 // Re-export database types for convenience
-export type { 
-  Tracker, 
-  NewTracker, 
-  TrackerEntry, 
-  NewTrackerEntry 
+export type {
+  Tracker,
+  NewTracker,
+  TrackerEntry,
+  NewTrackerEntry,
 } from "~/db/schema";
 
 export type CreateTrackerInput = z.infer<typeof createTrackerSchema>;

@@ -78,7 +78,7 @@ export class TrackerDB {
     }
 
     // Filter trackers based on member visibility
-    return allTrackers.filter(tracker => {
+    return allTrackers.filter((tracker: any) => {
       // If visibleToMembers is null or empty, tracker is visible to all members
       if (!tracker.visibleToMembers) {
         return true;
@@ -114,7 +114,7 @@ export class TrackerDB {
     householdId: string,
     visibleToMembers?: string
   ): Promise<Tracker | null> {
-    const updateData = {
+    const updateData: any = {
       ...data,
       updatedAt: new Date().toISOString(),
     };
@@ -384,7 +384,10 @@ export class TrackerDB {
       )
       .orderBy(desc(trackerEntries.createdAt));
 
-    const totalValue = entries.reduce((sum: number, entry: any) => sum + entry.value, 0);
+    const totalValue = entries.reduce(
+      (sum: number, entry: any) => sum + entry.value,
+      0
+    );
     const entryCount = entries.length;
     const averageValue = entryCount > 0 ? totalValue / entryCount : 0;
 

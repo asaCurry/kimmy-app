@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Running pre-push checks..."
+
+# Check if we're pushing to main/master branch
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
+  echo "🔥 Pushing to $branch - running full validation..."
+  
+  # Run full validation suite
+  npm run validate
+  
+  echo "✅ All pre-push checks passed for $branch!"
+else 
+  echo "📝 Pushing to feature branch ($branch) - running basic checks..."
+  
+  # Run lighter checks for feature branches
+  npm run lint
+  npm run test:run
+  
+  echo "✅ Pre-push checks passed for feature branch!"
+fi

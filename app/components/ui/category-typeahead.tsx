@@ -39,7 +39,9 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
-  const blurTimeoutRef = React.useRef<NodeJS.Timeout>();
+  const blurTimeoutRef = React.useRef<
+    ReturnType<typeof setTimeout> | undefined
+  >(undefined);
 
   // Load categories when component mounts
   React.useEffect(() => {
@@ -57,7 +59,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   React.useEffect(() => {
     return () => {
       if (blurTimeoutRef.current) {
-        clearTimeout(blurTimeoutRef.current);
+        if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
       }
     };
   }, []);
@@ -66,10 +68,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(target)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setIsOpen(false);
         setSearchQuery("");
       }
@@ -77,50 +76,10 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isOpen]);
-
-  // Handle keyboard navigation
-  React.useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isOpen) return;
-
-      switch (event.key) {
-        case "Escape":
-          setIsOpen(false);
-          setSearchQuery("");
-          setFocusedIndex(-1);
-          inputRef.current?.blur();
-          break;
-        case "ArrowDown":
-          event.preventDefault();
-          setFocusedIndex(prev => {
-            const maxIndex = suggestions.length + (showCreateOption ? 1 : 0) - 1;
-            return prev < maxIndex ? prev + 1 : 0;
-          });
-          break;
-        case "ArrowUp":
-          event.preventDefault();
-          setFocusedIndex(prev => {
-            const maxIndex = suggestions.length + (showCreateOption ? 1 : 0) - 1;
-            return prev > 0 ? prev - 1 : maxIndex;
-          });
-          break;
-        case "Enter":
-          event.preventDefault();
-          if (focusedIndex >= 0 && focusedIndex < suggestions.length) {
-            handleSelectCategory(suggestions[focusedIndex].name);
-          } else if (focusedIndex === suggestions.length && showCreateOption) {
-            handleCreateCategory();
-          }
-          break;
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, focusedIndex, suggestions, showCreateOption]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -150,13 +109,13 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   const handleInputBlur = () => {
     // Clear any existing timeout
     if (blurTimeoutRef.current) {
-      clearTimeout(blurTimeoutRef.current);
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
     }
-    
+
     // On mobile, give more time for interactions
     const isMobile = window.innerWidth < 768;
     const delay = isMobile ? 300 : 150;
-    
+
     blurTimeoutRef.current = setTimeout(() => {
       // Don't close if user is still interacting with the component
       if (!isInteracting) {
@@ -176,7 +135,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     setFocusedIndex(-1);
     setIsInteracting(false);
     if (blurTimeoutRef.current) {
-      clearTimeout(blurTimeoutRef.current);
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
     }
     inputRef.current?.blur();
   };
@@ -188,9 +147,9 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     setIsCreating(true);
     setIsInteracting(false);
     if (blurTimeoutRef.current) {
-      clearTimeout(blurTimeoutRef.current);
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
     }
-    
+
     try {
       await addCategory(householdId, trimmedQuery);
       handleSelectCategory(trimmedQuery);
@@ -208,7 +167,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     setIsOpen(false);
     setIsInteracting(false);
     if (blurTimeoutRef.current) {
-      clearTimeout(blurTimeoutRef.current);
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
     }
     inputRef.current?.focus();
   };
@@ -224,6 +183,49 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
       cat => cat.name.toLowerCase() === searchQuery.toLowerCase()
     ) &&
     searchQuery.trim().length > 0;
+
+  // Handle keyboard navigation
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      switch (event.key) {
+        case "Escape":
+          setIsOpen(false);
+          setSearchQuery("");
+          setFocusedIndex(-1);
+          inputRef.current?.blur();
+          break;
+        case "ArrowDown":
+          event.preventDefault();
+          setFocusedIndex(prev => {
+            const maxIndex =
+              suggestions.length + (showCreateOption ? 1 : 0) - 1;
+            return prev < maxIndex ? prev + 1 : 0;
+          });
+          break;
+        case "ArrowUp":
+          event.preventDefault();
+          setFocusedIndex(prev => {
+            const maxIndex =
+              suggestions.length + (showCreateOption ? 1 : 0) - 1;
+            return prev > 0 ? prev - 1 : maxIndex;
+          });
+          break;
+        case "Enter":
+          event.preventDefault();
+          if (focusedIndex >= 0 && focusedIndex < suggestions.length) {
+            handleSelectCategory(suggestions[focusedIndex].name);
+          } else if (focusedIndex === suggestions.length && showCreateOption) {
+            handleCreateCategory();
+          }
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, focusedIndex, suggestions, showCreateOption]);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -255,7 +257,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
           <button
             type="button"
             onClick={handleClear}
-            onMouseDown={(e) => {
+            onMouseDown={e => {
               e.preventDefault(); // Prevent blur
               setIsInteracting(true);
             }}
@@ -273,12 +275,12 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
         {/* Dropdown arrow */}
         <button
           type="button"
-          onClick={(e) => {
+          onClick={e => {
             e.preventDefault();
             setIsOpen(!isOpen);
             inputRef.current?.focus();
           }}
-          onMouseDown={(e) => {
+          onMouseDown={e => {
             e.preventDefault(); // Prevent blur
             setIsInteracting(true);
           }}
@@ -301,7 +303,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
 
       {/* Dropdown */}
       {isOpen && (
-        <div 
+        <div
           className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-md shadow-lg max-h-60 overflow-auto"
           role="listbox"
           aria-label="Category options"
@@ -338,7 +340,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
                     key={category.name}
                     type="button"
                     onClick={() => handleSelectCategory(category.name)}
-                    onMouseDown={(e) => {
+                    onMouseDown={e => {
                       e.preventDefault(); // Prevent blur
                       setIsInteracting(true);
                     }}
@@ -374,7 +376,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
                   <button
                     type="button"
                     onClick={handleCreateCategory}
-                    onMouseDown={(e) => {
+                    onMouseDown={e => {
                       e.preventDefault(); // Prevent blur
                       setIsInteracting(true);
                     }}
@@ -403,13 +405,11 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
           </div>
         </div>
       )}
-      
+
       {/* Screen reader help text */}
-      <div 
-        id="category-typeahead-help" 
-        className="sr-only"
-      >
-        Use arrow keys to navigate options. Press Enter to select. Press Escape to close.
+      <div id="category-typeahead-help" className="sr-only">
+        Use arrow keys to navigate options. Press Enter to select. Press Escape
+        to close.
       </div>
     </div>
   );

@@ -25,6 +25,7 @@ interface ParsedRecordType {
   icon: string | null;
   color: string | null;
   allowPrivate: number | null;
+  visibleToMembers: string | null;
   createdAt: string | null;
   createdBy: number | null;
 }
@@ -314,6 +315,14 @@ const RecordForm: React.FC<Route.ComponentProps> = ({ loaderData, params }) => {
         }
       : null);
 
+  const handleBack = useCallback(() => {
+    if (currentMember) {
+      navigate(
+        `/member/${currentMember.id}/category/${encodeURIComponent(category)}`
+      );
+    }
+  }, [currentMember, category, navigate]);
+
   // If no session and no member, show error
   if (!currentMember) {
     return (
@@ -331,12 +340,6 @@ const RecordForm: React.FC<Route.ComponentProps> = ({ loaderData, params }) => {
       </RequireAuth>
     );
   }
-
-  const handleBack = useCallback(() => {
-    navigate(
-      `/member/${currentMember.id}/category/${encodeURIComponent(category)}`
-    );
-  }, [currentMember.id, category, navigate]);
 
   return (
     <RequireAuth requireHousehold={true}>

@@ -37,23 +37,22 @@ export class ProductionErrorBoundary extends React.Component<
 
   constructor(props: any) {
     super(props);
-    
+
     this.state = {
       hasError: false,
-      errorId: '',
-      errorType: 'Unknown Error',
-      isDevelopment: this.checkIsDevelopment()
+      errorId: "",
+      errorType: "Unknown Error",
+      isDevelopment: this.checkIsDevelopment(),
     };
   }
 
   private checkIsDevelopment(): boolean {
     try {
       return (
-        typeof globalThis !== 'undefined' && 
-        import.meta.env?.DEV === true
-      ) || (
-        typeof location !== 'undefined' && 
-        (location.hostname === 'localhost' || location.hostname.includes('.dev'))
+        (typeof globalThis !== "undefined" && import.meta.env?.DEV === true) ||
+        (typeof location !== "undefined" &&
+          (location.hostname === "localhost" ||
+            location.hostname.includes(".dev")))
       );
     } catch {
       return false;
@@ -63,24 +62,24 @@ export class ProductionErrorBoundary extends React.Component<
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     // Generate a unique error ID for tracking
     const errorId = Math.random().toString(36).substring(2, 15);
-    
+
     return {
       hasError: true,
       errorId,
-      errorType: error.name || 'Runtime Error'
+      errorType: error.name || "Runtime Error",
     };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log the error securely
-    logger.error('React component error caught by boundary', {
+    logger.error("React component error caught by boundary", {
       errorType: error.name,
       errorId: this.state.errorId,
       // Only include stack trace in development
       ...(this.state.isDevelopment && {
         message: error.message,
-        stack: error.stack?.slice(0, 1000) // Limit stack trace length
-      })
+        stack: error.stack?.slice(0, 1000), // Limit stack trace length
+      }),
     });
 
     // Call optional error handler
@@ -110,13 +109,13 @@ export class ProductionErrorBoundary extends React.Component<
 
     this.setState({
       hasError: false,
-      errorId: '',
-      errorType: 'Unknown Error'
+      errorId: "",
+      errorType: "Unknown Error",
     });
   };
 
   handleGoHome = () => {
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   render() {
@@ -127,7 +126,7 @@ export class ProductionErrorBoundary extends React.Component<
         return (
           <FallbackComponent
             error={new Error(this.state.errorType)}
-            errorInfo={{ componentStack: '' }}
+            errorInfo={{ componentStack: "" }}
             retry={this.handleRetry}
           />
         );
@@ -147,9 +146,10 @@ export class ProductionErrorBoundary extends React.Component<
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-slate-600 dark:text-slate-400">
-                We're sorry, but something unexpected happened. Our team has been notified.
+                We're sorry, but something unexpected happened. Our team has
+                been notified.
               </p>
-              
+
               {this.state.isDevelopment && (
                 <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded p-3">
                   <p className="text-sm text-red-800 dark:text-red-300 font-mono">
@@ -160,7 +160,7 @@ export class ProductionErrorBoundary extends React.Component<
                   </p>
                 </div>
               )}
-              
+
               <div className="flex gap-2 justify-center">
                 <Button onClick={this.handleRetry} variant="outline" size="sm">
                   <RefreshCw className="w-4 h-4 mr-2" />
@@ -171,7 +171,7 @@ export class ProductionErrorBoundary extends React.Component<
                   Go Home
                 </Button>
               </div>
-              
+
               {this.state.isDevelopment && this.retryTimeoutId && (
                 <p className="text-xs text-slate-500">
                   Auto-retry in 5 seconds...
@@ -198,24 +198,24 @@ export class ApiErrorBoundary extends React.Component<
 > {
   constructor(props: any) {
     super(props);
-    this.state = { hasError: false, errorMessage: '' };
+    this.state = { hasError: false, errorMessage: "" };
   }
 
   static getDerivedStateFromError(error: Error) {
     return {
       hasError: true,
-      errorMessage: 'Failed to load data. Please try again later.'
+      errorMessage: "Failed to load data. Please try again later.",
     };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logger.error('API component error', {
+    logger.error("API component error", {
       errorType: error.name,
-      component: 'ApiErrorBoundary'
+      component: "ApiErrorBoundary",
     });
 
     if (this.props.onError) {
-      this.props.onError(error, 'API_ERROR_BOUNDARY');
+      this.props.onError(error, "API_ERROR_BOUNDARY");
     }
   }
 
@@ -269,13 +269,13 @@ export function useErrorHandler() {
   const [error, setError] = React.useState<Error | null>(null);
 
   const handleError = React.useCallback((error: Error | string) => {
-    const errorObj = typeof error === 'string' ? new Error(error) : error;
-    
-    logger.error('Async error handled by hook', {
+    const errorObj = typeof error === "string" ? new Error(error) : error;
+
+    logger.error("Async error handled by hook", {
       errorType: errorObj.name,
-      errorMessage: errorObj.message
+      errorMessage: errorObj.message,
     });
-    
+
     setError(errorObj);
   }, []);
 
@@ -302,17 +302,18 @@ export function withAsyncErrorHandling<T extends any[], R>(
     try {
       return await fn(...args);
     } catch (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      
-      logger.error('Async function error', {
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
+
+      logger.error("Async function error", {
         errorType: errorObj.name,
-        errorMessage: errorObj.message
+        errorMessage: errorObj.message,
       });
-      
+
       if (onError) {
         onError(errorObj);
       }
-      
+
       return null;
     }
   };

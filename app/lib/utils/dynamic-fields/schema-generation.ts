@@ -45,7 +45,7 @@ export const createRecordSchema = (fields: DynamicField[] | any) => {
 
 const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
   switch (field.type) {
-    case "text":
+    case "text": {
       let textSchema = z.string().trim();
 
       if (field.validation?.minLength !== undefined) {
@@ -71,8 +71,9 @@ const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
       return field.required
         ? textSchema.min(1, `${field.label} is required`)
         : textSchema.optional();
+    }
 
-    case "textarea":
+    case "textarea": {
       let textareaSchema = z.string().trim();
 
       if (field.validation?.minLength !== undefined) {
@@ -98,8 +99,9 @@ const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
       return field.required
         ? textareaSchema.min(1, `${field.label} is required`)
         : textareaSchema.optional();
+    }
 
-    case "number":
+    case "number": {
       let numberSchema = z.coerce.number();
 
       if (field.validation?.min !== undefined) {
@@ -123,10 +125,11 @@ const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
       );
 
       return field.required ? finalNumberSchema : finalNumberSchema.optional();
+    }
 
-    case "date":
+    case "date": {
       let dateSchema = z.string();
-      
+
       if (field.required) {
         dateSchema = dateSchema.min(1, `${field.label} is required`);
       }
@@ -139,6 +142,7 @@ const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
       }, `${field.label} must be a valid date`);
 
       return field.required ? finalDateSchema : finalDateSchema.optional();
+    }
 
     case "select":
       if (
@@ -167,7 +171,7 @@ const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
     case "checkbox":
       return z.boolean().default(false);
 
-    case "email":
+    case "email": {
       let emailSchema = z
         .string()
         .trim()
@@ -183,8 +187,9 @@ const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
       return field.required
         ? emailSchema.min(1, `${field.label} is required`)
         : emailSchema.optional();
+    }
 
-    case "url":
+    case "url": {
       let urlSchema = z
         .string()
         .trim()
@@ -200,8 +205,9 @@ const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
       return field.required
         ? urlSchema.min(1, `${field.label} is required`)
         : urlSchema.optional();
+    }
 
-    case "phone":
+    case "phone": {
       let phoneSchema = z.string().trim();
 
       if (field.validation?.pattern) {
@@ -212,7 +218,7 @@ const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
       } else {
         // Default phone validation - basic format check
         phoneSchema = phoneSchema.regex(
-          /^[\+]?[1-9][\d]{0,15}$/,
+          /^[+]?[1-9][\d]{0,15}$/,
           `${field.label} must be a valid phone number`
         );
       }
@@ -227,6 +233,7 @@ const createFieldSchema = (field: DynamicField): z.ZodTypeAny | null => {
       return field.required
         ? phoneSchema.min(1, `${field.label} is required`)
         : phoneSchema.optional();
+    }
 
     case "file":
       return z.any().optional();

@@ -55,7 +55,10 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
   const handleUpdate = (updates: Partial<DynamicField>) => {
     // Auto-generate field name if label changes
     if (updates.label && updates.label !== field.label) {
-      const newFieldName = createUniqueFieldName(updates.label, existingFieldNames.filter(name => name !== field.name));
+      const newFieldName = createUniqueFieldName(
+        updates.label,
+        existingFieldNames.filter(name => name !== field.name)
+      );
       updates.name = newFieldName;
     }
     onUpdate(field.id, updates);
@@ -153,7 +156,11 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                 className="bg-slate-700 border-slate-600 text-slate-200"
               />
               <p className="text-xs text-slate-500">
-                Field name: <code className="text-slate-400 bg-slate-800 px-1 py-0.5 rounded">{field.name}</code> (auto-generated)
+                Field name:{" "}
+                <code className="text-slate-400 bg-slate-800 px-1 py-0.5 rounded">
+                  {field.name}
+                </code>{" "}
+                (auto-generated)
               </p>
             </div>
           </div>

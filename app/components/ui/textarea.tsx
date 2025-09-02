@@ -8,9 +8,14 @@ const Textarea = React.forwardRef<
     onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   }
 >(({ className, onChange, ...props }, ref) => {
-  const handleChange = React.useCallback((value: string) => {
-    onChange?.({ target: { value } } as React.ChangeEvent<HTMLTextAreaElement>);
-  }, [onChange]);
+  const handleChange = React.useCallback(
+    (value: string) => {
+      onChange?.({
+        target: { value },
+      } as React.ChangeEvent<HTMLTextAreaElement>);
+    },
+    [onChange]
+  );
 
   return (
     <UnifiedTextarea

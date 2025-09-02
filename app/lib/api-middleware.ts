@@ -61,7 +61,7 @@ export function withAuthentication<T>(
         rawSession = JSON.parse(decodeURIComponent(sessionData));
       } catch (error) {
         apiLogger.error("Invalid session cookie", {
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : "Unknown error",
         });
         return ApiResponse.unauthorized();
       }
@@ -80,28 +80,34 @@ export function withAuthentication<T>(
       return result;
     } catch (error) {
       apiLogger.error("API middleware error", {
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
-      
+
       // Handle different error types
       if (error instanceof Response) {
         return error; // Re-throw Response objects
       }
-      
+
       if (error instanceof Error) {
         // Handle validation errors
-        if (error.message.includes("required") || error.message.includes("Invalid")) {
+        if (
+          error.message.includes("required") ||
+          error.message.includes("Invalid")
+        ) {
           return ApiResponse.error(error.message, 400);
         }
-        
+
         // Handle authorization errors
-        if (error.message.includes("Unauthorized") || error.message.includes("Session")) {
+        if (
+          error.message.includes("Unauthorized") ||
+          error.message.includes("Session")
+        ) {
           return ApiResponse.unauthorized();
         }
-        
+
         return ApiResponse.serverError(error.message);
       }
-      
+
       return ApiResponse.serverError("An unexpected error occurred");
     }
   };
@@ -124,27 +130,27 @@ export function validateHouseholdAccess(
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 export function checkRateLimit(
-  identifier: string, 
-  maxRequests: number = 100, 
+  identifier: string,
+  maxRequests: number = 100,
   windowMs: number = 15 * 60 * 1000 // 15 minutes
 ): boolean {
   const now = Date.now();
   const key = identifier;
-  
+
   const current = rateLimitMap.get(key);
-  
+
   if (!current || now > current.resetTime) {
     rateLimitMap.set(key, {
       count: 1,
-      resetTime: now + windowMs
+      resetTime: now + windowMs,
     });
     return true;
   }
-  
+
   if (current.count >= maxRequests) {
     return false;
   }
-  
+
   current.count++;
   return true;
 }

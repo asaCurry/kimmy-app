@@ -24,8 +24,10 @@ export function useDropdownState(options: UseDropdownStateOptions = {}) {
   const [isOpen, setIsOpen] = React.useState(initialOpen);
   const [isInteracting, setIsInteracting] = React.useState(false);
   const [focusedIndex, setFocusedIndex] = React.useState(-1);
-  
-  const blurTimeoutRef = React.useRef<NodeJS.Timeout>();
+
+  const blurTimeoutRef = React.useRef<
+    ReturnType<typeof setTimeout> | undefined
+  >(undefined);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   // Open dropdown
@@ -44,7 +46,7 @@ export function useDropdownState(options: UseDropdownStateOptions = {}) {
       setFocusedIndex(-1);
       setIsInteracting(false);
       if (blurTimeoutRef.current) {
-        clearTimeout(blurTimeoutRef.current);
+        if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
       }
       onClose?.();
     }
@@ -64,10 +66,10 @@ export function useDropdownState(options: UseDropdownStateOptions = {}) {
     if (!closeOnBlur) return;
 
     if (blurTimeoutRef.current) {
-      clearTimeout(blurTimeoutRef.current);
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
     }
 
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
     const delay = isMobile ? mobileBlurDelay : blurDelay;
 
     blurTimeoutRef.current = setTimeout(() => {
@@ -78,18 +80,21 @@ export function useDropdownState(options: UseDropdownStateOptions = {}) {
   }, [closeOnBlur, isInteracting, blurDelay, mobileBlurDelay, close]);
 
   // Handle selection
-  const handleSelect = React.useCallback((callback?: () => void) => {
-    callback?.();
-    if (closeOnSelect) {
-      close();
-    }
-  }, [closeOnSelect, close]);
+  const handleSelect = React.useCallback(
+    (callback?: () => void) => {
+      callback?.();
+      if (closeOnSelect) {
+        close();
+      }
+    },
+    [closeOnSelect, close]
+  );
 
   // Interaction handlers
   const startInteracting = React.useCallback(() => {
     setIsInteracting(true);
     if (blurTimeoutRef.current) {
-      clearTimeout(blurTimeoutRef.current);
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
     }
   }, []);
 
@@ -98,40 +103,43 @@ export function useDropdownState(options: UseDropdownStateOptions = {}) {
   }, []);
 
   // Keyboard navigation
-  const handleKeyDown = React.useCallback((
-    event: React.KeyboardEvent,
-    itemCount: number,
-    onSelectItem?: (index: number) => void
-  ) => {
-    if (!isOpen) return false;
+  const handleKeyDown = React.useCallback(
+    (
+      event: React.KeyboardEvent,
+      itemCount: number,
+      onSelectItem?: (index: number) => void
+    ) => {
+      if (!isOpen) return false;
 
-    switch (event.key) {
-      case 'Escape':
-        event.preventDefault();
-        close();
-        return true;
-      
-      case 'ArrowDown':
-        event.preventDefault();
-        setFocusedIndex(prev => (prev < itemCount - 1 ? prev + 1 : 0));
-        return true;
-      
-      case 'ArrowUp':
-        event.preventDefault();
-        setFocusedIndex(prev => (prev > 0 ? prev - 1 : itemCount - 1));
-        return true;
-      
-      case 'Enter':
-        event.preventDefault();
-        if (focusedIndex >= 0 && focusedIndex < itemCount) {
-          onSelectItem?.(focusedIndex);
-        }
-        return true;
-      
-      default:
-        return false;
-    }
-  }, [isOpen, focusedIndex, close]);
+      switch (event.key) {
+        case "Escape":
+          event.preventDefault();
+          close();
+          return true;
+
+        case "ArrowDown":
+          event.preventDefault();
+          setFocusedIndex(prev => (prev < itemCount - 1 ? prev + 1 : 0));
+          return true;
+
+        case "ArrowUp":
+          event.preventDefault();
+          setFocusedIndex(prev => (prev > 0 ? prev - 1 : itemCount - 1));
+          return true;
+
+        case "Enter":
+          event.preventDefault();
+          if (focusedIndex >= 0 && focusedIndex < itemCount) {
+            onSelectItem?.(focusedIndex);
+          }
+          return true;
+
+        default:
+          return false;
+      }
+    },
+    [isOpen, focusedIndex, close]
+  );
 
   // Click outside handler
   React.useEffect(() => {
@@ -144,15 +152,15 @@ export function useDropdownState(options: UseDropdownStateOptions = {}) {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, close]);
 
   // Cleanup
   React.useEffect(() => {
     return () => {
       if (blurTimeoutRef.current) {
-        clearTimeout(blurTimeoutRef.current);
+        if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
       }
     };
   }, []);

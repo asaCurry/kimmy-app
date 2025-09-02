@@ -122,7 +122,7 @@ export default function TrackerDetailPage() {
         <Navigation
           currentView="categories"
           member={{
-            id: parseInt(memberId || ''),
+            id: parseInt(memberId || ""),
             name: "Member",
             email: "",
             role: "member" as const,
@@ -216,7 +216,9 @@ export default function TrackerDetailPage() {
                           Created
                         </span>
                         <span className="font-semibold">
-                          {tracker.createdAt ? new Date(tracker.createdAt).toLocaleDateString() : 'Unknown'}
+                          {tracker.createdAt
+                            ? new Date(tracker.createdAt).toLocaleDateString()
+                            : "Unknown"}
                         </span>
                       </div>
                     </CardContent>

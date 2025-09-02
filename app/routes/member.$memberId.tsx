@@ -325,7 +325,7 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                     householdId={loaderData.householdId}
                     createdBy={currentMember.id}
                     existingCategories={currentCategories}
-                    householdMembers={loaderData.householdMembers}
+                    householdMembers={loaderData.householdMembers as any}
                     onCancel={() => setShowCreateForm(false)}
                     className="space-y-4"
                   />
@@ -413,7 +413,7 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                         householdId={loaderData.householdId}
                         createdBy={currentMember.id}
                         existingCategories={currentCategories}
-                        householdMembers={loaderData.householdMembers}
+                        householdMembers={loaderData.householdMembers as any}
                         onCancel={() => setShowCreateForm(false)}
                         className="space-y-4"
                       />
@@ -433,15 +433,23 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                 <div className="flex items-center space-x-2">
                   <span className="text-lg">⏱️</span>
                   <div>
-                    <h4 className="text-sm font-medium text-slate-200">Activity Trackers</h4>
-                    <p className="text-xs text-slate-500">Monitor time and activities</p>
+                    <h4 className="text-sm font-medium text-slate-200">
+                      Activity Trackers
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Monitor time and activities
+                    </p>
                   </div>
                 </div>
                 <Link
                   to={`/member/${currentMember.id}/trackers`}
                   className="inline-block"
                 >
-                  <Button size="sm" variant="outline" className="border-slate-600 text-slate-400 hover:bg-slate-700">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-slate-600 text-slate-400 hover:bg-slate-700"
+                  >
                     View Trackers
                   </Button>
                 </Link>

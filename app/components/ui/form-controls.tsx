@@ -1,9 +1,9 @@
 /**
  * Unified Form Controls System
- * 
+ *
  * This file provides a consolidated, reusable form control system that eliminates
  * code duplication and provides consistent behavior across the application.
- * 
+ *
  * Key Features:
  * - Unified state management with validation
  * - Consistent styling and accessibility
@@ -17,21 +17,26 @@ export { useInputState, type InputValidation } from "~/hooks/use-input-state";
 export { useDropdownState } from "~/hooks/use-dropdown-state";
 
 // Styling utilities
-export { getInputClasses, INPUT_STYLES, FOCUS_RING_STYLES, TRANSITION_STYLES } from "~/lib/ui/input-styles";
+export {
+  getInputClasses,
+  INPUT_STYLES,
+  FOCUS_RING_STYLES,
+  TRANSITION_STYLES,
+} from "~/lib/ui/input-styles";
 
 // Unified form components
-export { 
-  UnifiedInput, 
-  UnifiedTextarea, 
-  type UnifiedInputProps, 
+export {
+  UnifiedInput,
+  UnifiedTextarea,
+  type UnifiedInputProps,
   type UnifiedTextareaProps,
-  type BaseFormFieldProps 
+  type BaseFormFieldProps,
 } from "./form-field-unified";
 
-export { 
-  UnifiedSelect, 
+export {
+  UnifiedSelect,
   type UnifiedSelectProps,
-  type SelectOption 
+  type SelectOption,
 } from "./select-unified";
 
 export { CategoryTypeaheadUnified } from "./category-typeahead-unified";
@@ -42,7 +47,7 @@ export { Textarea } from "./textarea";
 export { DynamicField, FORM_FIELD_STYLES } from "./form-field";
 
 // Re-export existing components that work well
-export { 
+export {
   Select,
   SelectContent,
   SelectItem,
@@ -50,20 +55,20 @@ export {
   SelectValue,
   SelectGroup,
   SelectLabel,
-  SelectSeparator
+  SelectSeparator,
 } from "./select";
 
 /**
  * Migration Guide:
- * 
+ *
  * Old Pattern:
  * ```tsx
- * <input 
+ * <input
  *   className="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50..."
  *   onChange={handleChange}
  * />
  * ```
- * 
+ *
  * New Pattern:
  * ```tsx
  * <UnifiedInput
@@ -73,7 +78,7 @@ export {
  *   validation={{ required: true, minLength: 3 }}
  * />
  * ```
- * 
+ *
  * For complex dropdowns:
  * ```tsx
  * <UnifiedSelect

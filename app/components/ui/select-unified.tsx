@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "~/lib/utils";
 import { useDropdownState } from "~/hooks/use-dropdown-state";
 import { getInputClasses } from "~/lib/ui/input-styles";
-import { BaseFormFieldProps } from "./form-field-unified";
+import type { BaseFormFieldProps } from "./form-field-unified";
 import { Label } from "./label";
 import { Check, ChevronDown } from "lucide-react";
 
@@ -28,36 +28,44 @@ export interface UnifiedSelectProps extends BaseFormFieldProps {
   createText?: (query: string) => string;
 }
 
-export const UnifiedSelect = React.forwardRef<HTMLDivElement, UnifiedSelectProps>(
-  ({
-    label,
-    description,
-    error,
-    required,
-    disabled,
-    className,
-    size = 'default',
-    options,
-    value,
-    defaultValue,
-    placeholder = "Select an option...",
-    onChange,
-    onValidationChange,
-    searchable = false,
-    creatable = false,
-    onCreateOption,
-    loading = false,
-    loadingText = "Loading...",
-    noOptionsText = "No options found",
-    createText = (query) => `Create "${query}"`,
-    ...props
-  }, ref) => {
+export const UnifiedSelect = React.forwardRef<
+  HTMLDivElement,
+  UnifiedSelectProps
+>(
+  (
+    {
+      label,
+      description,
+      error,
+      required,
+      disabled,
+      className,
+      size = "default",
+      options,
+      value,
+      defaultValue,
+      placeholder = "Select an option...",
+      onChange,
+      onValidationChange,
+      searchable = false,
+      creatable = false,
+      onCreateOption,
+      loading = false,
+      loadingText = "Loading...",
+      noOptionsText = "No options found",
+      createText = query => `Create "${query}"`,
+      ...props
+    },
+    ref
+  ) => {
     const [searchQuery, setSearchQuery] = React.useState("");
-    const [selectedValue, setSelectedValue] = React.useState(value || defaultValue || "");
+    const [selectedValue, setSelectedValue] = React.useState(
+      value || defaultValue || ""
+    );
     const [isCreating, setIsCreating] = React.useState(false);
-    
+
     const inputRef = React.useRef<HTMLInputElement>(null);
-    
+
     const {
       isOpen,
       isInteracting,
@@ -81,18 +89,19 @@ export const UnifiedSelect = React.forwardRef<HTMLDivElement, UnifiedSelectProps
     // Filter options based on search query
     const filteredOptions = React.useMemo(() => {
       if (!searchable || !searchQuery.trim()) return options;
-      
+
       return options.filter(option =>
         option.label.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }, [options, searchQuery, searchable]);
 
     // Show create option
-    const showCreateOption = creatable && 
-      searchQuery.trim() && 
-      !filteredOptions.some(option => 
-        option.label.toLowerCase() === searchQuery.toLowerCase()
-      ) && 
+    const showCreateOption =
+      creatable &&
+      searchQuery.trim() &&
+      !filteredOptions.some(
+        option => option.label.toLowerCase() === searchQuery.toLowerCase()
+      ) &&
       onCreateOption;
 
     const totalItems = filteredOptions.length + (showCreateOption ? 1 : 0);
@@ -108,13 +117,16 @@ export const UnifiedSelect = React.forwardRef<HTMLDivElement, UnifiedSelectProps
     }, [value, selectedValue]);
 
     // Handle option selection
-    const selectOption = React.useCallback((option: SelectOption) => {
-      setSelectedValue(option.value);
-      setSearchQuery("");
-      onChange?.(option.value);
-      close();
-      inputRef.current?.blur();
-    }, [onChange, close]);
+    const selectOption = React.useCallback(
+      (option: SelectOption) => {
+        setSelectedValue(option.value);
+        setSearchQuery("");
+        onChange?.(option.value);
+        close();
+        inputRef.current?.blur();
+      },
+      [onChange, close]
+    );
 
     // Handle creating new option
     const createOption = React.useCallback(async () => {
@@ -126,30 +138,42 @@ export const UnifiedSelect = React.forwardRef<HTMLDivElement, UnifiedSelectProps
         setSearchQuery("");
         close();
       } catch (error) {
-        console.error('Failed to create option:', error);
+        console.error("Failed to create option:", error);
       } finally {
         setIsCreating(false);
       }
     }, [onCreateOption, searchQuery, close]);
 
     // Handle keyboard navigation
-    const onKeyDown = React.useCallback((e: React.KeyboardEvent) => {
-      const handled = handleKeyDown(e, totalItems, (index) => {
-        if (index < filteredOptions.length) {
-          selectOption(filteredOptions[index]);
-        } else if (showCreateOption) {
-          createOption();
-        }
-      });
+    const onKeyDown = React.useCallback(
+      (e: React.KeyboardEvent) => {
+        const handled = handleKeyDown(e, totalItems, index => {
+          if (index < filteredOptions.length) {
+            selectOption(filteredOptions[index]);
+          } else if (showCreateOption) {
+            createOption();
+          }
+        });
 
-      if (!handled && searchable && isOpen) {
-        // Let search input handle typing
-        return;
-      }
-    }, [handleKeyDown, totalItems, filteredOptions, selectOption, showCreateOption, createOption, searchable, isOpen]);
+        if (!handled && searchable && isOpen) {
+          // Let search input handle typing
+          return;
+        }
+      },
+      [
+        handleKeyDown,
+        totalItems,
+        filteredOptions,
+        selectOption,
+        showCreateOption,
+        createOption,
+        searchable,
+        isOpen,
+      ]
+    );
 
     const inputId = `select-${React.useId()}`;
-    const fieldState = error ? 'error' : 'default';
+    const fieldState = error ? "error" : "default";
 
     return (
       <div className={cn("space-y-2", className)} ref={containerRef}>
@@ -165,7 +189,7 @@ export const UnifiedSelect = React.forwardRef<HTMLDivElement, UnifiedSelectProps
             className={getInputClasses({
               size,
               state: fieldState,
-              hasIcon: 'right',
+              hasIcon: "right",
               className: cn(
                 "cursor-pointer justify-between",
                 !searchable && "select-none"
@@ -187,9 +211,11 @@ export const UnifiedSelect = React.forwardRef<HTMLDivElement, UnifiedSelectProps
                 ref={inputRef}
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 onBlur={handleBlur}
-                placeholder={selectedOption ? selectedOption.label : placeholder}
+                placeholder={
+                  selectedOption ? selectedOption.label : placeholder
+                }
                 className="flex-1 bg-transparent outline-none"
                 disabled={disabled}
               />
@@ -255,8 +281,11 @@ export const UnifiedSelect = React.forwardRef<HTMLDivElement, UnifiedSelectProps
                       disabled={option.disabled}
                       className={cn(
                         "w-full px-3 py-2 text-left text-sm text-slate-100 hover:bg-slate-700 focus:bg-slate-700 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-                        selectedValue === option.value && "bg-blue-600 text-white hover:bg-blue-700",
-                        focusedIndex === index && !option.disabled && "bg-slate-700"
+                        selectedValue === option.value &&
+                          "bg-blue-600 text-white hover:bg-blue-700",
+                        focusedIndex === index &&
+                          !option.disabled &&
+                          "bg-slate-700"
                       )}
                       role="option"
                       aria-selected={selectedValue === option.value}
@@ -278,18 +307,31 @@ export const UnifiedSelect = React.forwardRef<HTMLDivElement, UnifiedSelectProps
                       onMouseUp={stopInteracting}
                       onTouchStart={startInteracting}
                       onTouchEnd={stopInteracting}
-                      onMouseEnter={() => setFocusedIndex(filteredOptions.length)}
+                      onMouseEnter={() =>
+                        setFocusedIndex(filteredOptions.length)
+                      }
                       disabled={isCreating}
                       className={cn(
                         "w-full px-3 py-2 text-left text-sm text-blue-400 hover:bg-slate-700 focus:bg-slate-700 focus:outline-none transition-colors border-t border-slate-600 disabled:opacity-50",
-                        focusedIndex === filteredOptions.length && "bg-slate-700"
+                        focusedIndex === filteredOptions.length &&
+                          "bg-slate-700"
                       )}
                       role="option"
                       aria-selected={false}
                     >
                       <div className="flex items-center">
-                        <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        <svg
+                          className="h-4 w-4 mr-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 4v16m8-8H4"
+                          />
                         </svg>
                         {isCreating ? "Creating..." : createText(searchQuery)}
                       </div>
@@ -308,7 +350,10 @@ export const UnifiedSelect = React.forwardRef<HTMLDivElement, UnifiedSelectProps
         )}
 
         {error && (
-          <div id={`${inputId}-error`} className="mt-1 text-xs flex items-center gap-1 text-red-400">
+          <div
+            id={`${inputId}-error`}
+            className="mt-1 text-xs flex items-center gap-1 text-red-400"
+          >
             <span className="text-sm">⚠️</span>
             {error}
           </div>

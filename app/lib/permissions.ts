@@ -178,13 +178,13 @@ export function getUserRoleInHousehold(
     // Convert the simple role to HouseholdRole format
     return session.role === "admin" ? "ADMIN" : "MEMBER";
   }
-  
+
   // Handle the types.ts session structure if it exists
   if (session.households) {
     const household = session.households.find((h: any) => h.id === householdId);
     return household?.role || null;
   }
-  
+
   return null;
 }
 
@@ -199,12 +199,12 @@ export function isUserInHousehold(
   if (session.currentHouseholdId === householdId) {
     return true;
   }
-  
+
   // Handle the types.ts session structure if it exists
   if (session.households) {
     return session.households.some((h: any) => h.id === householdId);
   }
-  
+
   return false;
 }
 
@@ -216,12 +216,12 @@ export function getAdminHouseholds(session: any) {
   if (session.currentHouseholdId && session.role === "admin") {
     return [{ id: session.currentHouseholdId, role: "ADMIN" }];
   }
-  
+
   // Handle the types.ts session structure if it exists
   if (session.households) {
     return session.households.filter((h: any) => h.role === "ADMIN");
   }
-  
+
   return [];
 }
 
@@ -318,13 +318,18 @@ export function isValidRelationship(
 /**
  * Check if a household has access to analytics features (paid feature)
  */
-export function hasAnalyticsAccess(household: { hasAnalyticsAccess?: number | null }): boolean {
+export function hasAnalyticsAccess(household: {
+  hasAnalyticsAccess?: number | null;
+}): boolean {
   // Default to true for development/testing while building UI
   // In production, this will check the actual subscription status
-  if (household.hasAnalyticsAccess === null || household.hasAnalyticsAccess === undefined) {
+  if (
+    household.hasAnalyticsAccess === null ||
+    household.hasAnalyticsAccess === undefined
+  ) {
     return true; // Fallback to true while building UI
   }
-  
+
   return Boolean(household.hasAnalyticsAccess);
 }
 
@@ -340,7 +345,7 @@ export function canAccessAnalytics(
   if (userRole === "CHILD") {
     return {
       canAccess: false,
-      reason: "Children cannot access analytics features"
+      reason: "Children cannot access analytics features",
     };
   }
 
@@ -349,7 +354,8 @@ export function canAccessAnalytics(
   if (!hasAccess) {
     return {
       canAccess: false,
-      reason: "Analytics is a premium feature. Upgrade your plan to access insights and patterns."
+      reason:
+        "Analytics is a premium feature. Upgrade your plan to access insights and patterns.",
     };
   }
 
@@ -367,9 +373,11 @@ export interface PremiumFeatures {
   // customReports: boolean;
 }
 
-export function getPremiumFeatures(household: { hasAnalyticsAccess?: number | null }): PremiumFeatures {
+export function getPremiumFeatures(household: {
+  hasAnalyticsAccess?: number | null;
+}): PremiumFeatures {
   const analyticsAccess = hasAnalyticsAccess(household);
-  
+
   return {
     analytics: analyticsAccess,
     // Future premium features can be added here
@@ -379,9 +387,11 @@ export function getPremiumFeatures(household: { hasAnalyticsAccess?: number | nu
 /**
  * Check if any premium features require upgrade
  */
-export function needsUpgradeForFeatures(household: { hasAnalyticsAccess?: number | null }): boolean {
+export function needsUpgradeForFeatures(household: {
+  hasAnalyticsAccess?: number | null;
+}): boolean {
   const features = getPremiumFeatures(household);
-  
+
   // If any premium feature is disabled, user might benefit from upgrade
   return !features.analytics;
 }

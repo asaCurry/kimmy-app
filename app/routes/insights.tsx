@@ -16,7 +16,9 @@ import { analyticsLogger } from "~/lib/logger";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
-    analyticsLogger.info("Loading insights", { householdId: session.currentHouseholdId });
+    analyticsLogger.info("Loading insights", {
+      householdId: session.currentHouseholdId,
+    });
 
     // Get household data to check analytics access
     const household = await db
@@ -32,7 +34,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     const householdData = household[0];
 
     // Check if user has permission to access analytics
-    const userRole = getUserRoleInHousehold(session, session.currentHouseholdId);
+    const userRole = getUserRoleInHousehold(
+      session,
+      session.currentHouseholdId
+    );
     const accessCheck = canAccessAnalytics(householdData, userRole || "MEMBER");
 
     if (!accessCheck.canAccess) {
@@ -63,7 +68,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
           recommendations: [],
         },
         generatedAt: new Date().toISOString(),
-        cached: false
+        cached: false,
       };
     }
 
@@ -73,13 +78,19 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
     try {
       // Check for cached insights first
-      let insights = await analyticsDB.getCachedInsights(session.currentHouseholdId, cacheKey);
+      let insights = await analyticsDB.getCachedInsights(
+        session.currentHouseholdId,
+        cacheKey
+      );
 
       if (!insights) {
         analyticsLogger.debug("No cached insights found, generating new ones");
-        
+
         // Generate fresh insights
-        const analyticsService = new AnalyticsService(db, session.currentHouseholdId);
+        const analyticsService = new AnalyticsService(
+          db,
+          session.currentHouseholdId
+        );
         insights = await analyticsService.generateBasicInsights();
 
         // Save recommendations to database
@@ -108,7 +119,9 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       }
 
       // Always fetch fresh recommendations from database
-      const recommendations = await analyticsDB.getRecommendations(session.currentHouseholdId);
+      const recommendations = await analyticsDB.getRecommendations(
+        session.currentHouseholdId
+      );
 
       return {
         success: true,
@@ -130,16 +143,16 @@ export async function loader({ request, context }: Route.LoaderArgs) {
             memberId: rec.memberId,
             metadata: rec.metadata ? JSON.parse(rec.metadata) : null,
             createdAt: rec.createdAt,
-          }))
+          })),
         },
         generatedAt: new Date().toISOString(),
-        cached: !!insights // true if we used cached data
+        cached: !!insights, // true if we used cached data
       };
     } catch (error) {
       analyticsLogger.error("Error loading insights", {
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
-      
+
       // Return fallback data structure
       return {
         success: false,
@@ -166,7 +179,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
           recommendations: [],
         },
         generatedAt: new Date().toISOString(),
-        cached: false
+        cached: false,
       };
     }
   });
@@ -174,7 +187,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 export default function InsightsPage() {
   const data = useLoaderData<typeof loader>();
-  
+
   return (
     <RequireAuth requireHousehold={true}>
       <PageLayout>
@@ -182,23 +195,29 @@ export default function InsightsPage() {
           title="Household Insights"
           subtitle="Analytics and patterns from your household data"
         />
-        
+
         <div className="space-y-6">
           {!data.hasAccess && (
-            <UpgradeToPremiumCard reason={data.reason} household={data.household} />
+            <UpgradeToPremiumCard
+              reason={data.reason}
+              household={data.household}
+            />
           )}
 
           {!data.success && data.hasAccess && (
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-              <h3 className="text-blue-400 font-medium mb-2">No Insights Available Yet</h3>
+              <h3 className="text-blue-400 font-medium mb-2">
+                No Insights Available Yet
+              </h3>
               <p className="text-blue-300 text-sm">
-                {data.error || "Check back later for your first round of insights."}
+                {data.error ||
+                  "Check back later for your first round of insights."}
               </p>
             </div>
           )}
 
           {data.hasAccess && (
-            <InsightsDashboard 
+            <InsightsDashboard
               insights={data.insights}
               generatedAt={data.generatedAt}
               cached={data.cached}
@@ -213,16 +232,24 @@ export default function InsightsPage() {
                   Debug Information
                 </summary>
                 <pre className="mt-2 whitespace-pre-wrap">
-                  {JSON.stringify({
-                    success: data.success,
-                    cached: data.cached,
-                    generatedAt: data.generatedAt,
-                    summaryCount: data.insights?.summary ? Object.keys(data.insights.summary).length : 0,
-                    categoriesCount: data.insights?.categoryInsights?.length || 0,
-                    membersCount: data.insights?.memberInsights?.length || 0,
-                    patternsCount: data.insights?.patterns?.length || 0,
-                    recommendationsCount: data.insights?.recommendations?.length || 0,
-                  }, null, 2)}
+                  {JSON.stringify(
+                    {
+                      success: data.success,
+                      cached: data.cached,
+                      generatedAt: data.generatedAt,
+                      summaryCount: data.insights?.summary
+                        ? Object.keys(data.insights.summary).length
+                        : 0,
+                      categoriesCount:
+                        data.insights?.categoryInsights?.length || 0,
+                      membersCount: data.insights?.memberInsights?.length || 0,
+                      patternsCount: data.insights?.patterns?.length || 0,
+                      recommendationsCount:
+                        data.insights?.recommendations?.length || 0,
+                    },
+                    null,
+                    2
+                  )}
                 </pre>
               </details>
             </div>

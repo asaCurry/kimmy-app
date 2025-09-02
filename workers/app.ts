@@ -1,16 +1,20 @@
 import { Hono } from "hono";
 import { createRequestHandler } from "react-router";
-import { handleCorsRequest, addSecurityHeaders, type SecurityHeadersConfig } from "../app/lib/security-headers";
+import {
+  handleCorsRequest,
+  addSecurityHeaders,
+  type SecurityHeadersConfig,
+} from "../app/lib/security-headers";
 
 const app = new Hono();
 
 // Security configuration
 const securityConfig: SecurityHeadersConfig = {
   corsOrigins: [
-    'https://kimmy-app.workers.dev',
-    'https://kimmy-app.com' // Add your production domain here
+    "https://kimmy-app.workers.dev",
+    "https://kimmy-app.com", // Add your production domain here
   ],
-  isDevelopment: import.meta.env.MODE === 'development'
+  isDevelopment: import.meta.env.MODE === "development",
 };
 
 // Handle Chrome DevTools well-known route to prevent console errors

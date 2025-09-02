@@ -29,7 +29,12 @@ export function handleError(error: unknown, context: string): never {
   }
 
   // If it's a redirect, re-throw it
-  if (error && typeof error === 'object' && 'status' in error && error.status === 302) {
+  if (
+    error &&
+    typeof error === "object" &&
+    "status" in error &&
+    error.status === 302
+  ) {
     throw error;
   }
 

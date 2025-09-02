@@ -7,7 +7,11 @@ import { authDb, userDb, householdDb } from "./db";
 import { isDatabaseAvailable } from "./utils";
 import { inviteCodeDb } from "./db";
 import { generateSessionToken } from "./token-utils";
-import { createSecureToken, verifySecureToken, type SecureSessionData } from "./secure-session";
+import {
+  createSecureToken,
+  verifySecureToken,
+  type SecureSessionData,
+} from "./secure-session";
 import { authLogger } from "./logger";
 
 // Session management (unchanged for session storage)
@@ -75,17 +79,21 @@ export const sessionStorage = {
       );
 
       // Set secure HTTP-only cookie for server-side access
-      const maxAge = Math.floor((new Date(session.expiresAt).getTime() - Date.now()) / 1000);
-      const isSecure = window.location.protocol === 'https:';
-      
+      const maxAge = Math.floor(
+        (new Date(session.expiresAt).getTime() - Date.now()) / 1000
+      );
+      const isSecure = window.location.protocol === "https:";
+
       document.cookie = [
         `kimmy_auth_session=${encodeURIComponent(JSON.stringify(session))}`,
-        'path=/',
+        "path=/",
         `max-age=${maxAge}`,
-        isSecure ? 'Secure' : '', // Only set Secure flag over HTTPS
-        'SameSite=Strict', // CSRF protection
+        isSecure ? "Secure" : "", // Only set Secure flag over HTTPS
+        "SameSite=Strict", // CSRF protection
         // Note: HttpOnly cannot be set from JavaScript, needs server-side implementation
-      ].filter(Boolean).join('; ');
+      ]
+        .filter(Boolean)
+        .join("; ");
     }
   },
 
@@ -142,7 +150,9 @@ export const authApi = {
     email: string,
     password: string
   ): Promise<AuthSession | null> {
-    authLogger.info("Login attempt", { email: email.replace(/(.{2}).*@/, "$1***@") });
+    authLogger.info("Login attempt", {
+      email: email.replace(/(.{2}).*@/, "$1***@"),
+    });
 
     if (!isDatabaseAvailable(env)) {
       authLogger.error("Database not available during login");
@@ -153,19 +163,25 @@ export const authApi = {
       const user = await authDb.authenticateUser(env, email, password);
 
       if (!user) {
-        authLogger.warn("Authentication failed - invalid credentials", { email: email.replace(/(.{2}).*@/, "$1***@") });
+        authLogger.warn("Authentication failed - invalid credentials", {
+          email: email.replace(/(.{2}).*@/, "$1***@"),
+        });
         return null;
       }
 
       // Create secure session using new token system
-      const sessionSecret = env.SESSION_SECRET || 'dev-secret-change-in-production';
-      const secureToken = await createSecureToken({
-        userId: user.id,
-        email: user.email,
-        name: user.name,
-        currentHouseholdId: user.householdId || undefined,
-        role: user.role as "admin" | "member"
-      }, { secret: sessionSecret });
+      const sessionSecret =
+        env.SESSION_SECRET || "dev-secret-change-in-production";
+      const secureToken = await createSecureToken(
+        {
+          userId: user.id,
+          email: user.email,
+          name: user.name,
+          currentHouseholdId: user.householdId || undefined,
+          role: user.role as "admin" | "member",
+        },
+        { secret: sessionSecret }
+      );
 
       const session: AuthSession = {
         token: secureToken,
@@ -178,11 +194,14 @@ export const authApi = {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
 
-      authLogger.info("Login successful", { userId: user.id, householdId: user.householdId });
+      authLogger.info("Login successful", {
+        userId: user.id,
+        householdId: user.householdId,
+      });
       return session;
     } catch (error) {
-      authLogger.error("Login failed", { 
-        error: error instanceof Error ? error.message : 'Unknown error'
+      authLogger.error("Login failed", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       return null;
     }

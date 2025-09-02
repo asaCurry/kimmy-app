@@ -10,18 +10,21 @@
  */
 export function generateSecureToken(length: number = 32): string {
   // For Node.js/Edge runtime environments
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
     const buffer = new Uint8Array(length);
     crypto.getRandomValues(buffer);
-    return btoa(String.fromCharCode(...buffer))
-      .replace(/[+/=]/g, (char) => ({ '+': '-', '/': '_', '=': '' })[char] || char);
+    return btoa(String.fromCharCode(...buffer)).replace(
+      /[+/=]/g,
+      char => ({ "+": "-", "/": "_", "=": "" })[char] || char
+    );
   }
-  
+
   // Fallback for environments without crypto.getRandomValues
   // This should not happen in modern environments
-  console.warn('crypto.getRandomValues not available, using fallback method');
-  let result = '';
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  console.warn("crypto.getRandomValues not available, using fallback method");
+  let result = "";
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
@@ -43,10 +46,10 @@ export function generateSessionToken(): string {
  * @returns 8-character uppercase alphanumeric code
  */
 export function generateInviteCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
     const buffer = new Uint8Array(8);
     crypto.getRandomValues(buffer);
     for (let i = 0; i < 8; i++) {
@@ -57,6 +60,6 @@ export function generateInviteCode(): string {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
   }
-  
+
   return result;
 }
