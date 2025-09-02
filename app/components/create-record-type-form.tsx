@@ -24,7 +24,7 @@ interface CreateRecordTypeFormProps {
   householdId: string;
   createdBy: number;
   category?: string; // Optional - if not provided, user can select
-  existingCategories?: string[]; // Optional - existing categories to show as suggestions
+  _existingCategories?: string[]; // Optional - existing categories to show as suggestions
   existingRecordType?: any; // For editing mode
   isEditing?: boolean; // Whether this is edit mode
   onSuccess?: () => void;
