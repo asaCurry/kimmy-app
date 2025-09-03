@@ -99,6 +99,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
                 Manage
               </Button>
             </Link>
+            <Link to="/settings">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-300 hover:text-white hover:bg-slate-800"
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Button>
+            </Link>
           </nav>
         )}
 
@@ -130,9 +140,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
                     Role: {session?.role}
                   </p>
                 </div>
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-white" />
-                </div>
+                <Link to="/settings" className="group" title="Account Settings">
+                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center group-hover:from-emerald-600 group-hover:to-blue-600 transition-colors">
+                    <User className="h-4 w-4 text-white" />
+                  </div>
+                </Link>
               </div>
             </>
           ) : (
@@ -212,6 +224,14 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
         >
           <Plus className="h-5 w-5 text-slate-400" />
           <span className="text-slate-300">Add Member</span>
+        </Link>
+        <Link
+          to="/settings"
+          onClick={onClose}
+          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-colors"
+        >
+          <Settings className="h-5 w-5 text-slate-400" />
+          <span className="text-slate-300">Settings</span>
         </Link>
       </nav>
     </div>

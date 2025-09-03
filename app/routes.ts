@@ -9,6 +9,12 @@ export default [
 
   // Authentication routes
   route("login", "routes/login.tsx"),
+  route("logout", "routes/logout.tsx"),
+  route("forgot-password", "routes/forgot-password.tsx"),
+  route("reset-password", "routes/reset-password.tsx"),
+
+  // User settings
+  route("settings", "routes/settings.tsx"),
 
   // Onboarding routes
   route("onboarding", "routes/onboarding.tsx"),
@@ -34,6 +40,7 @@ export default [
     "routes/api.invite-codes.regenerate.tsx"
   ),
   route("api/tracker-entries", "routes/api.tracker-entries.tsx"),
+  route("api/password-reset", "routes/api.password-reset.tsx"),
 
   // Member record routes
   route("member/:memberId", "routes/member.$memberId.tsx"),
