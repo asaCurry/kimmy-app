@@ -233,7 +233,7 @@ const CreateRecordType: React.FC<Route.ComponentProps> = ({
           householdId={householdId}
           createdBy={currentMember.id}
           category={category}
-          existingCategories={loaderData.existingCategories}
+          _existingCategories={loaderData.existingCategories}
           householdMembers={householdMembers as any}
           onSuccess={() => {
             // Navigate to the category page with the newly created record type

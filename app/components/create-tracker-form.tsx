@@ -14,11 +14,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { createTrackerSchema, updateTrackerSchema } from "~/lib/schemas";
-import type {
-  CreateTrackerInput,
-  UpdateTrackerInput,
-  Tracker,
+import {
+  createTrackerSchema,
+  type CreateTrackerInput,
+  type Tracker,
 } from "~/lib/schemas";
 import type { User } from "~/db/schema";
 import { toast } from "react-toastify";

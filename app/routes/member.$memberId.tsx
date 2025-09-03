@@ -324,7 +324,7 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                   <CreateRecordTypeForm
                     householdId={loaderData.householdId}
                     createdBy={currentMember.id}
-                    existingCategories={currentCategories}
+                    _existingCategories={currentCategories}
                     householdMembers={loaderData.householdMembers as any}
                     onCancel={() => setShowCreateForm(false)}
                     className="space-y-4"
@@ -412,7 +412,7 @@ const MemberCategories: React.FC<Route.ComponentProps> = ({ loaderData }) => {
                       <CreateRecordTypeForm
                         householdId={loaderData.householdId}
                         createdBy={currentMember.id}
-                        existingCategories={currentCategories}
+                        _existingCategories={currentCategories}
                         householdMembers={loaderData.householdMembers as any}
                         onCancel={() => setShowCreateForm(false)}
                         className="space-y-4"
