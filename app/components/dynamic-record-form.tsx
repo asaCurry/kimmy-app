@@ -16,9 +16,13 @@ import {
   Label,
 } from "~/components/ui";
 import { DynamicField } from "~/components/ui/form-field";
+import { SmartInput } from "~/components/ui/smart-input";
+import { SmartTagInput } from "~/components/ui/smart-tag-input";
 import type { Householdmember } from "~/lib/utils";
 import type { RecordType as DbRecordType } from "~/db/schema";
 import { createRecordSchema } from "~/lib/utils/dynamic-fields/schema-generation";
+import { useAutoCompletion } from "~/hooks/use-auto-completion";
+import type { AutoCompletionSuggestion } from "~/lib/auto-completion-service";
 
 // Local interface that extends the database RecordType with parsed fields
 interface ParsedRecordType extends Omit<DbRecordType, "fields"> {
@@ -44,8 +48,10 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   recordType,
   householdId,
   memberId,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   createdBy,
   onBack,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onSubmit: customOnSubmit,
   onCancel,
   initialData,
@@ -54,6 +60,21 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
 }) => {
   const fetcher = useFetcher();
   const isSubmitting = customIsSubmitting || fetcher.state === "submitting";
+
+  // Auto-completion hook
+  const {
+    titleSuggestions,
+    tagSuggestions,
+    smartDefaults,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getFieldSuggestions,
+    isLoading: suggestionsLoading,
+  } = useAutoCompletion({
+    recordTypeId: recordType.id,
+    householdId,
+    memberId,
+    enabled: mode === "create", // Only enable for new records
+  });
 
   // Generate schema based on record type fields
 
@@ -68,6 +89,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   const {
     register,
     handleSubmit,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     control,
     formState: { errors, isValid, isDirty, touchedFields },
     setValue,
@@ -87,7 +109,8 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
       datetime:
         mode === "edit" && initialData && initialData.datetime
           ? new Date(initialData.datetime).toISOString().slice(0, 16)
-          : new Date().toISOString().slice(0, 16),
+          : smartDefaults?.suggestedTime ||
+            new Date().toISOString().slice(0, 16),
       ...Object.fromEntries(
         normalizedFields.map(field => {
           if (mode === "edit" && initialData && initialData.content) {
@@ -120,7 +143,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   // });
 
   const watchedIsPrivate = watch("isPrivate");
-  const watchedTitle = watch("title");
+  const _watchedTitle = watch("title");
 
   // Set title to record type name on mount
   React.useEffect(() => {
@@ -214,8 +237,8 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
 
   // Show toast notification when form validation status changes
   React.useEffect(() => {
-    const hasErrors = Object.keys(errors).length > 0;
-    const hasTouchedFields = Object.keys(touchedFields).length > 0;
+    const _hasErrors = Object.keys(errors).length > 0;
+    const _hasTouchedFields = Object.keys(touchedFields).length > 0;
 
     // Form validation is handled visually through field styling
     // No need for intrusive toast notifications during form interaction
@@ -358,63 +381,34 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
 
             {/* Title Field */}
             <div className="space-y-2">
-              <Label
-                htmlFor="title"
-                className="text-sm font-medium leading-none text-slate-200"
-              >
-                Title <span className="text-red-400">*</span>
-              </Label>
-              <div className="relative">
-                <input
-                  {...register("title")}
-                  type="text"
-                  id="title"
-                  defaultValue={recordType.name}
-                  className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm min-h-[44px]"
-                  placeholder="Enter record title"
-                />
-                {watchedTitle && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (watchedTitle === recordType.name) {
-                        setValue("title", "");
-                      } else if (watchedTitle === "") {
-                        setValue("title", recordType.name);
-                      } else {
-                        setValue("title", recordType.name);
-                      }
-                    }}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-200 hover:bg-slate-600 rounded-full p-1.5 transition-all duration-200 hover:scale-110"
-                    title={
-                      watchedTitle === recordType.name
-                        ? "Clear title"
-                        : "Restore default title"
-                    }
-                    aria-label={
-                      watchedTitle === recordType.name
-                        ? "Clear title"
-                        : "Restore default title"
-                    }
-                  >
-                    <span className="text-lg font-bold leading-none">
-                      {watchedTitle === recordType.name ? "×" : "↺"}
-                    </span>
-                  </button>
-                )}
+              <SmartInput
+                {...register("title")}
+                label="Title *"
+                placeholder="Enter record title"
+                suggestions={{
+                  recent: titleSuggestions.slice(0, 3),
+                  frequent: titleSuggestions.slice(3, 6),
+                  contextual: titleSuggestions.slice(6, 8),
+                }}
+                onSelectSuggestion={(suggestion: AutoCompletionSuggestion) => {
+                  setValue("title", suggestion.value);
+                }}
+                isLoading={suggestionsLoading}
+                error={
+                  errors.title
+                    ? String(errors.title.message) || "Title is required"
+                    : undefined
+                }
+                className="bg-slate-700/50 border-slate-600 text-slate-200 placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500"
+              />
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <span>💡</span>
+                <span>
+                  {titleSuggestions.length > 0
+                    ? `${titleSuggestions.length} suggestions available based on your history`
+                    : "Start typing to see suggestions"}
+                </span>
               </div>
-              <p className="text-xs text-slate-400">
-                {watchedTitle === recordType.name
-                  ? `Using default title "${recordType.name}". Click the × to clear and enter a custom title.`
-                  : watchedTitle === ""
-                    ? `Title cleared. Click the ↺ to restore default title "${recordType.name}".`
-                    : "Custom title entered. Click the ↺ to restore default title."}
-              </p>
-              {errors.title && (
-                <p className="text-red-400 text-sm">
-                  {String(errors.title.message) || "Title is required"}
-                </p>
-              )}
             </div>
 
             {/* Datetime Field */}
@@ -431,9 +425,23 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
                 id="datetime"
                 className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm min-h-[44px]"
               />
-              <p className="text-xs text-slate-400">
-                Leave empty to use current date and time
-              </p>
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                {smartDefaults?.commonPatterns?.mostCommonHour !==
+                  undefined && (
+                  <>
+                    <span>🕒</span>
+                    <span>
+                      Most common time:{" "}
+                      {smartDefaults.commonPatterns.mostCommonHour}:00
+                      {smartDefaults.commonPatterns.totalRecords > 0 &&
+                        ` (based on ${smartDefaults.commonPatterns.totalRecords} recent records)`}
+                    </span>
+                  </>
+                )}
+                {!smartDefaults?.commonPatterns && (
+                  <span>Leave empty to use current date and time</span>
+                )}
+              </div>
               {errors.datetime && (
                 <p className="text-red-400 text-sm">
                   {String(errors.datetime.message) || "Invalid datetime"}
@@ -495,26 +503,19 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
             ))}
 
             {/* Tags Field */}
-            <div className="space-y-2">
-              <Label
-                htmlFor="tags"
-                className="text-sm font-medium leading-none text-slate-200"
-              >
-                Tags
-              </Label>
-              <input
-                {...register("tags")}
-                type="text"
-                id="tags"
-                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm min-h-[44px]"
-                placeholder="Enter tags separated by commas"
-              />
-              {errors.tags && (
-                <p className="text-red-400 text-sm">
-                  {String(errors.tags.message) || "Invalid tags"}
-                </p>
-              )}
-            </div>
+            <SmartTagInput
+              label="Tags"
+              value={watch("tags") || ""}
+              onChange={value => setValue("tags", value)}
+              suggestions={tagSuggestions}
+              placeholder="Add tags to help organize this record"
+              error={
+                errors.tags
+                  ? String(errors.tags.message) || "Invalid tags"
+                  : undefined
+              }
+              maxTags={8}
+            />
 
             {/* Privacy Toggle */}
             {recordType.allowPrivate === 1 && (

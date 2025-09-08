@@ -1,5 +1,5 @@
 import * as React from "react";
-import { UnifiedInput, type UnifiedInputProps } from "./form-field-unified";
+import { UnifiedInput } from "./form-field-unified";
 
 // Legacy Input component - now uses UnifiedInput under the hood
 export interface InputProps
@@ -21,7 +21,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       [onChange]
     );
 
-    const state = error ? "error" : success ? "success" : "default";
+    const _state = error ? "error" : success ? "success" : "default";
 
     return (
       <UnifiedInput

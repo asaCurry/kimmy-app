@@ -31,6 +31,9 @@ export default [
   // Insights route (analytics and patterns)
   route("insights", "routes/insights.tsx"),
 
+  // Analytics dashboard (admin only)
+  route("analytics", "routes/analytics.tsx"),
+
   // Household records management
   route("household-records", "routes/household-records.tsx"),
 
@@ -41,6 +44,13 @@ export default [
   ),
   route("api/tracker-entries", "routes/api.tracker-entries.tsx"),
   route("api/password-reset", "routes/api.password-reset.tsx"),
+  route("api/auto-completion", "routes/api.auto-completion.tsx"),
+  route("api/cloudflare-analytics", "routes/api.cloudflare-analytics.tsx"),
+  route("api/performance-metrics", "routes/api.performance-metrics.tsx"),
+  route(
+    "api/admin/password-reset-rate-limit",
+    "routes/api.admin.password-reset-rate-limit.tsx"
+  ),
 
   // Member record routes
   route("member/:memberId", "routes/member.$memberId.tsx"),

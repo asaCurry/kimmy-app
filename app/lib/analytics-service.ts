@@ -1,11 +1,5 @@
-import { eq, and, desc, count, sql } from "drizzle-orm";
-import {
-  users,
-  records,
-  recordTypes,
-  trackers,
-  trackerEntries,
-} from "~/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { users, records, recordTypes } from "~/db/schema";
 import type { NewAiRecommendation } from "~/db/schema";
 
 export interface InsightSummary {

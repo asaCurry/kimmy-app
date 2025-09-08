@@ -1,4 +1,10 @@
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  real,
+  index,
+} from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
 // Households table
@@ -46,23 +52,48 @@ export const recordTypes = sqliteTable("record_types", {
 });
 
 // Records table (actual data entries)
-export const records = sqliteTable("records", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  title: text("title").notNull(),
-  content: text("content"), // JSON object with field values
-  recordTypeId: integer("record_type_id").references(() => recordTypes.id),
-  householdId: text("household_id")
-    .notNull()
-    .references(() => households.id),
-  memberId: integer("member_id").references(() => users.id), // Which household member this record is about
-  createdBy: integer("created_by").references(() => users.id), // Who created the record
-  tags: text("tags"), // Comma-separated tags
-  attachments: text("attachments"), // JSON array of file URLs
-  isPrivate: integer("is_private").default(0), // 0 = shared, 1 = private
-  datetime: text("datetime"), // When the record occurred (ISO string), defaults to createdAt if not specified
-  createdAt: text("created_at").default(sql`(datetime('now'))`),
-  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
-});
+export const records = sqliteTable(
+  "records",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    title: text("title").notNull(),
+    content: text("content"), // JSON object with field values
+    recordTypeId: integer("record_type_id").references(() => recordTypes.id),
+    householdId: text("household_id")
+      .notNull()
+      .references(() => households.id),
+    memberId: integer("member_id").references(() => users.id), // Which household member this record is about
+    createdBy: integer("created_by").references(() => users.id), // Who created the record
+    tags: text("tags"), // Comma-separated tags
+    attachments: text("attachments"), // JSON array of file URLs
+    isPrivate: integer("is_private").default(0), // 0 = shared, 1 = private
+    datetime: text("datetime"), // When the record occurred (ISO string), defaults to createdAt if not specified
+    createdAt: text("created_at").default(sql`(datetime('now'))`),
+    updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+  },
+  table => ({
+    // Index for auto-completion queries (household_id + record_type_id + datetime)
+    householdRecordTypeIdx: index("records_household_record_type_idx").on(
+      table.householdId,
+      table.recordTypeId,
+      table.datetime
+    ),
+    // Index for member-specific queries
+    householdMemberIdx: index("records_household_member_idx").on(
+      table.householdId,
+      table.memberId,
+      table.datetime
+    ),
+    // Index for datetime-based queries (smart defaults)
+    datetimeIdx: index("records_datetime_idx").on(table.datetime),
+    // Index for title suggestions
+    householdRecordTypeTitleIdx: index("records_title_idx").on(
+      table.householdId,
+      table.recordTypeId,
+      table.title
+    ),
+  })
+);
 
 // Quick notes table (for rapid note-taking)
 export const quickNotes = sqliteTable("quick_notes", {
@@ -128,17 +159,29 @@ export const trackerEntries = sqliteTable("tracker_entries", {
 });
 
 // Analytics cache table (for caching insights with TTL)
-export const analyticsCache = sqliteTable("analytics_cache", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  householdId: text("household_id")
-    .notNull()
-    .references(() => households.id),
-  cacheKey: text("cache_key").notNull(), // e.g., "basic_insights", "health_trends"
-  data: text("data"), // JSON object with analytics results
-  expiresAt: text("expires_at").notNull(), // ISO datetime string
-  createdAt: text("created_at").default(sql`(datetime('now'))`),
-  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
-});
+export const analyticsCache = sqliteTable(
+  "analytics_cache",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    householdId: text("household_id")
+      .notNull()
+      .references(() => households.id),
+    cacheKey: text("cache_key").notNull(), // e.g., "basic_insights", "health_trends"
+    data: text("data"), // JSON object with analytics results
+    expiresAt: text("expires_at").notNull(), // ISO datetime string
+    createdAt: text("created_at").default(sql`(datetime('now'))`),
+    updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+  },
+  table => ({
+    // Unique constraint on household_id + cache_key for upsert operations
+    householdCacheKeyIdx: index("analytics_cache_household_key_idx").on(
+      table.householdId,
+      table.cacheKey
+    ),
+    // Index for cleanup queries
+    expiresAtIdx: index("analytics_cache_expires_idx").on(table.expiresAt),
+  })
+);
 
 // AI recommendations table (for storing generated recommendations)
 export const aiRecommendations = sqliteTable("ai_recommendations", {

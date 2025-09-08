@@ -4,7 +4,7 @@ import { redirect, useLoaderData } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui";
 import { RequireAuth, useAuth } from "~/contexts";
 import { Navigation } from "~/components";
-import { DynamicRecordForm } from "~/components";
+import { DynamicRecordForm } from "~/components/dynamic-record-form";
 import { loadHouseholdDataWithMember, getDatabase } from "~/lib";
 import { recordTypes, records } from "~/db/schema";
 import { eq, and } from "drizzle-orm";

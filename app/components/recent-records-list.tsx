@@ -23,6 +23,7 @@ interface RecentRecord {
 }
 
 // Extended interface to include the full record type for context
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface RecentRecordWithType extends RecentRecord {
   recordType: RecordType;
 }
@@ -34,6 +35,7 @@ interface RecentRecordsListProps {
 
 export const RecentRecordsList: React.FC<RecentRecordsListProps> = ({
   records,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   householdMembers,
 }) => {
   const { openRecord } = useRecordManagement();

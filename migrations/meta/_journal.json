@@ -29,6 +29,20 @@
       "when": 1756649642792,
       "tag": "0003_late_komodo",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1756990008944,
+      "tag": "0004_tearful_skreet",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1756990076941,
+      "tag": "0005_overconfident_chronomancer",
+      "breakpoints": true
     }
   ]
 }

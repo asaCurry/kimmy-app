@@ -3,20 +3,18 @@ import { useFetcher, Link } from "react-router";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
   Button,
   DateDisplay,
   RelativeDate,
   RecordContentDisplay,
-  Accordion,
   AccordionItem,
   RecordsTable,
   RecordDrawer,
 } from "~/components/ui";
 import { useRecordManagement } from "~/contexts";
-import { Plus, Eye, Edit, Trash2, Lock, Grid3X3, Table } from "lucide-react";
+import { Plus, Eye, Trash2, Lock, Grid3X3, Table } from "lucide-react";
 import type { Record, RecordType } from "~/db/schema";
 
 interface RecordsListProps {
@@ -50,9 +48,9 @@ export const RecordsList: React.FC<RecordsListProps> = ({
     }
   };
 
-  const handleRecordUpdate = async (
-    recordId: number,
-    updates: Partial<Record>
+  const _handleRecordUpdate = async (
+    _recordId: number,
+    _updates: Partial<Record>
   ) => {
     // Record updates are now handled by the edit route's server action
     // This function is kept for compatibility but doesn't do client-side updates
@@ -96,7 +94,7 @@ export const RecordsList: React.FC<RecordsListProps> = ({
         ...recordType,
         fields: normalizedFields,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         ...recordType,
         fields: [],

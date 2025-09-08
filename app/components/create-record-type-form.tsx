@@ -288,7 +288,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                   <SelectItem value="📧">📧 Email</SelectItem>
                   <SelectItem value="🤝">🤝 Meeting</SelectItem>
                   <SelectItem value="🎯">🎯 Goal</SelectItem>
-                  <SelectItem value="🔬">🔬 Analysis</SelectItem>
+                  <SelectItem value="📊">📊 Analysis</SelectItem>
                   <SelectItem value="🔍">🔍 Research</SelectItem>
 
                   {/* Finance & Money */}

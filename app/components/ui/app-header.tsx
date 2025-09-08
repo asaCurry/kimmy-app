@@ -8,16 +8,22 @@ import { Link } from "react-router";
 import {
   Home,
   Users,
-  Plus,
   Settings,
-  Bell,
   User,
   Menu,
   X,
   BarChart3,
   FileText,
+  TrendingUp,
+  LogOut,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "./button";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "./dropdown-menu";
 import { useAuth } from "~/contexts/auth-context";
 import { cn } from "~/lib/utils";
 
@@ -28,6 +34,9 @@ interface AppHeaderProps {
 export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
   const { session, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Check if user has admin access
+  const isAdmin = session?.role === "admin";
 
   return (
     <header
@@ -89,26 +98,18 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
                 Trackers
               </Button>
             </Link>
-            <Link to="/manage">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-slate-300 hover:text-white hover:bg-slate-800"
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Manage
-              </Button>
-            </Link>
-            <Link to="/settings">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-slate-300 hover:text-white hover:bg-slate-800"
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </Button>
-            </Link>
+            {isAdmin && (
+              <Link to="/analytics">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-slate-300 hover:text-white hover:bg-slate-800"
+                >
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  Analytics
+                </Button>
+              </Link>
+            )}
           </nav>
         )}
 
@@ -132,7 +133,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
                 </Button>
               </div>
 
-              {/* User info */}
+              {/* User info with dropdown */}
               <div className="hidden sm:flex items-center space-x-2 text-sm">
                 <div className="text-right">
                   <p className="text-slate-300 font-medium">{session?.name}</p>
@@ -140,11 +141,39 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
                     Role: {session?.role}
                   </p>
                 </div>
-                <Link to="/settings" className="group" title="Account Settings">
-                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center group-hover:from-emerald-600 group-hover:to-blue-600 transition-colors">
-                    <User className="h-4 w-4 text-white" />
-                  </div>
-                </Link>
+                <DropdownMenu
+                  trigger={
+                    <button
+                      className="group flex items-center space-x-1"
+                      title="Account Menu"
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center group-hover:from-emerald-600 group-hover:to-blue-600 transition-colors">
+                        <User className="h-4 w-4 text-white" />
+                      </div>
+                      <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-slate-300 transition-colors" />
+                    </button>
+                  }
+                >
+                  <DropdownMenuItem
+                    to="/manage"
+                    icon={<Users className="h-4 w-4" />}
+                  >
+                    Manage Household
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    to="/settings"
+                    icon={<Settings className="h-4 w-4" />}
+                  >
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    to="/login"
+                    icon={<LogOut className="h-4 w-4" />}
+                  >
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenu>
               </div>
             </>
           ) : (
@@ -186,7 +215,10 @@ interface MobileNavProps {
 }
 
 export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
-  const { isAuthenticated } = useAuth();
+  const { session, isAuthenticated } = useAuth();
+
+  // Check if user has admin access
+  const isAdmin = session?.role === "admin";
 
   if (!isOpen || !isAuthenticated) return null;
 
@@ -202,12 +234,12 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
           <span className="text-slate-300">Home</span>
         </Link>
         <Link
-          to="/manage"
+          to="/household-records"
           onClick={onClose}
           className="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-colors"
         >
-          <Users className="h-5 w-5 text-slate-400" />
-          <span className="text-slate-300">Manage Household</span>
+          <FileText className="h-5 w-5 text-slate-400" />
+          <span className="text-slate-300">Records</span>
         </Link>
         <Link
           to="/trackers"
@@ -218,13 +250,23 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
           <span className="text-slate-300">Trackers</span>
         </Link>
         <Link
-          to="/manage/add-member"
+          to="/manage"
           onClick={onClose}
           className="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-colors"
         >
-          <Plus className="h-5 w-5 text-slate-400" />
-          <span className="text-slate-300">Add Member</span>
+          <Users className="h-5 w-5 text-slate-400" />
+          <span className="text-slate-300">Manage Household</span>
         </Link>
+        {isAdmin && (
+          <Link
+            to="/analytics"
+            onClick={onClose}
+            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-colors"
+          >
+            <TrendingUp className="h-5 w-5 text-slate-400" />
+            <span className="text-slate-300">Analytics</span>
+          </Link>
+        )}
         <Link
           to="/settings"
           onClick={onClose}

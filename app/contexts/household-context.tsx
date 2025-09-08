@@ -51,7 +51,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
 }) => {
   const [householdMembers, setHouseholdMembers] = useState<User[]>([]);
 
-  const calculateAge = (dateOfBirth?: Date): number => {
+  const calculateAge = useCallback((dateOfBirth?: Date): number => {
     if (!dateOfBirth) return 0;
     const today = new Date();
     const age = today.getFullYear() - dateOfBirth.getFullYear();
@@ -65,7 +65,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
     }
 
     return age;
-  };
+  }, []);
 
   const addAdminMember = useCallback(
     async (

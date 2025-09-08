@@ -3,15 +3,10 @@
  * Replaces the mock authentication with real database operations
  */
 
-import { authDb, userDb, householdDb } from "./db";
+import { authDb, userDb, inviteCodeDb } from "./db";
 import { isDatabaseAvailable } from "./utils";
-import { inviteCodeDb } from "./db";
 import { generateSessionToken } from "./token-utils";
-import {
-  createSecureToken,
-  verifySecureToken,
-  type SecureSessionData,
-} from "./secure-session";
+import { createSecureToken } from "./secure-session";
 import { authLogger } from "./logger";
 
 // Session management (unchanged for session storage)

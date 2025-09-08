@@ -1,94 +1,66 @@
-import type { ActionFunctionArgs } from "react-router";
-import { getDatabase } from "~/lib/db-utils";
 import { TrackerDB } from "~/lib/tracker-db";
-import {
-  createTrackerEntrySchema,
-  startTimeTrackingSchema,
-  stopTimeTrackingSchema,
-  quickLogSchema,
-} from "~/lib/schemas";
-import {
-  safeParseInt,
-  safeParseFloat,
-  safeParseOptionalInt,
-  safeParseDate,
-  safeGetString,
-  validateAction,
-  validateSession,
-  ApiResponse,
-} from "~/lib/validation-utils";
+import { createAuthenticatedAction } from "~/lib/validation-layer.server";
+import { z } from "zod";
 import { apiLogger } from "~/lib/logger";
 
-export async function action({ request, context }: ActionFunctionArgs) {
-  try {
-    const env = (context as any).cloudflare?.env;
+const trackerActionSchema = z.object({
+  _action: z.enum([
+    "complete-tracking",
+    "quick-log",
+    "create-entry",
+    "delete-entry",
+  ]),
+  trackerId: z.coerce.number().int().positive().optional(),
+  memberId: z.coerce.number().int().positive().optional(),
+  value: z.coerce.number().optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
+  notes: z.string().optional(),
+  tags: z.string().optional(),
+  id: z.coerce.number().int().positive().optional(),
+});
 
-    if (!env?.DB) {
-      throw new Response("Database not available", { status: 500 });
-    }
+function safeParseDate(dateStr: string | undefined, fieldName: string): Date {
+  if (!dateStr) {
+    throw new Error(`${fieldName} is required`);
+  }
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) {
+    throw new Error(`Invalid ${fieldName} format`);
+  }
+  return date;
+}
 
-    const db = getDatabase(env);
+const ApiResponse = {
+  success: (data: any) => Response.json({ success: true, ...data }),
+  error: (message: string, status: number = 400) =>
+    Response.json({ success: false, error: message }, { status }),
+  notFound: (resource: string) =>
+    Response.json(
+      { success: false, error: `${resource} not found` },
+      { status: 404 }
+    ),
+  serverError: (message: string) =>
+    Response.json({ success: false, error: message }, { status: 500 }),
+};
 
-    // Get session from cookies
-    const cookieHeader = request.headers.get("cookie");
-    if (!cookieHeader) {
-      throw new Response("Unauthorized", { status: 401 });
-    }
-
-    const cookies = cookieHeader.split(";").reduce(
-      (acc, cookie) => {
-        const [key, value] = cookie.trim().split("=");
-        if (key && value) {
-          acc[key] = value;
-        }
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-
-    const sessionData = cookies["kimmy_auth_session"];
-    if (!sessionData) {
-      throw new Response("Unauthorized", { status: 401 });
-    }
-
-    let session;
-    try {
-      session = JSON.parse(decodeURIComponent(sessionData));
-    } catch (error) {
-      throw new Response("Unauthorized", { status: 401 });
-    }
-
-    if (!session.currentHouseholdId || !session.userId) {
-      throw new Response("Unauthorized", { status: 401 });
-    }
-
-    const formData = await request.formData();
-    const validActions = [
-      "complete-tracking",
-      "quick-log",
-      "create-entry",
-      "delete-entry",
-    ];
-    const action = validateAction(formData.get("_action"), validActions);
-
-    const validatedSession = validateSession(session);
+export const action = createAuthenticatedAction(
+  trackerActionSchema,
+  async (data, { env, db, session }) => {
     const trackerDB = new TrackerDB(db);
 
-    switch (action) {
+    switch (data._action) {
       case "complete-tracking": {
-        try {
-          const trackerId = safeParseInt(
-            formData.get("trackerId"),
-            "trackerId"
+        if (!data.trackerId || !data.startTime || !data.endTime) {
+          return ApiResponse.error(
+            "trackerId, startTime, and endTime are required for complete-tracking"
           );
-          const memberId = safeParseOptionalInt(formData.get("memberId"));
-          const startTimeStr = formData.get("startTime") as string;
-          const endTimeStr = formData.get("endTime") as string;
-          const notes = safeGetString(formData.get("notes"));
+        }
 
+        try {
           // Validate and parse dates
-          const start = safeParseDate(startTimeStr, "startTime");
-          const end = safeParseDate(endTimeStr, "endTime");
+          const start = safeParseDate(data.startTime, "startTime");
+          const end = safeParseDate(data.endTime, "endTime");
 
           // Validate time range
           if (end <= start) {
@@ -98,14 +70,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
           // Calculate duration in minutes with decimal precision
           const durationMs = end.getTime() - start.getTime();
           const durationMinutes = durationMs / (1000 * 60);
-
-          const data = {
-            trackerId,
-            memberId,
-            startTime: startTimeStr,
-            endTime: endTimeStr,
-            notes,
-          };
 
           const entry = await trackerDB.createTrackerEntry(
             {
@@ -117,8 +81,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
               notes: data.notes,
               tags: undefined,
             },
-            validatedSession.currentHouseholdId,
-            validatedSession.userId
+            session.currentHouseholdId,
+            session.userId
           );
 
           return ApiResponse.success({ entry });
@@ -135,20 +99,23 @@ export async function action({ request, context }: ActionFunctionArgs) {
       }
 
       case "quick-log": {
-        try {
-          const data = {
-            trackerId: safeParseInt(formData.get("trackerId"), "trackerId"),
-            memberId: safeParseOptionalInt(formData.get("memberId")),
-            value: safeParseFloat(formData.get("value"), "value"),
-            notes: safeGetString(formData.get("notes")),
-            tags: safeGetString(formData.get("tags")),
-          };
+        if (!data.trackerId || data.value === undefined) {
+          return ApiResponse.error(
+            "trackerId and value are required for quick-log"
+          );
+        }
 
-          const validatedData = quickLogSchema.parse(data);
+        try {
           const entry = await trackerDB.quickLog(
-            validatedData,
-            validatedSession.currentHouseholdId,
-            validatedSession.userId
+            {
+              trackerId: data.trackerId,
+              memberId: data.memberId,
+              value: data.value,
+              notes: data.notes,
+              tags: data.tags,
+            },
+            session.currentHouseholdId,
+            session.userId
           );
 
           return ApiResponse.success({ entry });
@@ -165,22 +132,25 @@ export async function action({ request, context }: ActionFunctionArgs) {
       }
 
       case "create-entry": {
-        try {
-          const data = {
-            trackerId: safeParseInt(formData.get("trackerId"), "trackerId"),
-            memberId: safeParseOptionalInt(formData.get("memberId")),
-            value: safeParseFloat(formData.get("value"), "value"),
-            startTime: safeGetString(formData.get("startTime")),
-            endTime: safeGetString(formData.get("endTime")),
-            notes: safeGetString(formData.get("notes")),
-            tags: safeGetString(formData.get("tags")),
-          };
+        if (!data.trackerId || data.value === undefined) {
+          return ApiResponse.error(
+            "trackerId and value are required for create-entry"
+          );
+        }
 
-          const validatedData = createTrackerEntrySchema.parse(data);
+        try {
           const entry = await trackerDB.createTrackerEntry(
-            validatedData,
-            validatedSession.currentHouseholdId,
-            validatedSession.userId
+            {
+              trackerId: data.trackerId,
+              memberId: data.memberId,
+              value: data.value,
+              startTime: data.startTime,
+              endTime: data.endTime,
+              notes: data.notes,
+              tags: data.tags,
+            },
+            session.currentHouseholdId,
+            session.userId
           );
 
           return ApiResponse.success({ entry });
@@ -195,12 +165,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
       }
 
       case "delete-entry": {
-        try {
-          const id = safeParseInt(formData.get("id"), "entry ID");
+        if (!data.id) {
+          return ApiResponse.error("id is required for delete-entry");
+        }
 
+        try {
           const success = await trackerDB.deleteTrackerEntry(
-            id,
-            validatedSession.currentHouseholdId
+            data.id,
+            session.currentHouseholdId
           );
 
           if (!success) {
@@ -221,16 +193,5 @@ export async function action({ request, context }: ActionFunctionArgs) {
       default:
         return ApiResponse.error("Invalid action");
     }
-  } catch (error) {
-    apiLogger.error("Error in tracker entry action", {
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-
-    // Handle validation errors specifically
-    if (error instanceof Error && error.message.includes("required")) {
-      return ApiResponse.error(error.message, 400);
-    }
-
-    return ApiResponse.serverError("Failed to perform action");
   }
-}
+);

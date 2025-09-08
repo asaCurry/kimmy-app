@@ -12,15 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import {
-  Clock,
-  Calendar,
-  User,
-  Tag,
-  Trash2,
-  Edit,
-  BarChart3,
-} from "lucide-react";
+import { Clock, Calendar, Trash2, Edit, BarChart3 } from "lucide-react";
 import { toast } from "react-toastify";
 import type { Tracker, TrackerEntry } from "~/db/schema";
 

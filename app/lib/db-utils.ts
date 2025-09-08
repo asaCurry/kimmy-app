@@ -1,13 +1,14 @@
 import { drizzle } from "drizzle-orm/d1";
 import { redirect } from "react-router";
 import { extractSessionFromCookies } from "~/lib/utils";
+import * as schema from "../../db/schema";
 
 // Consolidated database connection utility
 export function getDatabase(env: any) {
   if (!env?.DB) {
     throw new Response("Database not available", { status: 500 });
   }
-  return drizzle(env.DB);
+  return drizzle(env.DB, { schema });
 }
 
 // Consolidated session validation utility

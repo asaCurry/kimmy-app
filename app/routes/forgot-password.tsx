@@ -29,9 +29,20 @@ export default function ForgotPasswordPage() {
           position: "top-right",
         });
       } else {
-        toast.error(fetcher.data.error || "Failed to send reset email", {
-          position: "top-right",
-        });
+        const errorMessage = fetcher.data.error || "Failed to send reset email";
+
+        // Show rate limiting specific message
+        if (fetcher.data.retryAfter) {
+          const minutes = Math.ceil(fetcher.data.retryAfter / 60);
+          toast.error(
+            `Too many requests. Please wait ${minutes} minute${minutes > 1 ? "s" : ""} before trying again.`,
+            { position: "top-right", autoClose: 8000 }
+          );
+        } else {
+          toast.error(errorMessage, {
+            position: "top-right",
+          });
+        }
       }
     }
   }, [fetcher.data]);
@@ -210,8 +221,12 @@ export default function ForgotPasswordPage() {
             For security reasons, we'll send reset instructions to your email
             regardless of whether an account exists with that address.
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 mb-2">
             Reset links expire after 30 minutes and can only be used once.
+          </p>
+          <p className="text-xs text-slate-500">
+            Limited to 3 requests per email address every 15 minutes to prevent
+            abuse.
           </p>
         </div>
       </div>

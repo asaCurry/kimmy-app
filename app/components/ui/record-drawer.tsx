@@ -8,7 +8,7 @@ import {
   DateDisplay,
   RelativeDate,
 } from "~/components/ui";
-import { DynamicRecordForm } from "~/components";
+import { DynamicRecordForm } from "~/components/dynamic-record-form";
 import { useRecordManagement } from "~/contexts";
 import {
   Edit,

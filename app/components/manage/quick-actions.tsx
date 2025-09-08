@@ -2,7 +2,6 @@ import { Link } from "react-router";
 import { IconCard } from "~/components/ui/interactive-card";
 import { Button } from "~/components/ui/button";
 import { UserPlus, Key, Settings, RefreshCw } from "lucide-react";
-import type { Householdmember } from "~/lib/utils";
 
 interface QuickActionsProps {
   currentHouseholdId: string | undefined;

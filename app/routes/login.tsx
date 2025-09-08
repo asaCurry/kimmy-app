@@ -6,18 +6,27 @@ import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import {
-  Form,
   FormField,
   FormLabel,
   FormInput,
   FormError,
-  FormDescription,
 } from "~/components/ui/form";
 import { LogIn, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useAuth } from "~/contexts/auth-context";
 import { useFormValidation, VALIDATION_RULE_SETS } from "~/lib/validation";
 import { PageLoading, ButtonLoading } from "~/components/ui/loading";
 import { authApi } from "~/lib/auth-db";
+import { createValidatedAction } from "~/lib/validation-layer.server";
+import { z } from "zod";
+
+// Login form validation schema
+const loginSchema = z.object({
+  email: z
+    .string()
+    .email("Please enter a valid email address")
+    .min(1, "Email is required"),
+  password: z.string().min(1, "Password is required"),
+});
 
 export function meta(_: Route.MetaArgs) {
   return [
@@ -26,65 +35,44 @@ export function meta(_: Route.MetaArgs) {
   ];
 }
 
-export async function action({ request, context }: Route.ActionArgs) {
-  try {
-    const env = (context.cloudflare as any)?.env;
+export const action = createValidatedAction(
+  loginSchema,
+  async (data, { env }) => {
+    try {
+      const session = await authApi.login(env, data.email, data.password);
 
-    if (!env?.DB) {
-      throw new Response("Database not available", { status: 500 });
-    }
-
-    const formData = await request.formData();
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-
-    if (!email || !password) {
-      return new Response(
-        JSON.stringify({ error: "Email and password are required" }),
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const session = await authApi.login(env, email, password);
-
-    if (!session) {
-      return new Response(
-        JSON.stringify({ error: "Invalid email or password" }),
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Set the session cookie and return success
-    const maxAge = 60 * 60 * 24 * 7; // 7 days in seconds
-    const response = new Response(JSON.stringify({ success: true, session }), {
-      headers: {
-        "Content-Type": "application/json",
-        "Set-Cookie": `kimmy_auth_session=${encodeURIComponent(JSON.stringify(session))}; Path=/; SameSite=Lax; Max-Age=${maxAge}`,
-      },
-    });
-
-    return response;
-  } catch (error) {
-    console.error("Login action error:", error);
-
-    if (error instanceof Response) {
-      throw error;
-    }
-
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Login failed",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
+      if (!session) {
+        return Response.json(
+          { success: false, error: "Invalid email or password" },
+          { status: 401 }
+        );
       }
-    );
+
+      // Set the session cookie and return success
+      const maxAge = 60 * 60 * 24 * 7; // 7 days in seconds
+      return new Response(JSON.stringify({ success: true, session }), {
+        headers: {
+          "Content-Type": "application/json",
+          "Set-Cookie": `kimmy_auth_session=${encodeURIComponent(JSON.stringify(session))}; Path=/; SameSite=Lax; Max-Age=${maxAge}`,
+        },
+      });
+    } catch (error) {
+      console.error("Login action error:", error);
+
+      if (error instanceof Response) {
+        throw error;
+      }
+
+      return Response.json(
+        {
+          success: false,
+          error: error instanceof Error ? error.message : "Login failed",
+        },
+        { status: 500 }
+      );
+    }
   }
-}
+);
 
 const Login: React.FC<Route.ComponentProps> = () => {
   const navigate = useNavigate();

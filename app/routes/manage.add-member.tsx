@@ -13,6 +13,7 @@ import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { ArrowLeft } from "lucide-react";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { loadHouseholdData } from "~/lib/loader-helpers";
+import { userDb } from "~/lib/db";
 import { HouseholdmemberForm } from "~/components/manage/household-member-form";
 
 export function meta(_: Route.MetaArgs) {
@@ -91,8 +92,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       return { error: "Household ID cannot be empty" };
     }
 
-    // Import the database utilities
-    const { userDb } = await import("~/lib/db");
+    // Use the database utilities
 
     // Create the member data
     const memberData = {

@@ -10,6 +10,7 @@ import {
   Input,
   Label,
   ValidationMessage,
+  RelativeDate,
 } from "~/components/ui";
 import {
   ChevronDown,
@@ -20,7 +21,6 @@ import {
   Trash2,
 } from "lucide-react";
 import type { QuickNote, User } from "~/db/schema";
-import { RelativeDate } from "~/components/ui";
 
 interface QuickNotesProps {
   householdId: string;

@@ -1,0 +1,2 @@
+CREATE INDEX `analytics_cache_household_key_idx` ON `analytics_cache` (`household_id`,`cache_key`);--> statement-breakpoint
+CREATE INDEX `analytics_cache_expires_idx` ON `analytics_cache` (`expires_at`);

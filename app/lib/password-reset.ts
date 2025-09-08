@@ -1,11 +1,6 @@
 import { eq, and, lt, gt } from "drizzle-orm";
 import { users, passwordResetTokens } from "~/db/schema";
-import type {
-  PasswordResetToken,
-  NewPasswordResetToken,
-  User,
-} from "~/db/schema";
-import { createSecureToken } from "./secure-session";
+import type { PasswordResetToken, User } from "~/db/schema";
 
 export class PasswordResetService {
   constructor(private db: any) {}

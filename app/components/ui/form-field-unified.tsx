@@ -1,7 +1,7 @@
 import * as React from "react";
 import { cn } from "~/lib/utils";
 import { useInputState, type InputValidation } from "~/hooks/use-input-state";
-import { getInputClasses, INPUT_STYLES } from "~/lib/ui/input-styles";
+import { getInputClasses } from "~/lib/ui/input-styles";
 import { Label } from "./label";
 
 // Base props shared by all form field components
