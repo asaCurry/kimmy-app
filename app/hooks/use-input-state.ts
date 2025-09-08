@@ -40,7 +40,7 @@ export function useInputState(options: UseInputStateOptions = {}) {
   } = options;
 
   const [state, setState] = React.useState<InputState>({
-    value: initialValue,
+    value: String(initialValue || ""),
     isValid: true,
     isFocused: false,
     isInteracting: false,
@@ -50,16 +50,19 @@ export function useInputState(options: UseInputStateOptions = {}) {
     (value: string): { isValid: boolean; error?: string; warning?: string } => {
       if (!validation) return { isValid: true };
 
+      // Ensure value is a string
+      const stringValue = String(value || "");
+
       // Required validation
-      if (validation.required && !value.trim()) {
+      if (validation.required && !stringValue.trim()) {
         return { isValid: false, error: "This field is required" };
       }
 
       // Skip other validations if empty (unless required)
-      if (!value.trim()) return { isValid: true };
+      if (!stringValue.trim()) return { isValid: true };
 
       // Length validations
-      if (validation.minLength && value.length < validation.minLength) {
+      if (validation.minLength && stringValue.length < validation.minLength) {
         return {
           isValid: false,
           error: `Must be at least ${validation.minLength} characters`,
@@ -67,17 +70,17 @@ export function useInputState(options: UseInputStateOptions = {}) {
       }
 
       if (validation.maxLength) {
-        if (value.length > validation.maxLength) {
+        if (stringValue.length > validation.maxLength) {
           return {
             isValid: false,
             error: `Must be no more than ${validation.maxLength} characters`,
           };
         }
         // Warning when approaching limit
-        if (value.length > validation.maxLength * 0.8) {
+        if (stringValue.length > validation.maxLength * 0.8) {
           return {
             isValid: true,
-            warning: `${validation.maxLength - value.length} characters remaining`,
+            warning: `${validation.maxLength - stringValue.length} characters remaining`,
           };
         }
       }
@@ -85,9 +88,9 @@ export function useInputState(options: UseInputStateOptions = {}) {
       // Number validations
       if (
         (validation.min !== undefined || validation.max !== undefined) &&
-        value
+        stringValue
       ) {
-        const numValue = Number(value);
+        const numValue = Number(stringValue);
         if (!isNaN(numValue)) {
           if (validation.min !== undefined && numValue < validation.min) {
             return {
@@ -105,9 +108,9 @@ export function useInputState(options: UseInputStateOptions = {}) {
       }
 
       // Pattern validation
-      if (validation.pattern && value) {
+      if (validation.pattern && stringValue) {
         const regex = new RegExp(validation.pattern);
-        if (!regex.test(value)) {
+        if (!regex.test(stringValue)) {
           return { isValid: false, error: "Invalid format" };
         }
       }
@@ -119,17 +122,18 @@ export function useInputState(options: UseInputStateOptions = {}) {
 
   const handleChange = React.useCallback(
     (value: string) => {
+      const stringValue = String(value || "");
       const validationResult = validateOnChange
-        ? validate(value)
+        ? validate(stringValue)
         : { isValid: true };
 
       setState(prev => ({
         ...prev,
-        value,
+        value: stringValue,
         ...validationResult,
       }));
 
-      onChange?.(value);
+      onChange?.(stringValue);
     },
     [validate, validateOnChange, onChange]
   );
@@ -167,7 +171,7 @@ export function useInputState(options: UseInputStateOptions = {}) {
 
   const reset = React.useCallback(() => {
     setState({
-      value: initialValue,
+      value: String(initialValue || ""),
       isValid: true,
       isFocused: false,
       isInteracting: false,

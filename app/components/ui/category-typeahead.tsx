@@ -59,7 +59,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   React.useEffect(() => {
     return () => {
       if (blurTimeoutRef.current) {
-        if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+        clearTimeout(blurTimeoutRef.current);
       }
     };
   }, []);
@@ -109,12 +109,12 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   const handleInputBlur = () => {
     // Clear any existing timeout
     if (blurTimeoutRef.current) {
-      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+      clearTimeout(blurTimeoutRef.current);
     }
 
     // On mobile, give more time for interactions
     const isMobile = window.innerWidth < 768;
-    const delay = isMobile ? 300 : 150;
+    const delay = isMobile ? 300 : 200;
 
     blurTimeoutRef.current = setTimeout(() => {
       // Don't close if user is still interacting with the component
@@ -135,7 +135,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     setFocusedIndex(-1);
     setIsInteracting(false);
     if (blurTimeoutRef.current) {
-      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+      clearTimeout(blurTimeoutRef.current);
     }
     inputRef.current?.blur();
   };
@@ -147,7 +147,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     setIsCreating(true);
     setIsInteracting(false);
     if (blurTimeoutRef.current) {
-      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+      clearTimeout(blurTimeoutRef.current);
     }
 
     try {
@@ -167,7 +167,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     setIsOpen(false);
     setIsInteracting(false);
     if (blurTimeoutRef.current) {
-      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+      clearTimeout(blurTimeoutRef.current);
     }
     inputRef.current?.focus();
   };
@@ -309,6 +309,8 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
           aria-label="Category options"
           onMouseDown={() => setIsInteracting(true)}
           onMouseUp={() => setIsInteracting(false)}
+          onMouseEnter={() => setIsInteracting(true)}
+          onMouseLeave={() => setIsInteracting(false)}
           onTouchStart={() => setIsInteracting(true)}
           onTouchEnd={() => setIsInteracting(false)}
         >

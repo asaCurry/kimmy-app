@@ -228,9 +228,10 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                     handleUpdate({
                       validation: {
                         ...field.validation,
-                        min: e.target.value
-                          ? Number(e.target.value)
-                          : undefined,
+                        min:
+                          e.target.value !== ""
+                            ? Number(e.target.value)
+                            : undefined,
                       },
                     })
                   }
@@ -249,9 +250,10 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                     handleUpdate({
                       validation: {
                         ...field.validation,
-                        max: e.target.value
-                          ? Number(e.target.value)
-                          : undefined,
+                        max:
+                          e.target.value !== ""
+                            ? Number(e.target.value)
+                            : undefined,
                       },
                     })
                   }
@@ -279,9 +281,10 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                     handleUpdate({
                       validation: {
                         ...field.validation,
-                        minLength: e.target.value
-                          ? Number(e.target.value)
-                          : undefined,
+                        minLength:
+                          e.target.value !== ""
+                            ? Number(e.target.value)
+                            : undefined,
                       },
                     })
                   }
@@ -300,9 +303,10 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                     handleUpdate({
                       validation: {
                         ...field.validation,
-                        maxLength: e.target.value
-                          ? Number(e.target.value)
-                          : undefined,
+                        maxLength:
+                          e.target.value !== ""
+                            ? Number(e.target.value)
+                            : undefined,
                       },
                     })
                   }
@@ -338,9 +342,10 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   value={field.defaultValue || ""}
                   onChange={e =>
                     handleUpdate({
-                      defaultValue: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      defaultValue:
+                        e.target.value !== ""
+                          ? Number(e.target.value)
+                          : undefined,
                     })
                   }
                   placeholder="Default number value"

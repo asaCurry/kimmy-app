@@ -8,7 +8,7 @@ import { Switch } from "~/components/ui/switch";
 import { Plus, ArrowLeft } from "lucide-react";
 import { useDynamicFields } from "~/hooks/use-dynamic-fields";
 import { DynamicFieldEditor } from "~/components/ui/dynamic-field-editor";
-import { CategoryTypeahead } from "~/components/ui/category-typeahead";
+import { CategorySelect } from "~/components/ui/category-select";
 import { toast } from "react-toastify";
 import {
   Select,
@@ -193,18 +193,14 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
 
           {/* Category field - always full width for better mobile UX */}
           <div className="space-y-2">
-            <Label htmlFor="category" className="text-slate-200">
-              Category *
-            </Label>
-            <CategoryTypeahead
+            <CategorySelect
               value={formData.category}
               onChange={value => setFormData({ ...formData, category: value })}
-              placeholder="Select or type a category..."
+              placeholder="Select a category..."
               className="bg-slate-600 text-slate-200"
               required
               householdId={householdId}
-              allowCreate={true}
-              maxSuggestions={8}
+              label="Category"
             />
           </div>
 
@@ -288,7 +284,7 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
                   <SelectItem value="📧">📧 Email</SelectItem>
                   <SelectItem value="🤝">🤝 Meeting</SelectItem>
                   <SelectItem value="🎯">🎯 Goal</SelectItem>
-                  <SelectItem value="📊">📊 Analysis</SelectItem>
+                  <SelectItem value="📉">📉 Analysis</SelectItem>
                   <SelectItem value="🔍">🔍 Research</SelectItem>
 
                   {/* Finance & Money */}
