@@ -27,7 +27,6 @@
     "@radix-ui/react-switch": "^1.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
-    "d1s": "^0.2.13",
     "drizzle-orm": "^0.44.5",
     "hono": "4.8.2",
     "isbot": "5.1.26",
