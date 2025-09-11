@@ -15,9 +15,6 @@ BASE_URL = "https://kimmy-app.workers.dev/"
 [observability]
 enabled = true
 
-[[analytics_engine_datasets]]
-binding = "ANALYTICS"
-dataset = "kimmy_app_analytics"
 
 [[d1_databases]]
 binding = "DB"
