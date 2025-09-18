@@ -34,6 +34,9 @@ export default [
   // Analytics dashboard (admin only)
   route("analytics", "routes/analytics.tsx"),
 
+  // Demo presentation
+  route("demo", "routes/demo.tsx"),
+
   // Household records management
   route("household-records", "routes/household-records.tsx"),
 

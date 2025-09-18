@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(wrangler secret put:*)",
+      "Bash(npx wrangler secret:*)",
+      "Bash(npm run:*)",
+      "Bash(taskkill:*)",
+      "Bash(node:*)",
+      "Bash(npx wrangler d1 execute:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
