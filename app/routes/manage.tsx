@@ -1,3 +1,4 @@
+import type { ActionFunctionArgs } from "react-router";
 import { useAuth } from "~/contexts/auth-context";
 import { useLoaderData, redirect, useFetcher } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
@@ -14,6 +15,8 @@ import { Button } from "~/components/ui/button";
 import { LoadingSpinner } from "~/components/ui/loading-spinner";
 import { loadHouseholdData } from "~/lib/loader-helpers";
 import { inviteCodeDb } from "~/lib/db";
+import { withDatabaseAndSession } from "~/lib/db-utils";
+import { seedAllDemoData } from "~/lib/demo-data-seeder";
 
 interface Householdmember {
   id: number;
@@ -38,6 +41,43 @@ export function meta() {
       content: "Manage your household members and settings",
     },
   ];
+}
+
+export async function action({ request, context }: ActionFunctionArgs) {
+  return withDatabaseAndSession(request, context, async (db, session) => {
+    const formData = await request.formData();
+    const action = formData.get("_action") as string;
+
+    if (action === "seed-demo-data") {
+      const result = await seedAllDemoData(db, {
+        householdId: session.currentHouseholdId,
+        userId: session.userId,
+        visibleToMembers: [session.userId],
+      });
+
+      if (result.success) {
+        return Response.json({
+          success: true,
+          message: result.message,
+          recordTypes: result.recordTypes,
+          trackers: result.trackers,
+        });
+      } else {
+        return Response.json(
+          {
+            success: false,
+            error: result.message,
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    return Response.json(
+      { success: false, error: "Unknown action" },
+      { status: 400 }
+    );
+  });
 }
 
 export async function loader({
@@ -150,15 +190,14 @@ const Manage: React.FC = () => {
   const handleSeedBasicData = () => {
     if (
       confirm(
-        "This will create basic record types to get you started. Continue?"
+        "This will create basic record types and trackers to get you started. Continue?"
       )
     ) {
       const formData = new FormData();
-      formData.append("householdId", currentHouseholdId!);
+      formData.append("_action", "seed-demo-data");
 
       fetcher.submit(formData, {
         method: "post",
-        action: "/api/seed-demo-data",
       });
     }
   };

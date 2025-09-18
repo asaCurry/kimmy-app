@@ -5,10 +5,12 @@ const envSchema = z.object({
   RATE_LIMIT_KV: z.any().optional(),
   SESSION_SECRET: z
     .string()
-    .min(32, "SESSION_SECRET must be at least 32 characters"),
+    .min(32, "SESSION_SECRET must be at least 32 characters")
+    .default("dev-session-secret-change-in-production-minimum-32-chars"),
   RESEND_API_KEY: z.string().optional(),
   ANALYTICS: z.any().optional(),
   KIMMY_EMAIL: z.any().optional(),
+  AI: z.any().optional(), // Cloudflare AI binding for advanced analytics
   BASE_URL: z.string().optional(),
   ENVIRONMENT: z
     .enum(["development", "staging", "production"])

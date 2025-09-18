@@ -32,7 +32,7 @@ interface AppHeaderProps {
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
-  const { session, isAuthenticated } = useAuth();
+  const { session, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Check if user has admin access
@@ -168,7 +168,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    to="/login"
+                    onClick={() =>
+                      logout(() => (window.location.href = "/login"))
+                    }
                     icon={<LogOut className="h-4 w-4" />}
                   >
                     Sign Out
@@ -215,7 +217,7 @@ interface MobileNavProps {
 }
 
 export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
-  const { session, isAuthenticated } = useAuth();
+  const { session, isAuthenticated, logout } = useAuth();
 
   // Check if user has admin access
   const isAdmin = session?.role === "admin";
@@ -275,6 +277,16 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
           <Settings className="h-5 w-5 text-slate-400" />
           <span className="text-slate-300">Settings</span>
         </Link>
+        <button
+          onClick={() => {
+            onClose();
+            logout(() => (window.location.href = "/login"));
+          }}
+          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-colors w-full text-left"
+        >
+          <LogOut className="h-5 w-5 text-slate-400" />
+          <span className="text-slate-300">Sign Out</span>
+        </button>
       </nav>
     </div>
   );

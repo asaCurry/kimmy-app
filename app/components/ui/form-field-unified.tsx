@@ -51,6 +51,7 @@ export const UnifiedInput = React.forwardRef<
       onValidationChange,
       onFocus,
       onBlur,
+      name,
       ...props
     },
     ref
@@ -70,10 +71,20 @@ export const UnifiedInput = React.forwardRef<
       validation: { ...validation, required },
       onChange,
       onFocus: onFocus
-        ? () => onFocus({} as React.FocusEvent<HTMLInputElement>)
+        ? () => {
+            const mockEvent = {
+              target: { name: name || "", value: "" },
+            } as React.FocusEvent<HTMLInputElement>;
+            onFocus(mockEvent);
+          }
         : undefined,
       onBlur: onBlur
-        ? () => onBlur({} as React.FocusEvent<HTMLInputElement>)
+        ? () => {
+            const mockEvent = {
+              target: { name: name || "", value: "" },
+            } as React.FocusEvent<HTMLInputElement>;
+            onBlur(mockEvent);
+          }
         : undefined,
       validateOnChange: true,
       validateOnBlur: true,
@@ -261,6 +272,7 @@ export const UnifiedTextarea = React.forwardRef<
       onValidationChange,
       onFocus,
       onBlur,
+      name,
       resizable = false,
       rows = 4,
       ...props
@@ -281,10 +293,20 @@ export const UnifiedTextarea = React.forwardRef<
       validation: { ...validation, required },
       onChange,
       onFocus: onFocus
-        ? () => onFocus({} as React.FocusEvent<HTMLTextAreaElement>)
+        ? () => {
+            const mockEvent = {
+              target: { name: name || "", value: "" },
+            } as React.FocusEvent<HTMLTextAreaElement>;
+            onFocus(mockEvent);
+          }
         : undefined,
       onBlur: onBlur
-        ? () => onBlur({} as React.FocusEvent<HTMLTextAreaElement>)
+        ? () => {
+            const mockEvent = {
+              target: { name: name || "", value: "" },
+            } as React.FocusEvent<HTMLTextAreaElement>;
+            onBlur(mockEvent);
+          }
         : undefined,
       validateOnChange: true,
       validateOnBlur: true,

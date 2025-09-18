@@ -97,7 +97,15 @@ export const SmartInput = React.forwardRef<HTMLInputElement, SmartInputProps>(
       setIsFocused(false);
       // Delay hiding dropdown to allow for clicks
       setTimeout(() => setShowDropdown(false), 150);
-      onBlur?.(e);
+
+      // Ensure event has the expected structure for onBlur handlers
+      if (onBlur) {
+        try {
+          onBlur(e);
+        } catch (error) {
+          console.warn("SmartInput onBlur error:", error);
+        }
+      }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

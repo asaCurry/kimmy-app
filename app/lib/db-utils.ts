@@ -22,10 +22,14 @@ export function getSession(request: Request) {
 
 // Consolidated error handler
 export function handleError(error: unknown, context: string): never {
-  console.error(`${context} error:`, error);
-
-  // If it's already a Response, re-throw it
+  // If it's already a Response, check if it's a redirect first
   if (error instanceof Response) {
+    // Don't log redirects as errors - they're normal flow control
+    if (error.status >= 300 && error.status < 400) {
+      throw error;
+    }
+    // Log actual error responses
+    console.error(`${context} error:`, error);
     throw error;
   }
 
@@ -39,6 +43,7 @@ export function handleError(error: unknown, context: string): never {
     throw error;
   }
 
+  console.error(`${context} error:`, error);
   throw new Response(`Failed to ${context}`, { status: 500 });
 }
 

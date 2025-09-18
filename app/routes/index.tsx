@@ -41,10 +41,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       relationshipToAdmin: member.relationshipToAdmin || undefined,
     })) as Array<Householdmember>;
 
-    // If only one member, redirect directly to their dashboard
-    if (householdMembers.length === 1) {
-      throw redirect(`/member/${householdMembers[0].id}`);
-    }
+    // Always show member selector for consistent UX, even for single-member households
 
     // Check analytics access for UI display
     const userRole = getUserRoleInHousehold(
@@ -93,19 +90,30 @@ function MemberSelection({
   return (
     <PageLayout>
       <PageHeader
-        title="Select Household Member"
-        subtitle="Choose which member you'd like to manage records and trackers for"
+        title={
+          householdMembers.length === 1
+            ? "Your Household"
+            : "Select Household Member"
+        }
+        subtitle={
+          householdMembers.length === 1
+            ? "Click below to access records and trackers"
+            : "Choose which member you'd like to manage records and trackers for"
+        }
       />
 
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-slate-200 mb-4">
-              Welcome to Your Household
+              {householdMembers.length === 1
+                ? "Ready to Get Started"
+                : "Welcome to Your Household"}
             </h2>
             <p className="text-slate-400 text-lg">
-              Select a household member to manage their records, trackers, and
-              activities.
+              {householdMembers.length === 1
+                ? "Click on your member card below to start managing records and trackers."
+                : "Select a household member to manage their records, trackers, and activities."}
             </p>
           </div>
 

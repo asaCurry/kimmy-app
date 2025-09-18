@@ -35,6 +35,10 @@ preview_id = "2a3f0f6f8e1a49d59484e79bbd046965"
 # Email Routing binding for sending password reset emails
 name = "KIMMY_EMAIL"
 
+[ai]
+# Cloudflare AI binding for advanced analytics and insights
+binding = "AI"
+
 # Smart Placement
 # Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
 # placement = { mode = "smart" }

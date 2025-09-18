@@ -7,6 +7,7 @@ import { withDatabaseAndSession } from "~/lib/db-utils";
 import { AnalyticsDB } from "~/lib/analytics-db";
 import { AnalyticsService } from "~/lib/analytics-service";
 import { InsightsDashboard } from "~/components/insights-dashboard";
+import { EnhancedAnalyticsDashboard } from "~/components/enhanced-analytics-dashboard";
 import { UpgradeToPremiumCard } from "~/components/upgrade-to-premium-card";
 import { canAccessAnalytics, getUserRoleInHousehold } from "~/lib/permissions";
 import { households } from "~/db/schema";
@@ -217,11 +218,26 @@ export default function InsightsPage() {
           )}
 
           {data.hasAccess && (
-            <InsightsDashboard
-              insights={data.insights}
-              generatedAt={data.generatedAt}
-              cached={data.cached}
-            />
+            <>
+              <EnhancedAnalyticsDashboard
+                insights={data.insights}
+                generatedAt={data.generatedAt}
+                cached={data.cached}
+                householdId={data.household.id}
+              />
+
+              {/* Fallback to basic dashboard if enhanced fails */}
+              <div className="mt-8 pt-8 border-t border-slate-700">
+                <h3 className="text-lg font-semibold text-slate-200 mb-4">
+                  Basic Analytics (Fallback)
+                </h3>
+                <InsightsDashboard
+                  insights={data.insights}
+                  generatedAt={data.generatedAt}
+                  cached={data.cached}
+                />
+              </div>
+            </>
           )}
 
           {/* Debug info in development */}
