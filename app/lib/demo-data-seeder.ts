@@ -355,6 +355,17 @@ export async function seedDemoRecordTypes(
     } catch (error) {
       // Skip if already exists (likely duplicate key error)
       console.warn(`Skipped record type ${recordType.name}:`, error);
+      // For demo data seeding, we want to be resilient and continue
+      // But if it's a critical error (not just duplicate), we should throw
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (
+        !errorMessage.includes("UNIQUE constraint") &&
+        !errorMessage.includes("duplicate") &&
+        !errorMessage.includes("already exists")
+      ) {
+        throw error;
+      }
     }
   }
 
@@ -387,6 +398,17 @@ export async function seedDemoTrackers(
     } catch (error) {
       // Skip if already exists (likely duplicate key error)
       console.warn(`Skipped tracker ${tracker.name}:`, error);
+      // For demo data seeding, we want to be resilient and continue
+      // But if it's a critical error (not just duplicate), we should throw
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (
+        !errorMessage.includes("UNIQUE constraint") &&
+        !errorMessage.includes("duplicate") &&
+        !errorMessage.includes("already exists")
+      ) {
+        throw error;
+      }
     }
   }
 

@@ -53,7 +53,7 @@ describe("Demo Data Seeder", () => {
             if (callCount === 1) {
               return Promise.resolve([{ id: 1, name: "Success" }]);
             }
-            throw new Error("Duplicate key error");
+            throw new Error("UNIQUE constraint failed: duplicate key");
           }),
         }),
       });
@@ -189,12 +189,9 @@ describe("Demo Data Seeder", () => {
         }),
       });
 
-      const result = await seedDemoTrackers(mockDb, demoOptions);
-
-      expect(result).toHaveLength(3);
-      expect(result[0]).toEqual({ id: 1 });
-      expect(result[1]).toEqual({ id: 2 });
-      expect(result[2]).toEqual({ id: 3 });
+      await expect(seedDemoTrackers(mockDb, demoOptions)).rejects.toThrow(
+        "Database error"
+      );
     });
   });
 
@@ -223,8 +220,13 @@ describe("Demo Data Seeder", () => {
     });
 
     it("should return success false if seeding fails", async () => {
-      mockDb.insert.mockImplementation(() => {
-        throw new Error("Database connection failed");
+      // Mock the insert to throw an error that will cause Promise.all to reject
+      mockDb.insert.mockReturnValue({
+        values: vi.fn().mockReturnValue({
+          returning: vi
+            .fn()
+            .mockRejectedValue(new Error("Database connection failed")),
+        }),
       });
 
       const result = await seedAllDemoData(mockDb, demoOptions);
@@ -236,25 +238,32 @@ describe("Demo Data Seeder", () => {
     });
 
     it("should handle partial success scenarios", async () => {
+      // Reset the mock first
+      mockDb.insert.mockReset();
+
       // Mock record types to succeed but trackers to fail
-      let isRecordTypeCall = true;
+      let callCount = 0;
       mockDb.insert.mockReturnValue({
         values: vi.fn().mockReturnValue({
           returning: vi.fn().mockImplementation(() => {
-            if (isRecordTypeCall) {
-              isRecordTypeCall = false;
-              return Promise.resolve([{ id: 1 }]);
+            callCount++;
+            if (callCount <= 6) {
+              // First 6 calls are record types - succeed
+              return Promise.resolve([{ id: callCount }]);
+            } else {
+              // Subsequent calls are trackers - fail
+              throw new Error("Tracker creation failed");
             }
-            throw new Error("Tracker creation failed");
           }),
         }),
       });
 
       const result = await seedAllDemoData(mockDb, demoOptions);
 
-      expect(result.success).toBe(true);
-      expect(result.recordTypes).toHaveLength(6);
+      expect(result.success).toBe(false);
+      expect(result.recordTypes).toHaveLength(0);
       expect(result.trackers).toHaveLength(0);
+      expect(result.message).toContain("Failed to seed demo data");
     });
 
     it("should use provided options correctly", async () => {

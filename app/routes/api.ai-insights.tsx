@@ -88,13 +88,23 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
           },
         };
 
-        // Cache the insights
-        await analyticsDB.cacheInsights(
-          session.currentHouseholdId,
-          cacheKey,
-          insights,
-          ttlMinutes
-        );
+        // Cache the insights (don't fail if caching fails)
+        try {
+          await analyticsDB.cacheInsights(
+            session.currentHouseholdId,
+            cacheKey,
+            insights,
+            ttlMinutes
+          );
+        } catch (cacheError) {
+          analyticsLogger.warn("Failed to cache insights", {
+            error:
+              cacheError instanceof Error
+                ? cacheError.message
+                : "Unknown error",
+          });
+          // Continue execution - caching failure shouldn't break the response
+        }
 
         analyticsLogger.info(
           `Generated ${filteredInsights.length} AI insights`

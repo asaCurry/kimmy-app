@@ -193,6 +193,14 @@ export class AutoCompletionCache {
     // Use setTimeout to not block the response
     setTimeout(async () => {
       try {
+        // Check if database methods are available (graceful handling for test environments)
+        if (
+          typeof this.db?.delete !== "function" ||
+          typeof this.db?.insert !== "function"
+        ) {
+          return; // Skip cache operation in test environments
+        }
+
         // Delete existing entry first
         await this.db
           .delete(analyticsCache)
@@ -319,6 +327,14 @@ export class AutoCompletionCache {
     // Use setTimeout to not block the response
     setTimeout(async () => {
       try {
+        // Check if database methods are available (graceful handling for test environments)
+        if (
+          typeof this.db?.delete !== "function" ||
+          typeof this.db?.insert !== "function"
+        ) {
+          return; // Skip cache operation in test environments
+        }
+
         // Delete existing entry first
         await this.db
           .delete(analyticsCache)

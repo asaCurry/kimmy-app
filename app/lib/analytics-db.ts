@@ -110,7 +110,11 @@ export class AnalyticsDB {
       return JSON.parse(cached.data || "{}");
     } catch (error) {
       console.error("Error in AnalyticsDB.getCachedInsights:", error);
-      return null; // Return null on error to trigger fresh generation
+      // Only return null for JSON parsing errors, re-throw database errors
+      if (error instanceof SyntaxError) {
+        return null; // JSON parsing error - return null to trigger fresh generation
+      }
+      throw error; // Re-throw database errors
     }
   }
 
@@ -213,11 +217,50 @@ export class AnalyticsDB {
 
   // Aliases for test compatibility
   async storeAIRecommendation(householdId: string, recommendation: any) {
-    return this.saveRecommendations([recommendation]);
+    console.log("AnalyticsDB.storeAIRecommendation called");
+
+    try {
+      const recommendationData = {
+        householdId,
+        type: recommendation.type,
+        title: recommendation.title,
+        description: recommendation.description,
+        priority: recommendation.priority || "medium",
+        data: JSON.stringify(recommendation.data),
+        status: "active" as const,
+      };
+
+      const result = await this.db
+        .insert(aiRecommendations)
+        .values(recommendationData)
+        .returning();
+
+      console.log("AI recommendation stored successfully:", result[0]);
+      return result[0];
+    } catch (error) {
+      console.error("Error in AnalyticsDB.storeAIRecommendation:", error);
+      throw error;
+    }
   }
 
-  async getAIRecommendations(householdId: string, limit?: number) {
-    return this.getRecommendations(householdId, limit);
+  async getAIRecommendations(householdId: string, limit: number = 10) {
+    try {
+      const result = await this.db
+        .select()
+        .from(aiRecommendations)
+        .where(eq(aiRecommendations.householdId, householdId))
+        .orderBy(
+          sql`CASE ${aiRecommendations.priority} WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END`,
+          desc(aiRecommendations.createdAt)
+        )
+        .limit(limit);
+
+      console.log("Found AI recommendations:", result.length);
+      return result;
+    } catch (error) {
+      console.error("Error in AnalyticsDB.getAIRecommendations:", error);
+      return [];
+    }
   }
 
   // Utility method to clean up expired cache entries
