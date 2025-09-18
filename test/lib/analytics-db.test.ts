@@ -13,7 +13,7 @@ describe("AnalyticsDB", () => {
 
   beforeEach(() => {
     mockDb = new DrizzleMock();
-    analyticsDB = new AnalyticsDB(mockDb);
+    analyticsDB = new AnalyticsDB(mockDb.getDb());
     householdId = "test-household-123";
     consoleSpy.mockClear();
   });

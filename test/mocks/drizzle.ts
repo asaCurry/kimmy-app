@@ -10,6 +10,12 @@ export class DrizzleMock {
     this.mockDb = this.createMockDb();
   }
 
+  // Expose database methods directly for testing
+  get select() { return this.mockDb.select; }
+  get insert() { return this.mockDb.insert; }
+  get update() { return this.mockDb.update; }
+  get delete() { return this.mockDb.delete; }
+
   private createMockDb() {
     return {
       select: vi.fn(() => this.mockDb),

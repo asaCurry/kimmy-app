@@ -211,6 +211,15 @@ export class AnalyticsDB {
     }
   }
 
+  // Aliases for test compatibility
+  async storeAIRecommendation(householdId: string, recommendation: any) {
+    return this.saveRecommendations([recommendation]);
+  }
+
+  async getAIRecommendations(householdId: string, limit?: number) {
+    return this.getRecommendations(householdId, limit);
+  }
+
   // Utility method to clean up expired cache entries
   async cleanupExpiredCache(): Promise<void> {
     console.log("AnalyticsDB.cleanupExpiredCache called");
