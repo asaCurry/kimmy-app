@@ -21,7 +21,7 @@ interface CategoryTypeaheadProps {
 export const CategoryTypeaheadUnified: React.FC<CategoryTypeaheadProps> = ({
   value,
   onChange,
-  onBlur,
+  onBlur: _onBlur,
   placeholder = "Select or type a category...",
   className,
   disabled = false,

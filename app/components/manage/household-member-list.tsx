@@ -34,8 +34,8 @@ interface HouseholdmemberListProps {
 
 export const HouseholdmemberList: React.FC<HouseholdmemberListProps> = ({
   householdMembers,
-  householdId,
-  onMemberUpdated,
+  householdId: _householdId,
+  onMemberUpdated: _onMemberUpdated,
   onMemberRemoved,
 }) => {
   const [removingMember, setRemovingMember] = useState<Householdmember | null>(

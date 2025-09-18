@@ -10,7 +10,7 @@ interface QuickActionsProps {
 }
 
 export const QuickActions: React.FC<QuickActionsProps> = ({
-  currentHouseholdId,
+  currentHouseholdId: _currentHouseholdId,
   isLoadingMembers,
   onRefresh,
 }) => {
