@@ -61,7 +61,7 @@ export const UnifiedInput = React.forwardRef<
       error: internalError,
       warning,
       isValid,
-      isFocused,
+      isFocused: _isFocused,
       handleChange,
       handleFocus,
       handleBlur,
@@ -117,7 +117,7 @@ export const UnifiedInput = React.forwardRef<
       if (externalValue !== undefined && externalValue !== value) {
         setValue(externalValue as string);
       }
-    }, [externalValue, value]);
+    }, [externalValue, value, setValue]);
 
     const generatedId = React.useId();
     const inputId = props.id || `input-${generatedId}`;
@@ -329,7 +329,7 @@ export const UnifiedTextarea = React.forwardRef<
       if (externalValue !== undefined && externalValue !== value) {
         setValue(externalValue as string);
       }
-    }, [externalValue, value]);
+    }, [externalValue, value, setValue]);
 
     const generatedId = React.useId();
     const inputId = props.id || `textarea-${generatedId}`;

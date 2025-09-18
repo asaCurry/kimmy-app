@@ -166,7 +166,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
             message: "Insight marked as complete",
           });
 
-        case "regenerate":
+        case "regenerate": {
           // Clear cache and regenerate insights
           const cachePattern = "ai_insights_";
           // Note: In a full implementation, you'd have a method to clear cache by pattern
@@ -177,6 +177,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
             success: true,
             message: "Insights will be regenerated on next request",
           });
+        }
 
         default:
           return Response.json(

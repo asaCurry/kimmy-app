@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -22,10 +22,7 @@ import {
   Brain,
   Sparkles,
   TrendingUp,
-  Users,
   Activity,
-  Calendar,
-  Filter,
   RefreshCw,
   Download,
   Settings,
@@ -91,7 +88,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Fetch AI insights
-  const fetchAIInsights = async () => {
+  const fetchAIInsights = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(
@@ -113,11 +110,11 @@ export const EnhancedAnalyticsDashboard: React.FC<
     } finally {
       setLoading(false);
     }
-  };
+  }, [householdId, timeRange]);
 
   useEffect(() => {
     fetchAIInsights();
-  }, [householdId, timeRange]);
+  }, [fetchAIInsights]);
 
   // Generate mock chart data from insights for demo purposes
   const generateChartData = (category: string): ChartDataPoint[] => {

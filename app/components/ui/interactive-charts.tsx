@@ -17,11 +17,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
 } from "recharts";
 import {
   Card,
@@ -43,7 +38,6 @@ import {
   Activity,
   ZoomIn,
   Download,
-  Filter,
 } from "lucide-react";
 
 interface InteractiveChartProps {
@@ -65,7 +59,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   height = 300,
   showControls = true,
   colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"],
-  onDataPointClick,
+  onDataPointClick: _onDataPointClick,
 }) => {
   const [chartType, setChartType] = useState(type);
   const [timeRange, setTimeRange] = useState("all");
@@ -257,22 +251,20 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
           </ScatterChart>
         );
 
-      case "pie":
-        const pieData = React.useMemo(() => {
-          const categoryTotals = filteredData.reduce(
-            (acc, item) => {
-              const cat = item.category || "Other";
-              acc[cat] = (acc[cat] || 0) + item.value;
-              return acc;
-            },
-            {} as Record<string, number>
-          );
+      case "pie": {
+        const categoryTotals = filteredData.reduce(
+          (acc, item) => {
+            const cat = item.category || "Other";
+            acc[cat] = (acc[cat] || 0) + item.value;
+            return acc;
+          },
+          {} as Record<string, number>
+        );
 
-          return Object.entries(categoryTotals).map(([name, value]) => ({
-            name,
-            value,
-          }));
-        }, [filteredData]);
+        const pieData = Object.entries(categoryTotals).map(([name, value]) => ({
+          name,
+          value,
+        }));
 
         return (
           <PieChart>
@@ -305,6 +297,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
             />
           </PieChart>
         );
+      }
 
       default:
         return <div>Chart type not supported</div>;

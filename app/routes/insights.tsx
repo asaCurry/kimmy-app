@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { Route } from "./+types/insights";
-import { useLoaderData } from "react-router";
+import { useLoaderData, redirect } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { RequireAuth } from "~/contexts/auth-context";
 import { withDatabaseAndSession } from "~/lib/db-utils";
@@ -12,7 +12,6 @@ import { UpgradeToPremiumCard } from "~/components/upgrade-to-premium-card";
 import { canAccessAnalytics, getUserRoleInHousehold } from "~/lib/permissions";
 import { households } from "~/db/schema";
 import { eq } from "drizzle-orm";
-import { redirect } from "react-router";
 import { analyticsLogger } from "~/lib/logger";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
