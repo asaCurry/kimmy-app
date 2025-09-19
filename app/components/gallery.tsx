@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
+import { CodeBlock, InlineCode } from "~/components/ui/code-block";
 
 interface Slide {
   id: number;
@@ -154,11 +155,26 @@ export function Gallery({ slides }: GalleryProps) {
                     {children}
                   </blockquote>
                 ),
-                code: ({ children }) => (
-                  <code className="bg-muted px-2 py-1 rounded text-sm font-mono">
-                    {children}
-                  </code>
-                ),
+                code: ({ className, children, ...props }: any) => {
+                  const match = /language-(\w+)/.exec(className || "");
+                  const isCodeBlock = match && String(children).includes("\n");
+
+                  return isCodeBlock ? (
+                    <div className="mb-4">
+                      <CodeBlock
+                        language={match[1]}
+                        className={className}
+                        {...props}
+                      >
+                        {String(children).replace(/\n$/, "")}
+                      </CodeBlock>
+                    </div>
+                  ) : (
+                    <InlineCode className={className} {...props}>
+                      {children}
+                    </InlineCode>
+                  );
+                },
               }}
             >
               {currentSlideData.content}

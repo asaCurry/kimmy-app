@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -9,7 +9,6 @@ import {
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { UnifiedSelect } from "~/components/ui/select-unified";
-import { LoadingSpinner } from "~/components/ui/loading-spinner";
 import {
   InteractiveChart,
   InsightVisualization,
@@ -17,7 +16,6 @@ import {
 } from "~/components/ui/interactive-charts";
 import type { BasicInsights } from "~/lib/analytics-service";
 import type { AIInsight, ChartDataPoint } from "~/lib/ai-analytics-service";
-import { analyticsLogger } from "~/lib/logger";
 import {
   Brain,
   Sparkles,
@@ -32,6 +30,7 @@ import {
 
 interface EnhancedAnalyticsDashboardProps {
   insights: BasicInsights;
+  aiInsights: AIInsight[];
   generatedAt: string;
   cached?: boolean;
   householdId: string;
@@ -79,82 +78,65 @@ const dashboardViews: DashboardView[] = [
 
 export const EnhancedAnalyticsDashboard: React.FC<
   EnhancedAnalyticsDashboardProps
-> = ({ insights, generatedAt, cached = false, householdId }) => {
+> = ({ insights, aiInsights, generatedAt, cached = false, householdId }) => {
   const [currentView, setCurrentView] = useState("overview");
-  const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
-  const [loading, setLoading] = useState(false);
   const [timeRange, setTimeRange] = useState("30");
   const [selectedMember, setSelectedMember] = useState("all");
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // Fetch AI insights
-  const fetchAIInsights = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/ai-insights?householdId=${householdId}&timeRange=${timeRange}`
+  // AI insights are now passed as props from the route loader
+
+  // Generate chart data from real insights data
+  const generateChartData = useMemo(() => {
+    return (category: string): ChartDataPoint[] => {
+      // Try to find AI insights with chart data for this category
+      const relevantAIInsights = aiInsights.filter(
+        insight =>
+          insight.chartData &&
+          (insight.type === category ||
+            insight.category.toLowerCase().includes(category.toLowerCase()))
       );
-      if (response.ok) {
-        const data = (await response.json()) as {
-          insights?: AIInsight[];
-          success: boolean;
-        };
-        setAiInsights(data.insights || []);
-      }
-    } catch (error) {
-      analyticsLogger.error("Failed to fetch AI insights", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        householdId,
-        timeRange,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [householdId, timeRange]);
 
-  useEffect(() => {
-    fetchAIInsights();
-  }, [fetchAIInsights]);
-
-  // Generate mock chart data from insights for demo purposes
-  const generateChartData = (category: string): ChartDataPoint[] => {
-    const days = parseInt(timeRange);
-    const data: ChartDataPoint[] = [];
-    const now = new Date();
-
-    for (let i = days; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-
-      // Generate realistic sample data based on category
-      let value = 0;
-      switch (category) {
-        case "sleep":
-          value = 7 + Math.sin(i / 7) * 1.5 + (Math.random() - 0.5) * 0.8;
-          break;
-        case "mood":
-          value = 7.5 + Math.sin(i / 5) * 2 + (Math.random() - 0.5) * 1.2;
-          break;
-        case "activity":
-          value = 60 + Math.sin(i / 7) * 20 + (Math.random() - 0.5) * 10;
-          break;
-        case "growth":
-          value = 100 + (i / days) * 5 + (Math.random() - 0.5) * 2;
-          break;
-        default:
-          value = Math.random() * 100;
+      if (relevantAIInsights.length > 0 && relevantAIInsights[0].chartData) {
+        return relevantAIInsights[0].chartData;
       }
 
-      data.push({
-        date: date.toISOString(),
-        value: Math.max(0, value),
-        category,
-        metadata: { day: i, category },
-      });
-    }
+      // Fallback to category insights data
+      const categoryData = insights.categoryInsights
+        .filter(cat =>
+          cat.category.toLowerCase().includes(category.toLowerCase())
+        )
+        .map((cat, index) => ({
+          date: new Date(
+            Date.now() - index * 24 * 60 * 60 * 1000
+          ).toISOString(),
+          value: cat.count,
+          category: cat.category,
+          metadata: {
+            trend: cat.trend,
+            averagePerWeek: cat.averagePerWeek,
+            lastRecordDate: cat.lastRecordDate,
+          },
+        }));
 
-    return data;
-  };
+      if (categoryData.length > 0) {
+        return categoryData;
+      }
+
+      // Final fallback: create data points from member insights if no category data
+      return insights.memberInsights.map((member, index) => ({
+        date: new Date(Date.now() - index * 24 * 60 * 60 * 1000).toISOString(),
+        value: member.recordCount,
+        category: category,
+        member: member.memberName,
+        metadata: {
+          memberId: member.memberId,
+          trend: member.trend,
+          categories: member.categories,
+        },
+      }));
+    };
+  }, [aiInsights, insights, timeRange]);
 
   const timeRangeOptions = [
     { value: "7", label: "Last 7 Days" },
@@ -277,25 +259,12 @@ export const EnhancedAnalyticsDashboard: React.FC<
             <CardContent className="p-6 text-center">
               <currentViewData.icon className="w-12 h-12 text-slate-400 mx-auto mb-4" />
               <h4 className="text-lg font-medium text-slate-200 mb-2">
-                Generating {currentViewData.name} Insights
+                No {currentViewData.name} Insights Available
               </h4>
               <p className="text-slate-400 mb-4">
-                AI is analyzing your data to generate personalized insights for{" "}
+                Add more data to generate AI insights for{" "}
                 {currentViewData.description.toLowerCase()}.
               </p>
-              <Button onClick={fetchAIInsights} disabled={loading}>
-                {loading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="w-4 h-4 mr-2" />
-                    Generate Insights
-                  </>
-                )}
-              </Button>
             </CardContent>
           </Card>
         )}
@@ -337,22 +306,12 @@ export const EnhancedAnalyticsDashboard: React.FC<
               options={memberOptions}
               placeholder="Member"
             />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchAIInsights}
-              disabled={loading}
-            >
-              {loading ? (
-                <RefreshCw className="w-4 h-4 animate-spin" />
-              ) : (
-                <RefreshCw className="w-4 h-4" />
-              )}
-            </Button>
+            {/* TODO: Implement export functionality
             <Button variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
+            */}
           </div>
         </div>
 
@@ -449,20 +408,9 @@ export const EnhancedAnalyticsDashboard: React.FC<
 
       {/* Main Content */}
       <div className="min-h-[600px]">
-        {loading && currentView !== "overview" ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <LoadingSpinner size="lg" />
-              <p className="text-slate-400 mt-4">
-                Analyzing data with AI models...
-              </p>
-            </div>
-          </div>
-        ) : currentView === "overview" ? (
-          renderOverviewView()
-        ) : (
-          renderSpecializedView()
-        )}
+        {currentView === "overview"
+          ? renderOverviewView()
+          : renderSpecializedView()}
       </div>
 
       {/* AI Status Footer */}

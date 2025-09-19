@@ -43,6 +43,13 @@
       "when": 1756990076941,
       "tag": "0005_overconfident_chronomancer",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1758289064775,
+      "tag": "0006_moaning_prism",
+      "breakpoints": true
     }
   ]
 }

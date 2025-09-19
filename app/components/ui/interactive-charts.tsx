@@ -325,14 +325,18 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
           </div>
           {showControls && (
             <div className="flex items-center gap-2">
+              {/* TODO: Implement export functionality
               <Button size="sm" variant="outline" className="text-xs">
                 <Download className="w-3 h-3 mr-1" />
                 Export
               </Button>
+              */}
+              {/* TODO: Implement full view functionality
               <Button size="sm" variant="outline" className="text-xs">
                 <ZoomIn className="w-3 h-3 mr-1" />
                 Full View
               </Button>
+              */}
             </div>
           )}
         </div>

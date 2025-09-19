@@ -89,6 +89,55 @@ export const InsightsDashboard: React.FC<InsightsDashboardProps> = ({
     }
   };
 
+  const renderPatternMetadata = (metadata: any) => {
+    if (!metadata || typeof metadata !== "object") return null;
+
+    return (
+      <div className="mt-3 space-y-2">
+        <h5 className="text-xs font-medium text-slate-300">Details:</h5>
+        <div className="space-y-1 text-xs">
+          {Object.entries(metadata).map(([key, value]) => (
+            <div key={key} className="flex flex-col">
+              <span className="text-slate-400 capitalize mb-1">
+                {key
+                  .replace(/([A-Z])/g, " $1")
+                  .replace(/^./, str => str.toUpperCase())}
+                :
+              </span>
+              <div className="text-slate-300 font-medium ml-2">
+                {Array.isArray(value) ? (
+                  value.length > 0 ? (
+                    <ul className="space-y-1">
+                      {value.map((item, index) => (
+                        <li
+                          key={index}
+                          className="text-blue-400 flex items-center gap-1"
+                        >
+                          <span className="w-1 h-1 bg-blue-400 rounded-full flex-shrink-0" />
+                          {String(item)}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="text-slate-500 italic">None</span>
+                  )
+                ) : typeof value === "number" ? (
+                  <span className="text-green-400">
+                    {value % 1 === 0 ? value : value.toFixed(1)}
+                  </span>
+                ) : value === null || value === undefined ? (
+                  <span className="text-slate-500 italic">Not available</span>
+                ) : (
+                  <span>{String(value)}</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with generation info */}
@@ -266,11 +315,7 @@ export const InsightsDashboard: React.FC<InsightsDashboardProps> = ({
                   <p className="text-sm text-slate-400">
                     {pattern.description}
                   </p>
-                  {pattern.metadata && (
-                    <div className="mt-2 text-xs text-slate-500">
-                      <pre>{JSON.stringify(pattern.metadata, null, 2)}</pre>
-                    </div>
-                  )}
+                  {pattern.metadata && renderPatternMetadata(pattern.metadata)}
                 </div>
               </div>
             ))}

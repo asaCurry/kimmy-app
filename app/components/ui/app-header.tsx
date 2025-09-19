@@ -14,7 +14,7 @@ import {
   X,
   BarChart3,
   FileText,
-  TrendingUp,
+  Brain,
   LogOut,
   ChevronDown,
 } from "lucide-react";
@@ -99,14 +99,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
               </Button>
             </Link>
             {isAdmin && (
-              <Link to="/analytics">
+              <Link to="/insights">
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-slate-300 hover:text-white hover:bg-slate-800"
                 >
-                  <TrendingUp className="mr-2 h-4 w-4" />
-                  Analytics
+                  <Brain className="mr-2 h-4 w-4" />
+                  Insights
                 </Button>
               </Link>
             )}
@@ -261,12 +261,12 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
         </Link>
         {isAdmin && (
           <Link
-            to="/analytics"
+            to="/insights"
             onClick={onClose}
             className="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-colors"
           >
-            <TrendingUp className="h-5 w-5 text-slate-400" />
-            <span className="text-slate-300">Analytics</span>
+            <Brain className="h-5 w-5 text-slate-400" />
+            <span className="text-slate-300">Insights</span>
           </Link>
         )}
         <Link

@@ -200,6 +200,27 @@ export const aiRecommendations = sqliteTable("ai_recommendations", {
   updatedAt: text("updated_at").default(sql`(datetime('now'))`),
 });
 
+// Insights requests table (for admin-requested AI analysis)
+export const insightsRequests = sqliteTable("insights_requests", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  householdId: text("household_id")
+    .notNull()
+    .references(() => households.id),
+  requestedBy: integer("requested_by")
+    .notNull()
+    .references(() => users.id),
+  type: text("type").notNull().default("comprehensive"), // 'comprehensive', 'health', 'growth', 'behavior'
+  priority: text("priority").notNull().default("normal"), // 'urgent', 'high', 'normal', 'low'
+  status: text("status").notNull().default("pending"), // 'pending', 'processing', 'completed', 'failed'
+  description: text("description"), // Optional description from admin
+  parameters: text("parameters"), // JSON object with specific analysis parameters
+  result: text("result"), // JSON object with analysis results
+  error: text("error"), // Error message if failed
+  processedAt: text("processed_at"), // When the request was completed
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+});
+
 // Password reset tokens table (for secure password reset flow)
 export const passwordResetTokens = sqliteTable("password_reset_tokens", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -234,5 +255,7 @@ export type AnalyticsCache = typeof analyticsCache.$inferSelect;
 export type NewAnalyticsCache = typeof analyticsCache.$inferInsert;
 export type AiRecommendation = typeof aiRecommendations.$inferSelect;
 export type NewAiRecommendation = typeof aiRecommendations.$inferInsert;
+export type InsightsRequest = typeof insightsRequests.$inferSelect;
+export type NewInsightsRequest = typeof insightsRequests.$inferInsert;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type NewPasswordResetToken = typeof passwordResetTokens.$inferInsert;

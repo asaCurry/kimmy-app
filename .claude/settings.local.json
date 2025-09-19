@@ -7,7 +7,9 @@
       "Bash(npm run:*)",
       "Bash(taskkill:*)",
       "Bash(node:*)",
-      "Bash(npx wrangler d1 execute:*)"
+      "Bash(npx wrangler d1 execute:*)",
+      "Bash(wrangler d1 execute:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
