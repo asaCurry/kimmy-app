@@ -70,11 +70,8 @@ const BLOCKED_PATHS = [
   "/api/v1/auth",
   "/xmlrpc",
 
-  // Specific file probes
-  "/robots.txt",
-  "/sitemap.xml",
-  "/.well-known",
-  "/favicon.ico",
+  // Note: Removed "/robots.txt", "/sitemap.xml", "/.well-known", "/favicon.ico"
+  // as these are handled specifically and should be allowed
 ];
 
 // Suspicious file extensions
@@ -120,16 +117,13 @@ const BLOCKED_USER_AGENTS = [
   "shodan",
   "censys",
   "scanner",
-  "crawl",
-  "bot",
-  "spider",
-  "scraper",
-  "harvest",
-  "extract",
-  "python-requests",
-  "curl",
-  "wget",
-  "libwww",
+  "badbot",
+  "malbot",
+  "hackbot",
+  "python-requests/2.6", // Very old version often used maliciously
+  "libwww-perl",
+  // Note: Removed generic "bot", "crawl", "spider", "scraper", "curl", "wget"
+  // as these can be legitimate
 ];
 
 // Rate limiting for suspicious IPs
@@ -232,11 +226,16 @@ function isWhitelisted(ip: string, whitelist: string[]): boolean {
 
 function isBlockedPath(pathname: string, blockedPaths: string[]): boolean {
   const normalizedPath = pathname.toLowerCase();
-  return blockedPaths.some(
-    blockedPath =>
-      normalizedPath.startsWith(blockedPath.toLowerCase()) ||
-      normalizedPath.includes(blockedPath.toLowerCase())
-  );
+  return blockedPaths.some(blockedPath => {
+    const normalizedBlockedPath = blockedPath.toLowerCase();
+    // Only match if path starts with blocked path and is followed by / or end of string
+    // This prevents "/admin" from blocking "/administration" (legitimate app route)
+    return (
+      normalizedPath === normalizedBlockedPath ||
+      normalizedPath.startsWith(normalizedBlockedPath + "/") ||
+      normalizedPath.startsWith(normalizedBlockedPath + ".")
+    );
+  });
 }
 
 function hasBlockedExtension(pathname: string): boolean {

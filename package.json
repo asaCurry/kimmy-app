@@ -86,6 +86,8 @@
     "db:reset:remote": "echo '⚠️  Remote database reset not implemented for safety. Use Cloudflare dashboard or manual commands.'",
     "db:setup-demo": "node scripts/setup-demo-account.mjs",
     "db:seed-demo": "wrangler d1 execute kimmy-app-db --local --file=scripts/demo-data.sql",
+    "db:setup-demo:prod": "node scripts/setup-demo-account-prod.mjs",
+    "db:seed-demo:prod": "wrangler d1 execute kimmy-app-db --remote --file=scripts/demo-data.sql",
     "db:status:local": "wrangler d1 execute kimmy-app-db --local --command='SELECT name FROM sqlite_master WHERE type=\"table\" ORDER BY name;'",
     "db:status:remote": "wrangler d1 execute kimmy-app-db --remote --command='SELECT name FROM sqlite_master WHERE type=\"table\" ORDER BY name;'",
     "db:info": "wrangler d1 info kimmy-app-db",

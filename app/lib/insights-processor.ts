@@ -10,6 +10,7 @@ import * as schema from "~/db/schema";
 import { AIAnalyticsService, type AIInsight } from "~/lib/ai-analytics-service";
 import { AnalyticsService } from "~/lib/analytics-service";
 import { AnalyticsDB } from "~/lib/analytics-db";
+import type { Env } from "~/lib/env.server";
 
 export async function processInsightsRequests(env: Env): Promise<void> {
   if (!env.DB) {

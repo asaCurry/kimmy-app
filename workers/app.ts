@@ -11,10 +11,11 @@ import {
   handleRobotsTxt,
   type BotProtectionConfig,
 } from "../app/lib/bot-protection";
+import type { Env as AppEnv } from "../app/lib/env.server";
 
 type ExportedHandlerScheduledHandler = (
   event: ScheduledEvent,
-  env: Env,
+  env: AppEnv,
   ctx: ExecutionContext
 ) => Promise<void>;
 
