@@ -1,15 +1,10 @@
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { eq, and, desc } from "drizzle-orm";
 import { withDatabaseAndSession } from "~/lib/db-utils";
 import { insightsRequests } from "~/db/schema";
 import type { NewInsightsRequest } from "~/db/schema";
 
-export async function loader({
-  request,
-  context,
-}: {
-  request: Request;
-  context: any;
-}) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
     // Only admin users can access insights requests
     if (session.role !== "admin") {
@@ -30,13 +25,7 @@ export async function loader({
   });
 }
 
-export async function action({
-  request,
-  context,
-}: {
-  request: Request;
-  context: any;
-}) {
+export async function action({ request, context }: ActionFunctionArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
     // Only admin users can create insights requests
     if (session.role !== "admin") {
@@ -79,6 +68,9 @@ export async function action({
           .insert(insightsRequests)
           .values(newRequest)
           .returning();
+
+        // TODO: Queue the request for async processing by a background worker
+        // For now, we just create the record in the database
 
         return {
           success: true,

@@ -50,6 +50,7 @@ export default [
   route("api/auto-completion", "routes/api.auto-completion.tsx"),
   route("api/cloudflare-analytics", "routes/api.cloudflare-analytics.tsx"),
   route("api/performance-metrics", "routes/api.performance-metrics.tsx"),
+  route("api/insights-request", "routes/api.insights-request.tsx"),
   route(
     "api/admin/password-reset-rate-limit",
     "routes/api.admin.password-reset-rate-limit.tsx"

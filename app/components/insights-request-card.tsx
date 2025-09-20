@@ -53,7 +53,7 @@ export const InsightsRequestCard: React.FC<InsightsRequestCardProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`p-3 ${colors.bg} border ${colors.border} rounded-lg text-left ${colors.hover} transition-colors`}
+      className={`p-3 ${colors.bg} border ${colors.border} rounded-lg text-left ${colors.hover} transition-colors cursor-pointer`}
       data-type={type}
     >
       <div className={`font-medium ${colors.titleColor} text-sm`}>

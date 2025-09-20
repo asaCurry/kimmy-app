@@ -85,7 +85,9 @@ export const CreateRecordTypeForm: React.FC<CreateRecordTypeFormProps> = ({
     e.preventDefault();
 
     if (!formData.name.trim() || !formData.category.trim()) {
-      alert("Please enter a name and select a category for the record type");
+      toast.error(
+        "Please enter a name and select a category for the record type"
+      );
       return;
     }
 

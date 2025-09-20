@@ -12,6 +12,7 @@ import {
   createSelectOption,
   validateSelectOptions,
 } from "~/lib/utils/dynamic-fields/select-options";
+import { toast } from "react-toastify";
 
 interface DynamicFieldEditorProps {
   field: DynamicField;
@@ -463,7 +464,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                           .map(opt => opt.label)
                           .join(", ");
                         navigator.clipboard.writeText(optionsText).then(() => {
-                          alert("Options copied to clipboard!");
+                          toast.success("Options copied to clipboard!");
                         });
                       }}
                       className="text-xs"

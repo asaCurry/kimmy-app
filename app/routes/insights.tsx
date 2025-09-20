@@ -16,6 +16,7 @@ import { canAccessAnalytics, getUserRoleInHousehold } from "~/lib/permissions";
 import { households } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { analyticsLogger } from "~/lib/logger";
+import { toast } from "react-toastify";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
@@ -245,15 +246,15 @@ export default function InsightsPage() {
           message: string;
           success: boolean;
         };
-        alert(
+        toast.success(
           `${result.message}. Your request has been queued for processing.`
         );
       } else {
-        alert("Failed to create insights request. Please try again.");
+        toast.error("Failed to create insights request. Please try again.");
       }
     } catch (error) {
       console.error("Error creating insights request:", error);
-      alert("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     }
   };
 
@@ -321,7 +322,7 @@ export default function InsightsPage() {
               {/* Admin-Only Insights Request Section */}
               {data.useAI &&
                 data.household.hasAnalyticsAccess &&
-                session?.admin && (
+                session?.role === "admin" && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h2 className="text-xl font-semibold text-slate-200 flex items-center gap-2">
