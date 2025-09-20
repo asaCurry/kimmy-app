@@ -245,10 +245,23 @@ export default function InsightsPage() {
         const result = (await response.json()) as {
           message: string;
           success: boolean;
+          processedImmediately?: boolean;
+          processingError?: string;
         };
-        toast.success(
-          `${result.message}. Your request has been queued for processing.`
-        );
+
+        if (result.processedImmediately) {
+          toast.success(
+            `${result.message}. Fresh insights have been generated!`
+          );
+        } else if (result.processingError) {
+          toast.warning(
+            `${result.message}. Processing will be handled by background worker.`
+          );
+        } else {
+          toast.success(
+            `${result.message}. Your request has been queued for processing.`
+          );
+        }
       } else {
         toast.error("Failed to create insights request. Please try again.");
       }

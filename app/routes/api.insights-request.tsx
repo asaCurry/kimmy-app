@@ -3,6 +3,7 @@ import { eq, and, desc } from "drizzle-orm";
 import { withDatabaseAndSession } from "~/lib/db-utils";
 import { insightsRequests } from "~/db/schema";
 import type { NewInsightsRequest } from "~/db/schema";
+import { getValidatedEnv } from "~/lib/env.server";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
@@ -69,14 +70,67 @@ export async function action({ request, context }: ActionFunctionArgs) {
           .values(newRequest)
           .returning();
 
-        // TODO: Queue the request for async processing by a background worker
-        // For now, we just create the record in the database
+        const createdRequest = result[0];
 
-        return {
-          success: true,
-          request: result[0],
-          message: `${type} insights request created successfully`,
-        };
+        // Process the request immediately for admin requests (bypass cron job)
+        try {
+          console.log(
+            `🚀 Admin requested immediate processing for request ${createdRequest.id}`,
+            {
+              requestId: createdRequest.id,
+              type: createdRequest.type,
+              householdId: createdRequest.householdId,
+              requestedBy: createdRequest.requestedBy,
+            }
+          );
+
+          // Import the insights processor
+          const { processInsightsRequests } = await import(
+            "~/lib/insights-processor"
+          );
+          const env = getValidatedEnv(context);
+
+          // Process immediately with force refresh to bypass cache
+          await processInsightsRequests(env, true);
+
+          console.log(
+            `✅ Admin request ${createdRequest.id} processed immediately`
+          );
+
+          return {
+            success: true,
+            request: createdRequest,
+            message: `${type} insights request created and processed immediately`,
+            processedImmediately: true,
+          };
+        } catch (processingError) {
+          console.error(
+            `❌ Failed to process admin request ${createdRequest.id} immediately:`,
+            {
+              requestId: createdRequest.id,
+              error:
+                processingError instanceof Error
+                  ? processingError.message
+                  : "Unknown error",
+              stack:
+                processingError instanceof Error
+                  ? processingError.stack
+                  : undefined,
+            }
+          );
+
+          // If immediate processing fails, the request will still be processed by the cron job
+          return {
+            success: true,
+            request: createdRequest,
+            message: `${type} insights request created successfully. Processing will be handled by background worker.`,
+            processedImmediately: false,
+            processingError:
+              processingError instanceof Error
+                ? processingError.message
+                : "Unknown error",
+          };
+        }
       }
 
       case "cancel": {

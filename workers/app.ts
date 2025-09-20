@@ -60,6 +60,40 @@ app.get("/.well-known/appspecific/com.chrome.devtools.json", c => {
   return c.json({ message: "Chrome DevTools integration not available" }, 404);
 });
 
+// Manual trigger for insights processing (for debugging)
+app.post("/admin/trigger-insights", async c => {
+  try {
+    const url = new URL(c.req.url);
+    const forceRefresh = url.searchParams.get("force") === "true";
+
+    console.log("🔧 Manual insights processing triggered via API", {
+      forceRefresh,
+      timestamp: new Date().toISOString(),
+    });
+
+    await processInsightsRequests(c.env as AppEnv, forceRefresh);
+
+    return c.json({
+      success: true,
+      message: forceRefresh
+        ? "Insights processing completed (forced refresh)"
+        : "Insights processing completed",
+      forceRefresh,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("💥 Error in manual insights processing:", error);
+    return c.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString(),
+      },
+      500
+    );
+  }
+});
+
 // Security middleware
 app.use("*", async (c, next) => {
   // Bot protection first
@@ -99,12 +133,26 @@ export const scheduled: ExportedHandlerScheduledHandler = async (
   env,
   ctx
 ) => {
+  console.log("⏰ Scheduled insights processing triggered", {
+    timestamp: new Date().toISOString(),
+    cron: event.cron,
+    scheduledTime: event.scheduledTime,
+    environment: env.ENVIRONMENT,
+    hasDB: !!env.DB,
+    hasAI: !!env.AI,
+  });
+
   try {
-    console.log("Processing scheduled insights requests...");
-    await processInsightsRequests(env);
-    console.log("Insights processing completed");
+    console.log("🔄 Processing scheduled insights requests...");
+    await processInsightsRequests(env as AppEnv, false); // Don't force refresh for scheduled runs
+    console.log("✅ Insights processing completed successfully");
   } catch (error) {
-    console.error("Error in scheduled insights processing:", error);
+    console.error("💥 Error in scheduled insights processing:", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+      cron: event.cron,
+      scheduledTime: event.scheduledTime,
+    });
   }
 };
 

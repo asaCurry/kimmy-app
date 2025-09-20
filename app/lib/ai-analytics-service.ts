@@ -216,9 +216,21 @@ Identify:
 Provide insights in a structured format focusing on actionable recommendations.`;
 
       if (this.ai && this.ai.run) {
+        console.log(`🤖 Making AI call for health analysis`, {
+          householdId: this.householdId,
+          recordCount: healthRecords.length,
+          promptLength: prompt.length,
+        });
+
         const response = await this.ai.run("@cf/meta/llama-3.1-8b-instruct", {
           messages: [{ role: "user", content: prompt }],
           max_tokens: 500,
+        });
+
+        console.log(`✅ AI call completed for health analysis`, {
+          householdId: this.householdId,
+          responseLength: response.response?.length || 0,
+          hasResponse: !!response.response,
         });
 
         const aiAnalysis = response.response || "";
@@ -241,6 +253,13 @@ Provide insights in a structured format focusing on actionable recommendations.`
         });
       }
     } catch (error) {
+      console.error(`❌ Error in AI health pattern analysis`, {
+        householdId: this.householdId,
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+        hasAI: !!this.ai,
+        aiRunMethod: !!this.ai?.run,
+      });
       analyticsLogger.error("Error in AI health pattern analysis", { error });
     }
 
