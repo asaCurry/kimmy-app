@@ -51,6 +51,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
         success: false,
         hasAccess: false,
         reason: accessCheck.reason,
+        useAI: false,
         household: {
           id: householdData.id,
           name: householdData.name,
@@ -71,6 +72,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
           patterns: [],
           recommendations: [],
         },
+        aiInsights: [],
         generatedAt: new Date().toISOString(),
         cached: false,
       };
@@ -135,6 +137,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
           aiInsights = (insights.aiInsights as AIInsight[]) || [];
           analyticsLogger.debug("Using cached insights");
         }
+      } else {
+        analyticsLogger.debug(
+          "Using insights from completed request, skipping cache"
+        );
       }
 
       if (!insights) {
@@ -195,8 +201,11 @@ export async function loader({ request, context }: Route.LoaderArgs) {
           `Generated and cached new ${useAI ? "AI-enhanced" : "basic"} insights`
         );
       } else {
-        analyticsLogger.debug("Using cached insights");
-        aiInsights = (insights.aiInsights as AIInsight[]) || [];
+        analyticsLogger.debug("Using existing insights data");
+        // Don't overwrite aiInsights if we already have them from completed request
+        if (aiInsights.length === 0) {
+          aiInsights = (insights.aiInsights as AIInsight[]) || [];
+        }
       }
 
       // Always fetch fresh recommendations from database
@@ -204,10 +213,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
         session.currentHouseholdId
       );
 
-      return {
+      const result = {
         success: true,
         hasAccess: true,
         useAI,
+        reason: undefined,
+        error: undefined,
         household: {
           id: householdData.id,
           name: householdData.name,
@@ -231,6 +242,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
         generatedAt: new Date().toISOString(),
         cached: !!insights, // true if we used cached data
       };
+
+      return result;
     } catch (error) {
       analyticsLogger.error("Error loading insights", {
         error: error instanceof Error ? error.message : "Unknown error",
@@ -241,6 +254,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
         success: false,
         hasAccess: true,
         error: "check back later for your first round of insights",
+        useAI: false,
         household: {
           id: householdData.id,
           name: householdData.name,
@@ -261,6 +275,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
           patterns: [],
           recommendations: [],
         },
+        aiInsights: [],
         generatedAt: new Date().toISOString(),
         cached: false,
       };
@@ -357,7 +372,7 @@ export default function InsightsPage() {
         <div className="space-y-6">
           {!data.hasAccess && (
             <UpgradeToPremiumCard
-              reason={data.reason}
+              reason={data.reason || "Analytics access required"}
               household={data.household}
             />
           )}
@@ -368,13 +383,13 @@ export default function InsightsPage() {
                 No Insights Available Yet
               </h3>
               <p className="text-blue-300 text-sm">
-                {data.error ||
+                {(data as any).error ||
                   "Check back later for your first round of insights."}
               </p>
             </div>
           )}
 
-          {data.hasAccess && (
+          {data.hasAccess && data.success && (
             <>
               {/* Admin-Only Insights Request Section */}
               {data.useAI &&

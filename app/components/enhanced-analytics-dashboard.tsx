@@ -84,8 +84,10 @@ export const EnhancedAnalyticsDashboard: React.FC<
 
   // AI insights are now passed as props from the route loader
 
-  // Generate chart data from real insights data
   const generateChartData = useMemo(() => {
+    if (!aiInsights || !insights) {
+      return () => [];
+    }
     return (category: string): ChartDataPoint[] => {
       // Try to find AI insights with chart data for this category
       const relevantAIInsights = aiInsights.filter(
@@ -100,7 +102,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
       }
 
       // Fallback to category insights data
-      const categoryData = insights.categoryInsights
+      const categoryData = (insights?.categoryInsights || [])
         .filter(cat =>
           cat.category.toLowerCase().includes(category.toLowerCase())
         )
@@ -122,7 +124,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
       }
 
       // Final fallback: create data points from member insights if no category data
-      return insights.memberInsights.map((member, index) => ({
+      return (insights?.memberInsights || []).map((member, index) => ({
         date: new Date(Date.now() - index * 24 * 60 * 60 * 1000).toISOString(),
         value: member.recordCount,
         category: category,
@@ -136,6 +138,30 @@ export const EnhancedAnalyticsDashboard: React.FC<
     };
   }, [aiInsights, insights]);
 
+  // Safety check for missing insights data
+  if (!insights) {
+    return (
+      <div className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-lg p-6">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-slate-200 mb-2">
+            Loading Insights...
+          </h3>
+          <p className="text-slate-400 text-sm mb-4">
+            Please wait while we generate your insights.
+          </p>
+          <a
+            href="#insights-section"
+            className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-md transition-colors"
+          >
+            View Insights Below ↓
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Generate chart data from real insights data
+
   const timeRangeOptions = [
     { value: "7", label: "Last 7 Days" },
     { value: "30", label: "Last 30 Days" },
@@ -145,7 +171,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
 
   const memberOptions = [
     { value: "all", label: "All Members" },
-    ...insights.memberInsights.map(member => ({
+    ...(insights?.memberInsights || []).map(member => ({
       value: member.memberId.toString(),
       label: member.memberName,
     })),
@@ -207,17 +233,6 @@ export const EnhancedAnalyticsDashboard: React.FC<
           type="area"
           height={300}
         />
-      </div>
-
-      {/* Recent Insights */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-400" />
-          Latest AI Insights
-        </h3>
-        {viewInsights.slice(0, 3).map(insight => (
-          <InsightVisualization key={insight.id} insight={insight} />
-        ))}
       </div>
     </div>
   );
@@ -405,7 +420,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
       </div>
 
       {/* Main Content */}
-      <div className="min-h-[600px]">
+      <div id="insights-section" className="min-h-[600px]">
         {currentView === "overview"
           ? renderOverviewView()
           : renderSpecializedView()}

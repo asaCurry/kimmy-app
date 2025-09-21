@@ -1,10 +1,9 @@
 import type { Route } from "./+types/member.$memberId.category.$category.edit-record-type.$recordTypeId";
 import * as React from "react";
 import { redirect, useNavigate } from "react-router";
-import { PageLayout } from "~/components/ui/layout";
+import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
-import { PageHeader } from "~/components/ui/layout";
 import { loadHouseholdDataWithMember } from "~/lib/loader-helpers";
 import { withDatabase, getDatabase } from "~/lib/db-utils";
 import { recordTypes } from "~/db/schema";
@@ -54,6 +53,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     let session;
     try {
       session = JSON.parse(decodeURIComponent(sessionData));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       throw redirect("/welcome");
     }
@@ -108,8 +108,8 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     if (recordType.fields) {
       try {
         parsedFields = JSON.parse(recordType.fields);
-      } catch (error) {
-        console.error("Failed to parse record type fields:", error);
+      } catch {
+        console.error("Failed to parse record type fields:");
       }
     }
 
@@ -214,7 +214,7 @@ export async function action({
 
 const EditRecordType: React.FC<Route.ComponentProps> = ({
   loaderData,
-  params,
+  params: _params,
 }) => {
   const { member, category, householdId, recordType, householdMembers } =
     loaderData;
