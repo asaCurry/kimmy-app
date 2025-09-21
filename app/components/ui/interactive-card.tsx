@@ -1,12 +1,6 @@
 import * as React from "react";
 import { cn } from "~/lib/utils";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./card";
+import { Card, CardDescription, CardHeader, CardTitle } from "./card";
 import { ChevronRight } from "lucide-react";
 
 // Shared interactive card styling constants

@@ -94,7 +94,7 @@ export const RecordsList: React.FC<RecordsListProps> = ({
         ...recordType,
         fields: normalizedFields,
       };
-    } catch (_error) {
+    } catch {
       return {
         ...recordType,
         fields: [],
@@ -169,9 +169,9 @@ export const RecordsList: React.FC<RecordsListProps> = ({
           <RecordsTable
             records={records}
             recordType={recordType}
-            memberId={memberId}
-            category={category}
-            householdId={householdId}
+            _memberId={memberId}
+            _category={category}
+            _householdId={householdId}
             onDelete={handleDelete}
             isDeleting={isDeleting}
           />

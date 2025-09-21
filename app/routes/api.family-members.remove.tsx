@@ -1,5 +1,4 @@
 import type { ActionFunctionArgs } from "react-router";
-import { userDb } from "~/lib/db";
 
 export async function action({ request, context }: ActionFunctionArgs) {
   try {

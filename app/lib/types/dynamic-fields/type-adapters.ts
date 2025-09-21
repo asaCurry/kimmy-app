@@ -79,7 +79,7 @@ export const legacyFormFieldToDynamicField = (
   }
 
   const options: SelectOption[] | undefined = field.options?.map(
-    (opt, index) => ({
+    (opt, _index) => ({
       value: opt.toLowerCase().replace(/\s+/g, "_"),
       label: opt,
     })
@@ -132,7 +132,7 @@ export const extendedFormFieldToDynamicField = (
   }
 
   const options: SelectOption[] | undefined = field.options?.map(
-    (opt, index) => ({
+    (opt, _index) => ({
       value: opt.toLowerCase().replace(/\s+/g, "_"),
       label: opt,
     })

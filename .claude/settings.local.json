@@ -10,7 +10,8 @@
       "Bash(npx wrangler d1 execute:*)",
       "Bash(wrangler d1 execute:*)",
       "Bash(curl:*)",
-      "Bash(wrangler tail:*)"
+      "Bash(wrangler tail:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

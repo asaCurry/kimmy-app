@@ -156,7 +156,7 @@ export function useInputState(options: UseInputStateOptions = {}) {
     }));
 
     onBlur?.();
-  }, [validate, validateOnBlur, onBlur, state.value]);
+  }, [validate, validateOnBlur, onBlur, state.value, state.isValid]);
 
   const setInteracting = React.useCallback((isInteracting: boolean) => {
     setState(prev => ({ ...prev, isInteracting }));

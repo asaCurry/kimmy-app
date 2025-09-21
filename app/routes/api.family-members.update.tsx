@@ -1,5 +1,4 @@
 import type { ActionFunctionArgs } from "react-router";
-import { userDb } from "~/lib/db";
 
 export async function action({ request, context }: ActionFunctionArgs) {
   try {
@@ -13,9 +12,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const memberId = formData.get("memberId") as string;
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
-    const email = formData.get("email") as string;
+    const _email = formData.get("email") as string;
     const relationship = formData.get("relationship") as string;
-    const dateOfBirth = formData.get("dateOfBirth") as string;
+    const _dateOfBirth = formData.get("dateOfBirth") as string;
 
     // Validation
     if (!memberId || !firstName || !lastName || !relationship) {

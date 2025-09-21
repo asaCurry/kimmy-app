@@ -1,8 +1,7 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { eq, and, desc } from "drizzle-orm";
 import { withDatabaseAndSession } from "~/lib/db-utils";
-import { insightsRequests } from "~/db/schema";
-import type { NewInsightsRequest } from "~/db/schema";
+import { insightsRequests, type NewInsightsRequest } from "~/db/schema";
 import { getValidatedEnv } from "~/lib/env.server";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {

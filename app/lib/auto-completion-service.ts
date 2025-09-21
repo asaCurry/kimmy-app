@@ -1,11 +1,8 @@
-import { eq, and, desc, like, sql } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { records, recordTypes, users } from "~/db/schema";
 import type { Database } from "../../db";
 import { AutoCompletionCache } from "./auto-completion-cache";
-import {
-  monitorPerformance,
-  withPerformanceMonitoring,
-} from "./performance-monitor";
+import { withPerformanceMonitoring } from "./performance-monitor";
 import { CloudflarePerformanceMonitor } from "./cloudflare-analytics";
 import { MonitoredDatabase } from "./monitored-db";
 
@@ -178,7 +175,7 @@ export class AutoCompletionService {
               fieldValues.push(suggestion);
             }
           }
-        } catch (error) {
+        } catch {
           // Skip records with invalid JSON
           continue;
         }
@@ -264,7 +261,7 @@ export class AutoCompletionService {
   async getTitleSuggestions(
     recordTypeId: number,
     householdId: string,
-    memberId?: number
+    _memberId?: number
   ): Promise<AutoCompletionSuggestion[]> {
     try {
       // Optimized query for title suggestions
@@ -341,7 +338,7 @@ export class AutoCompletionService {
   async getTagSuggestions(
     recordTypeId: number,
     householdId: string,
-    memberId?: number
+    _memberId?: number
   ): Promise<string[]> {
     try {
       // Optimized query for tag suggestions - only get records with tags

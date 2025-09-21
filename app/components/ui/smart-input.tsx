@@ -38,7 +38,6 @@ export const SmartInput = React.forwardRef<HTMLInputElement, SmartInputProps>(
     },
     ref
   ) => {
-    const [isFocused, setIsFocused] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -86,7 +85,6 @@ export const SmartInput = React.forwardRef<HTMLInputElement, SmartInputProps>(
     }, [suggestions, value]);
 
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-      setIsFocused(true);
       if (showSuggestions && allSuggestions.length > 0) {
         setShowDropdown(true);
       }
@@ -94,7 +92,6 @@ export const SmartInput = React.forwardRef<HTMLInputElement, SmartInputProps>(
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      setIsFocused(false);
       // Delay hiding dropdown to allow for clicks
       setTimeout(() => setShowDropdown(false), 150);
 

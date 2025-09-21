@@ -52,7 +52,7 @@ export default function TrackersPage() {
         });
       }
     }
-  }, [fetcher.data]); // Remove revalidator from dependency array
+  }, [fetcher.data, revalidator]);
 
   const handleDeleteTracker = (tracker: Tracker) => {
     if (

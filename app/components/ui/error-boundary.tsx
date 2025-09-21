@@ -65,7 +65,7 @@ interface ErrorDisplayProps {
   title?: string;
   message?: string;
   onRetry?: () => void;
-  showDetails?: boolean;
+  _showDetails?: boolean;
   actions?: ReactNode;
 }
 
@@ -74,7 +74,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   title = "Something went wrong",
   message,
   onRetry,
-  showDetails = false,
+  _showDetails = false,
   actions,
 }) => {
   const [showFullError, setShowFullError] = React.useState(false);

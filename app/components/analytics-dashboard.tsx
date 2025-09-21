@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { UnifiedSelect } from "./ui/select-unified";
@@ -26,7 +26,7 @@ export function AnalyticsDashboard() {
   const [timeRange, setTimeRange] = useState("24h");
   const [metric, setMetric] = useState("performance");
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -52,11 +52,11 @@ export function AnalyticsDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange, metric]);
 
   useEffect(() => {
     fetchAnalytics();
-  }, [timeRange, metric]);
+  }, [timeRange, metric, fetchAnalytics]);
 
   const timeRangeOptions = [
     { value: "1h", label: "Last Hour" },

@@ -1,9 +1,7 @@
 import type { Route } from "./+types/member.$memberId.category.$category";
-import * as React from "react";
 import { useNavigate, redirect } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
-import { Navigation } from "~/components/navigation";
 import { RecordsList } from "~/components/records-list";
 import { RecordDrawer } from "~/components/ui/record-drawer";
 import { AddCard } from "~/components/ui/interactive-card";
@@ -27,7 +25,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { QuickNotes } from "~/components/ui";
-import { useLoaderData, useActionData, useRevalidator } from "react-router";
+import { useLoaderData, useRevalidator } from "react-router";
 import { useEffect } from "react";
 
 export function meta({ params }: Route.MetaArgs) {
@@ -198,6 +196,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     let session;
     try {
       session = JSON.parse(decodeURIComponent(sessionData));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       throw redirect("/welcome");
     }
@@ -289,6 +288,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
           } else {
             parsedFields = [];
           }
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           parsedFields = [];
         }
@@ -388,7 +388,7 @@ export default function CategoryRecordTypes() {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, []); // Empty dependency array - only run once on mount
+  }, [revalidator]);
 
   // Show toast notification when data is being refreshed
   // Loading states are handled visually through UI indicators
@@ -400,11 +400,13 @@ export default function CategoryRecordTypes() {
     );
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleNoteCreated = (note: any) => {
     // This function is called when a quick note is created
     // The page will automatically refresh due to the action redirect
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleNoteDeleted = (noteId: number) => {
     // This function is called when a quick note is deleted
     // The page will automatically refresh due to the action redirect

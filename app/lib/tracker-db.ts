@@ -1,9 +1,7 @@
-import { eq, and, desc, sql, count } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { trackers, trackerEntries, users } from "~/db/schema";
 import type {
-  NewTracker,
   Tracker,
-  NewTrackerEntry,
   TrackerEntry,
   CreateTrackerInput,
   UpdateTrackerInput,

@@ -135,9 +135,12 @@ const EditMember: React.FC<Route.ComponentProps> = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
   const actionData = useActionData<typeof action>();
-  const navigation = useNavigation();
-  const { householdId, householdMembers, member } =
-    useLoaderData<typeof loader>();
+  const _navigation = useNavigation();
+  const {
+    householdId,
+    householdMembers: _householdMembers,
+    member,
+  } = useLoaderData<typeof loader>();
   const [isSuccess, setIsSuccess] = useState(false);
 
   // Handle action data changes

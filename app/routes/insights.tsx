@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { Route } from "./+types/insights";
-import { useLoaderData, redirect } from "react-router";
+import { useLoaderData } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
 import { RequireAuth, useAuth } from "~/contexts/auth-context";
 import { withDatabaseAndSession } from "~/lib/db-utils";
@@ -13,8 +13,8 @@ import { EnhancedAnalyticsDashboard } from "~/components/enhanced-analytics-dash
 import { UpgradeToPremiumCard } from "~/components/upgrade-to-premium-card";
 import { InsightsRequestCard } from "~/components/insights-request-card";
 import { canAccessAnalytics, getUserRoleInHousehold } from "~/lib/permissions";
-import { households } from "~/db/schema";
-import { eq } from "drizzle-orm";
+import { households, insightsRequests } from "~/db/schema";
+import { eq, and, desc } from "drizzle-orm";
 import { analyticsLogger } from "~/lib/logger";
 import { toast } from "react-toastify";
 
@@ -81,17 +81,61 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
     // Try to use AI analytics if available, fallback to basic analytics
     const useAI = !!env.AI;
-    const cacheKey = useAI ? "ai_insights" : "basic_insights";
+    const cacheKey = useAI ? "insights_comprehensive" : "basic_insights";
     const ttlMinutes = useAI ? 120 : 60; // Cache AI insights longer
 
     try {
-      // Check for cached insights first
-      let insights = await analyticsDB.getCachedInsights(
-        session.currentHouseholdId,
-        cacheKey
-      );
+      // First check for completed insights requests
+      const completedRequests = await db
+        .select()
+        .from(insightsRequests)
+        .where(
+          and(
+            eq(insightsRequests.householdId, session.currentHouseholdId),
+            eq(insightsRequests.status, "completed")
+          )
+        )
+        .orderBy(desc(insightsRequests.processedAt))
+        .limit(1);
 
+      let insights: any = null;
       let aiInsights: AIInsight[] = [];
+
+      if (completedRequests.length > 0) {
+        // Use insights from completed request
+        const request = completedRequests[0];
+        try {
+          const requestResult = JSON.parse(request.result || "{}");
+          insights = requestResult.basicInsights;
+          aiInsights = requestResult.aiInsights || [];
+
+          analyticsLogger.info(
+            `Using insights from completed request ${request.id}`,
+            {
+              requestType: request.type,
+              aiInsightsCount: aiInsights.length,
+              processedAt: request.processedAt,
+            }
+          );
+        } catch (parseError) {
+          analyticsLogger.warn("Failed to parse insights request result", {
+            parseError,
+          });
+        }
+      }
+
+      // Fall back to cached insights if no completed requests
+      if (!insights) {
+        insights = await analyticsDB.getCachedInsights(
+          session.currentHouseholdId,
+          cacheKey
+        );
+
+        if (insights) {
+          aiInsights = (insights.aiInsights as AIInsight[]) || [];
+          analyticsLogger.debug("Using cached insights");
+        }
+      }
 
       if (!insights) {
         analyticsLogger.debug(
@@ -485,7 +529,7 @@ export default function InsightsPage() {
                 aiInsights={data.aiInsights || []}
                 generatedAt={data.generatedAt}
                 cached={data.cached}
-                householdId={data.household.id}
+                _householdId={data.household.id}
               />
 
               {/* Fallback to basic dashboard if enhanced fails */}

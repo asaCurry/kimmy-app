@@ -160,7 +160,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const insightId = formData.get("insightId") as string;
 
     try {
-      const analyticsDB = new AnalyticsDB(db);
+      const _analyticsDB = new AnalyticsDB(db);
 
       switch (action) {
         case "dismiss":
@@ -178,7 +178,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
         case "regenerate": {
           // Clear cache and regenerate insights
-          const cachePattern = "ai_insights_";
+          const _cachePattern = "ai_insights_";
           // Note: In a full implementation, you'd have a method to clear cache by pattern
           analyticsLogger.info("Regenerating AI insights", {
             householdId: session.currentHouseholdId,

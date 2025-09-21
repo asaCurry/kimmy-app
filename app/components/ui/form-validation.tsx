@@ -134,7 +134,6 @@ interface FormStatusProps {
 
 export const FormStatus: React.FC<FormStatusProps> = ({
   isValid,
-  isDirty,
   errorCount,
   touchedFieldCount,
   className,

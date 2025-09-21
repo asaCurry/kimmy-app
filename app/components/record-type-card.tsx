@@ -1,4 +1,7 @@
-import { IconCard, INTERACTIVE_CARD_STYLES } from "~/components/ui/interactive-card";
+import {
+  IconCard,
+  INTERACTIVE_CARD_STYLES,
+} from "~/components/ui/interactive-card";
 import { CardContent } from "~/components/ui/card";
 import type { RecordType } from "~/lib/utils";
 

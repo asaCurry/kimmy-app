@@ -155,7 +155,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({
   );
 
   const refreshMembers = useCallback(
-    async (householdId: string): Promise<void> => {
+    async (_householdId: string): Promise<void> => {
       // Member fetching handled by route loaders
     },
     []

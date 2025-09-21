@@ -28,7 +28,7 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
   allowCreate = true,
   maxSuggestions = 8,
 }) => {
-  const { categories, getCategorySuggestions, addCategory, loadCategories } =
+  const { getCategorySuggestions, addCategory, loadCategories } =
     useCategories();
   const [isOpen, setIsOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -127,20 +127,23 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     }, delay);
   };
 
-  const handleSelectCategory = (categoryName: string) => {
-    setInputValue(categoryName);
-    onChange(categoryName);
-    setIsOpen(false);
-    setSearchQuery("");
-    setFocusedIndex(-1);
-    setIsInteracting(false);
-    if (blurTimeoutRef.current) {
-      clearTimeout(blurTimeoutRef.current);
-    }
-    inputRef.current?.blur();
-  };
+  const handleSelectCategory = React.useCallback(
+    (categoryName: string) => {
+      setInputValue(categoryName);
+      onChange(categoryName);
+      setIsOpen(false);
+      setSearchQuery("");
+      setFocusedIndex(-1);
+      setIsInteracting(false);
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+      }
+      inputRef.current?.blur();
+    },
+    [onChange]
+  );
 
-  const handleCreateCategory = async () => {
+  const handleCreateCategory = React.useCallback(async () => {
     const trimmedQuery = searchQuery.trim();
     if (!trimmedQuery || !allowCreate) return;
 
@@ -158,7 +161,13 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     } finally {
       setIsCreating(false);
     }
-  };
+  }, [
+    addCategory,
+    householdId,
+    handleSelectCategory,
+    searchQuery,
+    allowCreate,
+  ]);
 
   const handleClear = () => {
     setInputValue("");
@@ -225,7 +234,14 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, focusedIndex, suggestions, showCreateOption]);
+  }, [
+    isOpen,
+    focusedIndex,
+    suggestions,
+    showCreateOption,
+    handleCreateCategory,
+    handleSelectCategory,
+  ]);
 
   return (
     <div className="relative" ref={dropdownRef}>

@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { Record, RecordType, User } from "~/db/schema";
+import type { Record, RecordType } from "~/db/schema";
 
 interface RecordManagementState {
   selectedRecord: Record | null;
@@ -181,10 +181,6 @@ export const RecordManagementProvider: React.FC<
       updateRecord,
       setDeleting,
       setUpdating,
-      householdMembers,
-      householdId,
-      memberId,
-      category,
     ]
   );
 

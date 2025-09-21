@@ -18,7 +18,7 @@ export interface UnifiedSelectProps extends BaseFormFieldProps {
   defaultValue?: string;
   placeholder?: string;
   onChange?: (value: string) => void;
-  onValidationChange?: (isValid: boolean, error?: string) => void;
+  _onValidationChange?: (isValid: boolean, error?: string) => void;
   searchable?: boolean;
   creatable?: boolean;
   onCreateOption?: (label: string) => Promise<void> | void;
@@ -46,7 +46,7 @@ export const UnifiedSelect = React.forwardRef<
       defaultValue,
       placeholder = "Select an option...",
       onChange,
-      onValidationChange,
+      _onValidationChange,
       searchable = false,
       creatable = false,
       onCreateOption,
@@ -54,9 +54,9 @@ export const UnifiedSelect = React.forwardRef<
       loadingText = "Loading...",
       noOptionsText = "No options found",
       createText = query => `Create "${query}"`,
-      ...props
+      ..._props
     },
-    ref
+    _ref
   ) => {
     const [searchQuery, setSearchQuery] = React.useState("");
     const [selectedValue, setSelectedValue] = React.useState(
@@ -68,14 +68,12 @@ export const UnifiedSelect = React.forwardRef<
 
     const {
       isOpen,
-      isInteracting,
       focusedIndex,
       containerRef,
       open,
       close,
       toggle,
       handleBlur,
-      handleSelect,
       startInteracting,
       stopInteracting,
       handleKeyDown,

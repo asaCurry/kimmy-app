@@ -1,6 +1,5 @@
 import { eq, and } from "drizzle-orm";
-import { createDatabase } from "../../db";
-import type { Database } from "../../db";
+import { createDatabase, type Database } from "../../db";
 import * as schema from "../../db/schema";
 import { hashPassword, verifyPassword } from "./password-utils";
 import { generateSecureToken, generateInviteCode } from "./token-utils";
@@ -322,6 +321,186 @@ export const recordTypeDb = {
     } catch (error) {
       console.error("Failed to find record type by ID:", error);
       throw new Error("Failed to find record type");
+    }
+  },
+
+  async createCoreRecordTypes(
+    env: any,
+    params: {
+      householdId: string;
+      createdBy: number;
+    }
+  ): Promise<RecordType[]> {
+    const db = ensureDatabase(env);
+    const { householdId, createdBy } = params;
+
+    // Define core record types that are essential for insights
+    const coreRecordTypes = [
+      {
+        name: "Sleep",
+        description: "Track sleep patterns, quality, and duration",
+        category: "Health",
+        icon: "😴",
+        color: "purple",
+        allowPrivate: 0,
+        visibleToMembers: "[]", // Available to all members
+        fields: JSON.stringify([
+          {
+            id: "sleep-duration",
+            name: "Sleep Duration",
+            type: "number",
+            required: true,
+            placeholder: "Hours of sleep",
+            validation: { min: 0, max: 24 },
+            order: 1,
+            active: true,
+          },
+          {
+            id: "sleep-quality",
+            name: "Sleep Quality",
+            type: "select",
+            required: true,
+            options: [
+              { value: "poor", label: "Poor" },
+              { value: "fair", label: "Fair" },
+              { value: "good", label: "Good" },
+              { value: "excellent", label: "Excellent" },
+            ],
+            order: 2,
+            active: true,
+          },
+          {
+            id: "bedtime",
+            name: "Bedtime",
+            type: "time",
+            required: false,
+            placeholder: "What time did you go to bed?",
+            order: 3,
+            active: true,
+          },
+          {
+            id: "wake-time",
+            name: "Wake Time",
+            type: "time",
+            required: false,
+            placeholder: "What time did you wake up?",
+            order: 4,
+            active: true,
+          },
+          {
+            id: "sleep-notes",
+            name: "Sleep Notes",
+            type: "text",
+            required: false,
+            placeholder: "Any notes about your sleep?",
+            order: 5,
+            active: true,
+          },
+        ]),
+      },
+      {
+        name: "Mood",
+        description:
+          "Track daily mood, energy levels, and emotional well-being",
+        category: "Health",
+        icon: "😊",
+        color: "blue",
+        allowPrivate: 0,
+        visibleToMembers: "[]", // Available to all members
+        fields: JSON.stringify([
+          {
+            id: "mood-rating",
+            name: "Overall Mood",
+            type: "select",
+            required: true,
+            options: [
+              { value: "1", label: "1 - Very Low" },
+              { value: "2", label: "2 - Low" },
+              { value: "3", label: "3 - Below Average" },
+              { value: "4", label: "4 - Average" },
+              { value: "5", label: "5 - Above Average" },
+              { value: "6", label: "6 - Good" },
+              { value: "7", label: "7 - Very Good" },
+              { value: "8", label: "8 - Great" },
+              { value: "9", label: "9 - Excellent" },
+              { value: "10", label: "10 - Amazing" },
+            ],
+            order: 1,
+            active: true,
+          },
+          {
+            id: "energy-level",
+            name: "Energy Level",
+            type: "select",
+            required: true,
+            options: [
+              { value: "very-low", label: "Very Low" },
+              { value: "low", label: "Low" },
+              { value: "moderate", label: "Moderate" },
+              { value: "high", label: "High" },
+              { value: "very-high", label: "Very High" },
+            ],
+            order: 2,
+            active: true,
+          },
+          {
+            id: "stress-level",
+            name: "Stress Level",
+            type: "select",
+            required: false,
+            options: [
+              { value: "none", label: "None" },
+              { value: "low", label: "Low" },
+              { value: "moderate", label: "Moderate" },
+              { value: "high", label: "High" },
+              { value: "very-high", label: "Very High" },
+            ],
+            order: 3,
+            active: true,
+          },
+          {
+            id: "mood-notes",
+            name: "Mood Notes",
+            type: "text",
+            required: false,
+            placeholder: "What influenced your mood today?",
+            order: 4,
+            active: true,
+          },
+        ]),
+      },
+    ];
+
+    try {
+      const createdRecordTypes: RecordType[] = [];
+
+      for (const coreType of coreRecordTypes) {
+        const newRecordType: NewRecordType = {
+          name: coreType.name,
+          description: coreType.description,
+          category: coreType.category,
+          householdId,
+          fields: coreType.fields,
+          icon: coreType.icon,
+          color: coreType.color,
+          allowPrivate: coreType.allowPrivate,
+          visibleToMembers: coreType.visibleToMembers,
+          createdBy,
+        };
+
+        const result = await db
+          .insert(schema.recordTypes)
+          .values(newRecordType)
+          .returning();
+
+        createdRecordTypes.push(result[0]);
+        console.log(`✅ Created core record type: ${coreType.name}`);
+      }
+
+      return createdRecordTypes;
+    } catch (error) {
+      console.error("Failed to create core record types:", error);
+      throw new Error("Failed to create core record types");
     }
   },
 };
@@ -697,6 +876,14 @@ export const authDb = {
         role: "admin",
       });
       console.log("✅ User created successfully:", user);
+
+      // Create core record types for the new household
+      console.log("📋 Creating core record types for household:", householdId);
+      await recordTypeDb.createCoreRecordTypes(env, {
+        householdId,
+        createdBy: user.id,
+      });
+      console.log("✅ Core record types created successfully");
 
       return { user, householdId };
     } catch (error) {

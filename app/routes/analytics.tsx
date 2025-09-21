@@ -1,5 +1,4 @@
-import type { LoaderFunctionArgs } from "react-router";
-import { redirect } from "react-router";
+import { redirect, type LoaderFunctionArgs } from "react-router";
 import { extractSessionFromCookies } from "~/lib/utils";
 import { AnalyticsDashboard } from "~/components/analytics-dashboard";
 import { PageLayout, PageHeader } from "~/components/ui/layout";

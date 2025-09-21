@@ -3,15 +3,6 @@ interface CloudflareEnv {
   DB?: D1Database;
 }
 
-interface PerformanceDataPoint {
-  operation: string;
-  duration: number;
-  success: boolean;
-  userId?: string;
-  householdId?: string;
-  metadata?: Record<string, any>;
-}
-
 interface DatabaseQueryMetrics {
   queryType: "select" | "insert" | "update" | "delete";
   table: string;
@@ -372,14 +363,11 @@ export function createPerformanceMiddleware(env: CloudflareEnv) {
     next: () => Promise<void>
   ) {
     const startTime = Date.now();
-    const operationId = `request_${Math.random().toString(36)}`;
-
     try {
       await next();
-
-      const duration = Date.now() - startTime;
       const request = c.req;
       const response = c.res;
+      const duration = Date.now() - startTime;
 
       monitor.trackApiPerformance({
         endpoint: request.url.pathname,
@@ -392,7 +380,7 @@ export function createPerformanceMiddleware(env: CloudflareEnv) {
         country: c.req.cf?.country || undefined,
       });
     } catch (error) {
-      const duration = Date.now() - startTime;
+      const _duration = Date.now() - startTime;
 
       monitor.trackError({
         type: "request_error",

@@ -45,7 +45,7 @@ export const parseSelectOptions = (
 ): { value: string; label: string }[] => {
   if (!optionsString) return [];
 
-  return optionsString.split(",").map((option, index) => {
+  return optionsString.split(",").map((option, _index) => {
     const trimmed = option.trim();
     return {
       value: trimmed.toLowerCase().replace(/\s+/g, "_"),

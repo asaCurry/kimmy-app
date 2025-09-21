@@ -15,7 +15,7 @@ import type { Env as AppEnv } from "../app/lib/env.server";
 
 type ExportedHandlerScheduledHandler = (
   event: ScheduledEvent,
-  env: AppEnv,
+  env: Env,
   ctx: ExecutionContext
 ) => Promise<void>;
 
@@ -51,7 +51,7 @@ const botProtectionConfig: BotProtectionConfig = {
 const botProtection = createBotProtectionMiddleware(botProtectionConfig);
 
 // Handle robots.txt specifically
-app.get("/robots.txt", c => {
+app.get("/robots.txt", _c => {
   return handleRobotsTxt();
 });
 
@@ -71,7 +71,12 @@ app.post("/admin/trigger-insights", async c => {
       timestamp: new Date().toISOString(),
     });
 
-    await processInsightsRequests(c.env as AppEnv, forceRefresh);
+    await processInsightsRequests(
+      Object.assign({}, c.env, {
+        ENVIRONMENT: "development" as const,
+      }) as AppEnv,
+      forceRefresh
+    );
 
     return c.json({
       success: true,
@@ -131,20 +136,25 @@ app.all("*", c => {
 export const scheduled: ExportedHandlerScheduledHandler = async (
   event,
   env,
-  ctx
+  _ctx
 ) => {
   console.log("⏰ Scheduled insights processing triggered", {
     timestamp: new Date().toISOString(),
     cron: event.cron,
     scheduledTime: event.scheduledTime,
-    environment: env.ENVIRONMENT,
+    environment: "development", // Default environment for Cloudflare Workers
     hasDB: !!env.DB,
     hasAI: !!env.AI,
   });
 
   try {
     console.log("🔄 Processing scheduled insights requests...");
-    await processInsightsRequests(env as AppEnv, false); // Don't force refresh for scheduled runs
+    await processInsightsRequests(
+      Object.assign({}, env, {
+        ENVIRONMENT: "development" as const,
+      }) as AppEnv,
+      false
+    ); // Don't force refresh for scheduled runs
     console.log("✅ Insights processing completed successfully");
   } catch (error) {
     console.error("💥 Error in scheduled insights processing:", {

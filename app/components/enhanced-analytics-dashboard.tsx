@@ -21,8 +21,6 @@ import {
   Sparkles,
   TrendingUp,
   Activity,
-  RefreshCw,
-  Download,
   Settings,
   ChevronDown,
   ChevronUp,
@@ -33,7 +31,7 @@ interface EnhancedAnalyticsDashboardProps {
   aiInsights: AIInsight[];
   generatedAt: string;
   cached?: boolean;
-  householdId: string;
+  _householdId: string;
 }
 
 interface DashboardView {
@@ -78,7 +76,7 @@ const dashboardViews: DashboardView[] = [
 
 export const EnhancedAnalyticsDashboard: React.FC<
   EnhancedAnalyticsDashboardProps
-> = ({ insights, aiInsights, generatedAt, cached = false, householdId }) => {
+> = ({ insights, aiInsights, generatedAt, cached = false, _householdId }) => {
   const [currentView, setCurrentView] = useState("overview");
   const [timeRange, setTimeRange] = useState("30");
   const [selectedMember, setSelectedMember] = useState("all");
@@ -136,7 +134,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
         },
       }));
     };
-  }, [aiInsights, insights, timeRange]);
+  }, [aiInsights, insights]);
 
   const timeRangeOptions = [
     { value: "7", label: "Last 7 Days" },

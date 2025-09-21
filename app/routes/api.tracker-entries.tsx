@@ -46,7 +46,7 @@ const ApiResponse = {
 
 export const action = createAuthenticatedAction(
   trackerActionSchema,
-  async (data, { env, db, session }) => {
+  async (data, { env: _env, db, session }) => {
     const trackerDB = new TrackerDB(db);
 
     switch (data._action) {

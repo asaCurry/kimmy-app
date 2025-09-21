@@ -3,7 +3,6 @@ import { Button } from "./button";
 import { Input } from "./input";
 import { Label } from "./label";
 import { Switch } from "./switch";
-import { Textarea } from "./textarea";
 import { Pencil, PencilOff, Copy, Trash2, GripVertical } from "lucide-react";
 import { createUniqueFieldName } from "~/lib/utils/field-name-generator";
 import type { DynamicField } from "~/lib/types/dynamic-fields";

@@ -159,7 +159,8 @@ const AddMember: React.FC<Route.ComponentProps> = () => {
   const { session } = useAuth();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
-  const { householdId, householdMembers } = useLoaderData<typeof loader>();
+  const { householdId, householdMembers: _householdMembers } =
+    useLoaderData<typeof loader>();
   const [isSuccess, setIsSuccess] = useState(false);
 
   // Handle action data changes

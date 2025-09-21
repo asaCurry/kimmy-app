@@ -59,18 +59,18 @@ export class ProductionErrorBoundary extends React.Component<
     }
   }
 
-  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+  static getDerivedStateFromError(_error: Error): Partial<ErrorBoundaryState> {
     // Generate a unique error ID for tracking
     const errorId = Math.random().toString(36).substring(2, 15);
 
     return {
       hasError: true,
       errorId,
-      errorType: error.name || "Runtime Error",
+      errorType: _error.name || "Runtime Error",
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch(error: Error, _errorInfo: ErrorInfo) {
     // Log the error securely
     logger.error("React component error caught by boundary", {
       errorType: error.name,
@@ -84,7 +84,7 @@ export class ProductionErrorBoundary extends React.Component<
 
     // Call optional error handler
     if (this.props.onError) {
-      this.props.onError(error, errorInfo);
+      this.props.onError(error, _errorInfo);
     }
 
     // Auto-retry after 5 seconds in development
@@ -201,14 +201,14 @@ export class ApiErrorBoundary extends React.Component<
     this.state = { hasError: false, errorMessage: "" };
   }
 
-  static getDerivedStateFromError(error: Error) {
+  static getDerivedStateFromError(_error: Error) {
     return {
       hasError: true,
       errorMessage: "Failed to load data. Please try again later.",
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch(error: Error, _errorInfo: ErrorInfo) {
     logger.error("API component error", {
       errorType: error.name,
       component: "ApiErrorBoundary",

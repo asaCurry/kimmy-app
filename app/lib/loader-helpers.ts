@@ -2,8 +2,8 @@
  * Loader helper functions for household data
  */
 
-import { userDb, householdDb } from "./db";
-import { parseCookies, extractSessionFromCookies } from "./utils";
+import { userDb } from "./db";
+import { extractSessionFromCookies } from "./utils";
 
 export interface HouseholdData {
   householdId: string | null;

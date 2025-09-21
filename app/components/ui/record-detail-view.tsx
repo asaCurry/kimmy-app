@@ -27,8 +27,6 @@ import {
   User as UserIcon,
   Tag,
   ArrowLeft,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 import type { Record, RecordType, User } from "~/db/schema";
 
@@ -36,7 +34,7 @@ interface RecordDetailViewProps {
   record: Record;
   recordType: RecordType;
   householdMembers: User[];
-  householdId: string;
+  _householdId: string;
   memberId: string;
   category: string;
   recordTypeId: string;
@@ -49,7 +47,7 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
   record,
   recordType,
   householdMembers,
-  householdId,
+  _householdId,
   memberId,
   category,
   recordTypeId,
@@ -92,7 +90,7 @@ export const RecordDetailView: React.FC<RecordDetailViewProps> = ({
         ...recordType,
         fields: normalizedFields,
       };
-    } catch (error) {
+    } catch {
       return {
         ...recordType,
         fields: [],

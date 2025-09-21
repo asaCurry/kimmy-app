@@ -8,24 +8,18 @@ import {
   useParams,
 } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
-import { RequireAuth, useAuth } from "~/contexts/auth-context";
+import { RequireAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { TrackerCard } from "~/components/tracker-card";
 import { TrackerHistory } from "~/components/tracker-history";
 import { CreateTrackerForm } from "~/components/create-tracker-form";
-import { ArrowLeft, Edit, BarChart3, Clock, Plus } from "lucide-react";
+import { ArrowLeft, Edit, BarChart3, Plus } from "lucide-react";
 import { toast } from "react-toastify";
 import { withDatabaseAndSession } from "~/lib/db-utils";
 import { TrackerDB } from "~/lib/tracker-db";
-import type { Tracker, TrackerEntry } from "~/db/schema";
+import type { TrackerEntry } from "~/db/schema";
 
 export async function loader({ request, context, params }: Route.LoaderArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
@@ -58,7 +52,6 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
 
 export default function TrackerDetailPage() {
   const { tracker, entries, activeEntry } = useLoaderData<typeof loader>();
-  const { session } = useAuth();
   // Get params from React Router
   const params = useParams();
   const memberId = params.memberId;
@@ -66,7 +59,7 @@ export default function TrackerDetailPage() {
   const revalidator = useRevalidator();
   const navigate = useNavigate();
   const [showEditForm, setShowEditForm] = React.useState(false);
-  const [showCreateEntryForm, setShowCreateEntryForm] = React.useState(false);
+  const [_showCreateEntryForm, setShowCreateEntryForm] = React.useState(false);
 
   React.useEffect(() => {
     if (fetcher.data) {
@@ -84,7 +77,7 @@ export default function TrackerDetailPage() {
         });
       }
     }
-  }, [fetcher.data]); // Remove revalidator from dependency array
+  }, [fetcher.data, revalidator]);
 
   const handleEditTracker = () => {
     setShowEditForm(true);
@@ -100,7 +93,7 @@ export default function TrackerDetailPage() {
   };
 
   const handleEditEntry = (entry: TrackerEntry) => {
-    // Entry editing functionality to be implemented
+    console.log(`Editing entry NYI: ${entry.id}`);
   };
 
   if (!tracker) {

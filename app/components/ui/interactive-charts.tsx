@@ -36,8 +36,6 @@ import {
   LineChart as LineChartIcon,
   PieChart as PieChartIcon,
   Activity,
-  ZoomIn,
-  Download,
 } from "lucide-react";
 
 interface InteractiveChartProps {

@@ -41,7 +41,7 @@ export function CodeBlock({
   return (
     <div className={cn("relative group", className)}>
       {/* Header with filename and copy button */}
-      {(filename || true) && (
+      {filename && (
         <div className="flex items-center justify-between bg-slate-800 text-slate-300 px-4 py-2 text-sm border-b border-slate-700 rounded-t-lg">
           <div className="flex items-center gap-2">
             {filename && (

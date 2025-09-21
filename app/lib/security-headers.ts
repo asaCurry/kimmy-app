@@ -16,7 +16,7 @@ export function getDefaultSecurityHeaders(
   config: SecurityHeadersConfig = {}
 ): Record<string, string> {
   const {
-    corsOrigins = [],
+    corsOrigins: _corsOrigins = [],
     cspDirectives = {},
     isDevelopment = false,
   } = config;

@@ -7,23 +7,17 @@ import {
   useParams,
 } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
-import { RequireAuth, useAuth } from "~/contexts/auth-context";
+import { RequireAuth } from "~/contexts/auth-context";
 import { Navigation } from "~/components/navigation";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent } from "~/components/ui/card";
 import { TrackerCard } from "~/components/tracker-card";
 import { CreateTrackerForm } from "~/components/create-tracker-form";
-import { Plus, BarChart3, Timer, Clock } from "lucide-react";
+import { Plus, BarChart3, Clock } from "lucide-react";
 import { toast } from "react-toastify";
 import { withDatabaseAndSession } from "~/lib/db-utils";
 import { TrackerDB } from "~/lib/tracker-db";
-import type { Tracker, TrackerEntry } from "~/db/schema";
+import type { Tracker } from "~/db/schema";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
@@ -131,7 +125,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 export default function TrackersPage() {
   const { trackers, activeEntries, trackerEntries, householdMembers } =
     useLoaderData<typeof loader>();
-  const { session } = useAuth();
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
   const [showCreateForm, setShowCreateForm] = React.useState(false);
@@ -155,7 +148,7 @@ export default function TrackersPage() {
         });
       }
     }
-  }, [fetcher.data]); // Remove revalidator from dependency array
+  }, [fetcher.data, revalidator]);
 
   const handleDeleteTracker = (tracker: Tracker) => {
     if (

@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { AutoCompletionService } from "~/lib/auto-completion-service";
-import type {
-  AutoCompletionSuggestion,
-  FieldSuggestions,
-} from "~/lib/auto-completion-service";
 
 // Mock database
 const mockDb = {

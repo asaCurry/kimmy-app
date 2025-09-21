@@ -3,10 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { DynamicField } from "~/lib/types/dynamic-fields";
 import { createRecordSchema } from "~/lib/utils/dynamic-fields/schema-generation";
-import {
-  convertFieldsToFormData,
-  convertFormDataToFields,
-} from "~/lib/utils/dynamic-fields/field-serialization";
+import { convertFieldsToFormData } from "~/lib/utils/dynamic-fields/field-serialization";
 
 interface UseDynamicFormOptions {
   fields: DynamicField[];

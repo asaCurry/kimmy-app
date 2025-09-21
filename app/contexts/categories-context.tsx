@@ -1,7 +1,4 @@
 import * as React from "react";
-import { getDatabase } from "~/lib/db-utils";
-import { recordTypes } from "~/db/schema";
-import { eq } from "drizzle-orm";
 
 interface Category {
   name: string;
@@ -60,7 +57,7 @@ export const CategoriesProvider: React.FC<CategoriesProviderProps> = ({
     error: null,
   });
 
-  const loadCategories = React.useCallback(async (householdId: string) => {
+  const loadCategories = React.useCallback(async (_householdId: string) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {

@@ -88,7 +88,7 @@ const Login: React.FC<Route.ComponentProps> = () => {
   const { errors, clearError, clearAllErrors } = useFormValidation(
     VALIDATION_RULE_SETS.login
   );
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, _setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
   const hasProcessedLogin = useRef(false);
@@ -126,7 +126,7 @@ const Login: React.FC<Route.ComponentProps> = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (_e: React.FormEvent) => {
     // Don't prevent default - let the form submit naturally to the action
     // e.preventDefault();
     clearAllErrors();

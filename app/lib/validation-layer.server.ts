@@ -1,8 +1,7 @@
 import { z } from "zod";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { getValidatedEnv } from "./env.server";
-import { getDatabase } from "./db-utils";
-import { getSession } from "./db-utils";
+import { getDatabase, getSession } from "./db-utils";
 
 export interface ValidatedContext {
   db: ReturnType<typeof getDatabase>;

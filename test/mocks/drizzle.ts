@@ -11,10 +11,18 @@ export class DrizzleMock {
   }
 
   // Expose database methods directly for testing
-  get select() { return this.mockDb.select; }
-  get insert() { return this.mockDb.insert; }
-  get update() { return this.mockDb.update; }
-  get delete() { return this.mockDb.delete; }
+  get select() {
+    return this.mockDb.select;
+  }
+  get insert() {
+    return this.mockDb.insert;
+  }
+  get update() {
+    return this.mockDb.update;
+  }
+  get delete() {
+    return this.mockDb.delete;
+  }
 
   private createMockDb() {
     return {

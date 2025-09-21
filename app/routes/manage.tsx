@@ -1,10 +1,8 @@
 import type { ActionFunctionArgs } from "react-router";
-import { useAuth } from "~/contexts/auth-context";
 import { useLoaderData, redirect, useFetcher } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
-import { RequireAuth } from "~/contexts/auth-context";
+import { useAuth, RequireAuth } from "~/contexts/auth-context";
 import { PageLoading } from "~/components/ui/loading";
-import { NoHousehold } from "~/components/manage/no-household";
 import { QuickActions } from "~/components/manage/quick-actions";
 import { HouseholdOverview } from "~/components/manage/household-overview";
 import { HouseholdmemberList } from "~/components/manage/household-member-list";
@@ -112,7 +110,7 @@ export async function loader({
   let session;
   try {
     session = JSON.parse(decodeURIComponent(sessionData));
-  } catch (error) {
+  } catch {
     throw redirect("/welcome");
   }
 
@@ -173,7 +171,7 @@ export async function loader({
 }
 
 const Manage: React.FC = () => {
-  const { session, isAuthenticated, isLoading } = useAuth();
+  const { session: _session, isAuthenticated, isLoading } = useAuth();
   const {
     members: loaderMembers,
     householdId: loaderHouseholdId,
@@ -300,7 +298,7 @@ const Manage: React.FC = () => {
           <InviteCodeManager
             householdId={currentHouseholdId}
             currentInviteCode={inviteCode}
-            onInviteCodeGenerated={newCode => {
+            onInviteCodeGenerated={_newCode => {
               // Code update handled by component
             }}
           />

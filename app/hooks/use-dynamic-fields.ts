@@ -22,7 +22,7 @@ export const useDynamicFields = (options: UseDynamicFieldsOptions = {}) => {
   const { initialFields = [], onFieldsChange } = options;
 
   const [fields, setFields] = useState<DynamicField[]>(initialFields);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   // Memoized sorted and active fields
   const sortedFields = useMemo(() => sortFieldsByOrder(fields), [fields]);

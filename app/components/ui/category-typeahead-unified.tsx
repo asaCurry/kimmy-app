@@ -33,7 +33,7 @@ export const CategoryTypeaheadUnified: React.FC<CategoryTypeaheadProps> = ({
   description,
   error,
 }) => {
-  const { categories, getCategorySuggestions, addCategory, loadCategories } =
+  const { getCategorySuggestions, addCategory, loadCategories } =
     useCategories();
 
   // Load categories when component mounts

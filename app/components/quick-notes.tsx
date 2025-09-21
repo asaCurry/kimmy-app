@@ -43,7 +43,7 @@ export const QuickNotes: React.FC<QuickNotesProps> = ({
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [noteContent, setNoteContent] = React.useState("");
   const [noteTags, setNoteTags] = React.useState("");
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [_isSubmitting, setIsSubmitting] = React.useState(false);
 
   const isCreating = fetcher.state === "submitting";
 

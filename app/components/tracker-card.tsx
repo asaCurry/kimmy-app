@@ -47,6 +47,57 @@ export function TrackerCard({
   >(null);
   const [elapsedTime, setElapsedTime] = React.useState<string>("");
 
+  const formatDuration = React.useCallback(
+    (minutes: number, showSeconds = true) => {
+      if (minutes < 1) {
+        // Less than 1 minute, show seconds for precision
+        const totalSeconds = Math.round(minutes * 60);
+        if (totalSeconds === 0) {
+          return "0s"; // Handle very small durations
+        }
+        return `${totalSeconds}s`;
+      }
+
+      if (minutes < 60) {
+        if (showSeconds) {
+          // While tracking, show minutes and seconds
+          const mins = Math.floor(minutes);
+          const secs = Math.round((minutes - mins) * 60);
+          return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+        }
+        // For completed sessions, show minutes with decimal precision for small values
+        if (minutes < 10) {
+          return `${minutes.toFixed(1)}m`; // Show decimal for precision
+        }
+        return `${Math.round(minutes)}m`;
+      }
+
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+
+      if (showSeconds && mins > 0) {
+        // While tracking, show hours, minutes, and seconds
+        const secs = Math.round(mins * 60);
+        return `${hours}h ${secs}s`;
+      }
+
+      // For completed sessions, show hours and minutes
+      return mins > 0 ? `${hours}h ${Math.round(mins)}m` : `${hours}h`;
+    },
+    []
+  );
+
+  const getElapsedTime = React.useCallback(
+    (startTime: string, showSeconds = false) => {
+      const start = new Date(startTime);
+      const now = new Date();
+      const diffMs = now.getTime() - start.getTime();
+      const diffMins = diffMs / (1000 * 60); // Keep as decimal for seconds calculation
+      return formatDuration(diffMins, showSeconds);
+    },
+    [formatDuration]
+  );
+
   // Update elapsed time every second while tracking
   React.useEffect(() => {
     if (isTracking && localTrackingStart) {
@@ -58,7 +109,7 @@ export function TrackerCard({
     } else {
       setElapsedTime("");
     }
-  }, [isTracking, localTrackingStart]);
+  }, [isTracking, localTrackingStart, getElapsedTime]);
 
   React.useEffect(() => {
     if (fetcher.data) {
@@ -132,51 +183,6 @@ export function TrackerCard({
       method: "post",
       action: "/api/tracker-entries",
     });
-  };
-
-  const formatDuration = (minutes: number, showSeconds = true) => {
-    if (minutes < 1) {
-      // Less than 1 minute, show seconds for precision
-      const totalSeconds = Math.round(minutes * 60);
-      if (totalSeconds === 0) {
-        return "0s"; // Handle very small durations
-      }
-      return `${totalSeconds}s`;
-    }
-
-    if (minutes < 60) {
-      if (showSeconds) {
-        // While tracking, show minutes and seconds
-        const mins = Math.floor(minutes);
-        const secs = Math.round((minutes - mins) * 60);
-        return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
-      }
-      // For completed sessions, show minutes with decimal precision for small values
-      if (minutes < 10) {
-        return `${minutes.toFixed(1)}m`; // Show decimal for precision
-      }
-      return `${Math.round(minutes)}m`;
-    }
-
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-
-    if (showSeconds && mins > 0) {
-      // While tracking, show hours, minutes, and seconds
-      const secs = Math.round(mins * 60);
-      return `${hours}h ${secs}s`;
-    }
-
-    // For completed sessions, show hours and minutes
-    return mins > 0 ? `${hours}h ${Math.round(mins)}m` : `${hours}h`;
-  };
-
-  const getElapsedTime = (startTime: string, showSeconds = false) => {
-    const start = new Date(startTime);
-    const now = new Date();
-    const diffMs = now.getTime() - start.getTime();
-    const diffMins = diffMs / (1000 * 60); // Keep as decimal for seconds calculation
-    return formatDuration(diffMins, showSeconds);
   };
 
   return (

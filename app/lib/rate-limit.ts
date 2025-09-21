@@ -40,7 +40,7 @@ export class CloudflareRateLimiter {
   ): Promise<RateLimitResult> {
     const key = `${config.keyPrefix || "rl"}:${identifier}`;
     const now = Date.now();
-    const windowStart = now - config.windowMs;
+    const _windowStart = now - config.windowMs;
 
     try {
       if (this.isDevelopment || !this.env?.RATE_LIMIT_KV) {
@@ -181,7 +181,7 @@ export const RATE_LIMIT_CONFIGS = {
   // API endpoints
   api: {
     windowMs: 60 * 1000, // 1 minute
-    maxRequests: 60, // 60 requests per minute
+    maxRequests: 120, // 120 requests per minute (increased for normal usage)
     keyPrefix: "api",
     skipOnError: true,
   },
@@ -189,7 +189,7 @@ export const RATE_LIMIT_CONFIGS = {
   // Analytics endpoints (more generous)
   analytics: {
     windowMs: 60 * 1000, // 1 minute
-    maxRequests: 30, // 30 requests per minute
+    maxRequests: 60, // 60 requests per minute (increased for frequent data refreshes)
     keyPrefix: "analytics",
     skipOnError: true,
   },

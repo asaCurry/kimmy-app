@@ -126,9 +126,9 @@ const BLOCKED_USER_AGENTS = [
   // as these can be legitimate
 ];
 
-// Rate limiting for suspicious IPs
+// Rate limiting for suspicious IPs (adjusted for normal human interaction)
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 10;
+const MAX_REQUESTS_PER_WINDOW = 120; // Allow 120 requests per minute (2 per second) for normal usage
 
 export interface BotProtectionConfig {
   enabled: boolean;

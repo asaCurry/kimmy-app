@@ -10,7 +10,7 @@ import { recordTypes, records } from "~/db/schema";
 import { eq, and } from "drizzle-orm";
 import { ErrorBoundary } from "~/components/ui/error-boundary";
 
-export function meta({ params }: Route.MetaArgs) {
+export function meta() {
   return [
     { title: `View Record - Kimmy` },
     {
@@ -53,6 +53,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     let session;
     try {
       session = JSON.parse(decodeURIComponent(sessionData));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       throw redirect("/welcome");
     }
@@ -213,7 +214,6 @@ const RecordViewPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
     category,
     recordTypeId,
   } = loaderData;
-  const { session } = useAuth();
 
   const handleDelete = (recordId: number) => {
     const formData = new FormData();
@@ -252,7 +252,7 @@ const RecordViewPage: React.FC<Route.ComponentProps> = ({ loaderData }) => {
             record={record}
             recordType={recordType}
             householdMembers={householdMembers}
-            householdId={householdId}
+            _householdId={householdId}
             memberId={memberId}
             category={category}
             recordTypeId={recordTypeId}

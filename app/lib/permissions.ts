@@ -6,8 +6,6 @@ import type {
   HouseholdRole,
   HouseholdPermissions,
   HouseholdMember,
-  AuthSession,
-  Household,
 } from "./types";
 
 /**
@@ -130,7 +128,7 @@ export function canViewRecord(
   viewerRole: HouseholdRole,
   viewerUserId: string,
   record: { isPrivate: boolean; createdByUserId: string },
-  targetMember: HouseholdMember
+  _targetMember: HouseholdMember
 ): boolean {
   // Children can't view any records
   if (viewerRole === "CHILD") {
@@ -155,7 +153,7 @@ export function canViewRecord(
  */
 export function canManageHouseholdMember(
   managerRole: HouseholdRole,
-  targetMemberRole: HouseholdRole
+  _targetMemberRole: HouseholdRole
 ): boolean {
   // Only admins can manage members
   if (managerRole !== "ADMIN") {
@@ -229,7 +227,7 @@ export function getAdminHouseholds(session: any) {
  * Validate if a user can create a new household
  * (could add limits here like max households per user)
  */
-export function canCreateHousehold(session: any): boolean {
+export function canCreateHousehold(_session: any): boolean {
   // For now, any authenticated user can create a household
   // Could add limits like: max 3 households per user
   return true;

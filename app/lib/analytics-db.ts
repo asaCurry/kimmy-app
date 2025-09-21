@@ -1,10 +1,11 @@
 import { eq, and, desc, lt, sql } from "drizzle-orm";
-import { analyticsCache, aiRecommendations } from "~/db/schema";
-import type {
-  NewAnalyticsCache,
-  AnalyticsCache,
-  NewAiRecommendation,
-  AiRecommendation,
+import {
+  analyticsCache,
+  aiRecommendations,
+  type NewAnalyticsCache,
+  type AnalyticsCache,
+  type NewAiRecommendation,
+  type AiRecommendation,
 } from "~/db/schema";
 
 export class AnalyticsDB {
@@ -269,7 +270,7 @@ export class AnalyticsDB {
 
     try {
       const now = new Date().toISOString();
-      const result = await this.db
+      await this.db
         .delete(analyticsCache)
         .where(lt(analyticsCache.expiresAt, now));
 

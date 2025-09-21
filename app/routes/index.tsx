@@ -2,14 +2,16 @@ import type { Route } from "./+types/index";
 import * as React from "react";
 import { useNavigate, useLoaderData, redirect } from "react-router";
 import { PageLayout, PageHeader } from "~/components/ui/layout";
-import { RequireAuth, useAuth } from "~/contexts/auth-context";
+import { RequireAuth } from "~/contexts/auth-context";
 import { MemberCard } from "~/components/member-card";
 import type { Householdmember } from "~/lib/utils";
 import { QuickActionButton } from "~/components/ui/quick-action-button";
+import { RecentInsights } from "~/components/recent-insights";
 import { withDatabaseAndSession } from "~/lib/db-utils";
-import { users, households } from "~/db/schema";
-import { eq } from "drizzle-orm";
+import { users, households, insightsRequests } from "~/db/schema";
+import { eq, and, desc } from "drizzle-orm";
 import { hasAnalyticsAccess, getUserRoleInHousehold } from "~/lib/permissions";
+import type { AIInsight } from "~/lib/ai-analytics-service";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   return withDatabaseAndSession(request, context, async (db, session) => {
@@ -44,11 +46,45 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     // Always show member selector for consistent UX, even for single-member households
 
     // Check analytics access for UI display
-    const userRole = getUserRoleInHousehold(
+    const _userRole = getUserRoleInHousehold(
       session,
       session.currentHouseholdId
     );
     const canViewAnalytics = hasAnalyticsAccess(household);
+
+    // Fetch recent insights if analytics access is available
+    let recentInsights: AIInsight[] = [];
+    if (canViewAnalytics) {
+      try {
+        const completedRequests = await db
+          .select()
+          .from(insightsRequests)
+          .where(
+            and(
+              eq(insightsRequests.householdId, session.currentHouseholdId),
+              eq(insightsRequests.status, "completed")
+            )
+          )
+          .orderBy(desc(insightsRequests.processedAt))
+          .limit(1);
+
+        if (completedRequests.length > 0) {
+          const request = completedRequests[0];
+          try {
+            const requestResult = JSON.parse(request.result || "{}");
+            recentInsights = requestResult.aiInsights || [];
+          } catch (parseError) {
+            console.warn("Failed to parse insights for home page", {
+              parseError,
+            });
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to fetch recent insights for home page", {
+          error,
+        });
+      }
+    }
 
     // If multiple members, return them for selection
     return {
@@ -61,6 +97,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
         hasAnalyticsAccess: canViewAnalytics,
       },
       canViewAnalytics,
+      recentInsights,
     };
   });
 }
@@ -68,9 +105,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 // Member selection component for households with multiple members
 function MemberSelection({
   householdMembers,
-  householdId,
+  householdId: _householdId,
   canViewAnalytics = false,
-  household,
+  household: _household,
+  recentInsights = [],
 }: {
   householdMembers: Array<Householdmember>;
   householdId: string;
@@ -80,6 +118,7 @@ function MemberSelection({
     name: string;
     hasAnalyticsAccess: boolean;
   };
+  recentInsights?: AIInsight[];
 }) {
   const navigate = useNavigate();
 
@@ -131,6 +170,11 @@ function MemberSelection({
               </div>
             ))}
           </div>
+
+          <RecentInsights
+            insights={recentInsights}
+            canViewAnalytics={canViewAnalytics}
+          />
 
           <div className="mt-12 text-center">
             <div className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-blue-500/20 rounded-lg p-6">
@@ -204,6 +248,7 @@ export default function Index() {
         householdId={loaderData.householdId}
         canViewAnalytics={loaderData.canViewAnalytics}
         household={loaderData.household}
+        recentInsights={loaderData.recentInsights}
       />
     </RequireAuth>
   );

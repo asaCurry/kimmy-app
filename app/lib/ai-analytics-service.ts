@@ -1,8 +1,8 @@
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import type { Env } from "~/lib/env.server";
 import { users, records, recordTypes } from "~/db/schema";
-import { eq, sql, desc, and, gte, lte } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { analyticsLogger } from "~/lib/logger";
+import { promptRouter, type PromptStyleId } from "~/lib/prompts";
 
 export interface AIInsight {
   id: string;
@@ -59,7 +59,8 @@ export class AIAnalyticsService {
   constructor(
     private db: DrizzleD1Database<any>,
     private ai: any,
-    private householdId: string
+    private householdId: string,
+    private promptStyle: PromptStyleId = "comprehensive"
   ) {}
 
   /**
@@ -74,271 +75,623 @@ export class AIAnalyticsService {
       // Get raw data for analysis
       const rawData = await this.collectAnalyticsData();
 
-      if (!rawData.records.length) {
+      if (!rawData.records || !rawData.records.length) {
         analyticsLogger.info("No data available for AI analysis");
         return [];
       }
 
-      // Process data with AI for pattern detection
-      const insights: AIInsight[] = [];
+      console.log(
+        `🤖 Starting AI analysis for household ${this.householdId} with ${rawData.records?.length || 0} records`
+      );
 
-      // 1. Growth pattern analysis
-      const growthInsights = await this.analyzeGrowthPatterns(rawData);
-      insights.push(...growthInsights);
+      // Generate AI insights using compiled data and basic analytics
+      const insights = await this.generateAIInsights(rawData);
 
-      // 2. Health pattern analysis
-      const healthInsights = await this.analyzeHealthPatterns(rawData);
-      insights.push(...healthInsights);
-
-      // 3. Behavioral pattern analysis
-      const behaviorInsights = await this.analyzeBehavioralPatterns(rawData);
-      insights.push(...behaviorInsights);
-
-      // 4. Correlation analysis
-      const correlationInsights = await this.analyzeCorrelations(rawData);
-      insights.push(...correlationInsights);
-
-      // 5. Predictive insights
-      const predictiveInsights = await this.generatePredictiveInsights(rawData);
-      insights.push(...predictiveInsights);
-
-      analyticsLogger.info(`Generated ${insights.length} AI insights`);
+      console.log(
+        `✅ AI analysis completed: ${insights.length} insights generated`
+      );
       return insights;
     } catch (error) {
-      analyticsLogger.error("Error generating AI insights", { error });
-      return [];
-    }
-  }
-
-  /**
-   * Analyze growth patterns using AI
-   */
-  private async analyzeGrowthPatterns(data: any): Promise<AIInsight[]> {
-    const insights: AIInsight[] = [];
-
-    // Find growth-related records (height, weight, development milestones)
-    const growthRecords = data.records.filter((record: any) => {
-      const category = record.recordType?.category?.toLowerCase() || "";
-      return (
-        category.includes("growth") ||
-        category.includes("health") ||
-        category.includes("development")
-      );
-    });
-
-    if (growthRecords.length < 5) return insights;
-
-    // Group by member and analyze trends
-    const memberGroups = this.groupRecordsByMember(growthRecords);
-
-    for (const [memberId, records] of Object.entries(memberGroups)) {
-      const memberRecords = records as any[];
-      const memberName = memberRecords[0]?.createdBy?.firstName || "Member";
-
-      // Analyze numerical data for trends
-      const numericalFields = this.extractNumericalFields(memberRecords);
-
-      for (const [fieldName, values] of Object.entries(numericalFields)) {
-        const trend = this.calculateTrend(values as number[]);
-
-        if (Math.abs(trend.slope) > 0.1) {
-          // Significant trend
-          const chartData = this.createChartData(values as any[], fieldName);
-
-          insights.push({
-            id: `growth-${memberId}-${fieldName}`,
-            type: "growth",
-            category: "Physical Development",
-            title: `${memberName}'s ${fieldName} Trend`,
-            description: `${fieldName} is ${trend.slope > 0 ? "increasing" : "decreasing"} at a rate of ${Math.abs(trend.slope).toFixed(2)} units per week`,
-            confidence:
-              trend.r2 > 0.7 ? "high" : trend.r2 > 0.4 ? "medium" : "low",
-            importance: Math.abs(trend.slope) > 0.5 ? "high" : "medium",
-            data: {
-              trend: trend.slope > 0 ? "increasing" : "decreasing",
-              timeframe: "4 weeks",
-              dataPoints: values.length,
-            },
-            recommendations: this.generateGrowthRecommendations(
-              fieldName,
-              trend
-            ),
-            chartData,
-            createdAt: new Date(),
-          });
-        }
-      }
-    }
-
-    return insights;
-  }
-
-  /**
-   * Analyze health patterns using AI text analysis
-   */
-  private async analyzeHealthPatterns(data: any): Promise<AIInsight[]> {
-    const insights: AIInsight[] = [];
-
-    // Get health-related records
-    const healthRecords = data.records.filter((record: any) => {
-      const category = record.recordType?.category?.toLowerCase() || "";
-      return (
-        category.includes("health") ||
-        category.includes("medical") ||
-        category.includes("symptom")
-      );
-    });
-
-    if (healthRecords.length < 3) return insights;
-
-    try {
-      // Use AI to analyze health patterns
-      const healthText = healthRecords
-        .map((record: any) => {
-          const data =
-            typeof record.data === "string"
-              ? JSON.parse(record.data)
-              : record.data;
-          return Object.values(data).join(" ");
-        })
-        .join("\n");
-
-      const prompt = `Analyze the following health records for patterns, concerns, and recommendations:
-
-${healthText}
-
-Identify:
-1. Recurring symptoms or conditions
-2. Potential correlations between symptoms and activities
-3. Early warning signs that need attention
-4. Positive health trends
-
-Provide insights in a structured format focusing on actionable recommendations.`;
-
-      if (this.ai && this.ai.run) {
-        console.log(`🤖 Making AI call for health analysis`, {
-          householdId: this.householdId,
-          recordCount: healthRecords.length,
-          promptLength: prompt.length,
-        });
-
-        const response = await this.ai.run("@cf/meta/llama-3.1-8b-instruct", {
-          messages: [{ role: "user", content: prompt }],
-          max_tokens: 500,
-        });
-
-        console.log(`✅ AI call completed for health analysis`, {
-          householdId: this.householdId,
-          responseLength: response.response?.length || 0,
-          hasResponse: !!response.response,
-        });
-
-        const aiAnalysis = response.response || "";
-
-        insights.push({
-          id: `health-pattern-${Date.now()}`,
-          type: "health",
-          category: "Health Analysis",
-          title: "AI Health Pattern Analysis",
-          description: aiAnalysis,
-          confidence: "medium",
-          importance: "high",
-          data: {
-            trend: "stable",
-            timeframe: "recent",
-            dataPoints: healthRecords.length,
-          },
-          recommendations: this.extractRecommendationsFromText(aiAnalysis),
-          createdAt: new Date(),
-        });
-      }
-    } catch (error) {
-      console.error(`❌ Error in AI health pattern analysis`, {
+      console.error(`❌ Error generating AI insights`, {
         householdId: this.householdId,
         error: error instanceof Error ? error.message : "Unknown error",
         stack: error instanceof Error ? error.stack : undefined,
-        hasAI: !!this.ai,
-        aiRunMethod: !!this.ai?.run,
+        errorType: typeof error,
+        errorString: String(error),
       });
-      analyticsLogger.error("Error in AI health pattern analysis", { error });
+      analyticsLogger.error("Error generating AI insights", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+        errorType: typeof error,
+      });
+      // Re-throw the error so the insights processor can handle it properly
+      throw error;
     }
-
-    return insights;
   }
 
   /**
-   * Analyze behavioral patterns
+   * Generate AI insights using compiled household data and basic analytics
    */
-  private async analyzeBehavioralPatterns(data: any): Promise<AIInsight[]> {
-    const insights: AIInsight[] = [];
+  private async generateAIInsights(rawData: any): Promise<AIInsight[]> {
+    if (!this.ai || !this.ai.run) {
+      console.log("❌ AI binding not available");
+      return [];
+    }
 
-    // Look for sleep, mood, activity patterns
-    const behaviorRecords = data.records.filter((record: any) => {
-      const category = record.recordType?.category?.toLowerCase() || "";
-      return (
-        category.includes("behavior") ||
-        category.includes("mood") ||
-        category.includes("sleep") ||
-        category.includes("activity")
+    // Compile household data summary
+    const dataCompilation = this.compileHouseholdData(rawData);
+
+    // Validate data compilation before creating prompt
+    const validationResult = this.validateDataCompilation(dataCompilation);
+    if (!validationResult.isValid) {
+      console.warn(
+        "⚠️ Data compilation validation failed:",
+        validationResult.errors
       );
+      // Generate fallback insights when data validation fails too
+      return this.generateFallbackInsights(
+        `Data validation failed: ${validationResult.errors.join(", ")}`
+      );
+    }
+
+    // Auto-select or use specified prompt style
+    const selectedStyle = promptRouter.selectBestStyle(
+      dataCompilation,
+      this.promptStyle
+    );
+    console.log(`🎯 Using prompt style: ${selectedStyle}`);
+
+    // Generate prompt using selected style
+    const prompt = promptRouter.generatePrompt(selectedStyle, dataCompilation);
+
+    // Validate prompt using style-specific validation
+    if (!promptRouter.validatePrompt(selectedStyle, prompt)) {
+      console.error("❌ Prompt validation failed");
+      return [];
+    }
+
+    console.log(`🤖 Making AI call with ${prompt.length} character prompt`);
+
+    try {
+      const response = await this.ai.run("@cf/meta/llama-3.1-8b-instruct", {
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 1000,
+      });
+
+      console.log(
+        `✅ AI response received (${response.response?.length || 0} characters)`
+      );
+
+      // Validate and parse response
+      return this.validateAndParseAIResponse(response.response || "");
+    } catch (error) {
+      console.error("❌ AI call failed:", error);
+
+      // Log the error for monitoring
+      analyticsLogger.error("Error generating AI insights", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+        errorType: typeof error,
+      });
+
+      return this.generateFallbackInsights(
+        `AI service error: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    }
+  }
+
+  /**
+   * Compile household data into a structured summary with dynamic field analysis
+   */
+  private compileHouseholdData(rawData: any) {
+    const compilation: any = {
+      totalRecords: rawData.records?.length || 0,
+      members: rawData.users?.length || 0,
+      recordTypeStructures: [],
+      patterns: {},
+      fieldAnalysis: {},
+    };
+
+    // Analyze record type structures and their fields
+    const recordTypes = Array.isArray(rawData.recordTypes)
+      ? rawData.recordTypes
+      : [];
+    recordTypes.forEach((recordType: any) => {
+      let fields = [];
+      try {
+        fields = recordType.fields ? JSON.parse(recordType.fields) : [];
+      } catch {
+        fields = [];
+      }
+
+      compilation.recordTypeStructures.push({
+        name: recordType.name,
+        category: recordType.category,
+        description: recordType.description,
+        fieldCount: fields.length,
+        fields: fields.map((field: any) => ({
+          name: field.name,
+          type: field.type,
+          required: field.required || false,
+        })),
+      });
     });
 
-    if (behaviorRecords.length < 10) return insights;
+    // Get recent records by category and analyze field values
+    const categorizedRecords: Record<string, any[]> = {};
+    const records = Array.isArray(rawData.records) ? rawData.records : [];
+    records.slice(0, 50).forEach((record: any) => {
+      const category = record.recordType?.category || "Other";
+      if (!categorizedRecords[category]) categorizedRecords[category] = [];
+      categorizedRecords[category].push(record);
+    });
 
-    // Analyze sleep patterns
-    const sleepData = this.extractSleepData(behaviorRecords);
-    if (sleepData.length > 5) {
-      const sleepInsight = this.analyzeSleepPatterns(sleepData);
-      if (sleepInsight) insights.push(sleepInsight);
-    }
+    // Enhanced pattern analysis with field value insights
+    Object.entries(categorizedRecords).forEach(([category, records]) => {
+      const fieldValueAnalysis: Record<string, any> = {};
+      const recentEntries = records.slice(0, 10);
 
-    // Analyze mood patterns
-    const moodData = this.extractMoodData(behaviorRecords);
-    if (moodData.length > 5) {
-      const moodInsight = this.analyzeMoodPatterns(moodData);
-      if (moodInsight) insights.push(moodInsight);
-    }
+      // Analyze field values for insights
+      recentEntries.forEach(record => {
+        let recordContent = {};
+        try {
+          recordContent = record.content ? JSON.parse(record.content) : {};
+        } catch {
+          recordContent = {};
+        }
 
-    return insights;
+        // Extract and analyze field values
+        Object.entries(recordContent).forEach(([fieldKey, value]) => {
+          if (!fieldValueAnalysis[fieldKey]) {
+            fieldValueAnalysis[fieldKey] = {
+              values: [],
+              type: typeof value,
+              frequency: {},
+            };
+          }
+
+          fieldValueAnalysis[fieldKey].values.push(value);
+
+          // Track frequency for categorical data
+          const stringValue = String(value);
+          fieldValueAnalysis[fieldKey].frequency[stringValue] =
+            (fieldValueAnalysis[fieldKey].frequency[stringValue] || 0) + 1;
+        });
+      });
+
+      // Generate summary statistics for numeric fields
+      Object.entries(fieldValueAnalysis).forEach(
+        ([_fieldKey, analysis]: [string, any]) => {
+          if (analysis.type === "number") {
+            const numericValues = analysis.values
+              .filter((v: any) => !isNaN(Number(v)))
+              .map(Number);
+            if (numericValues.length > 0) {
+              analysis.statistics = {
+                average:
+                  numericValues.reduce((a: number, b: number) => a + b, 0) /
+                  numericValues.length,
+                min: Math.min(...numericValues),
+                max: Math.max(...numericValues),
+                trend:
+                  numericValues.length > 1
+                    ? this.calculateTrend(numericValues.slice(-5))
+                    : "stable",
+              };
+            }
+          }
+        }
+      );
+
+      compilation.patterns[category] = {
+        count: records.length,
+        fieldAnalysis: fieldValueAnalysis,
+        timeSpan: this.getTimeSpan(records),
+        mostCommonFields: Object.keys(fieldValueAnalysis).slice(0, 5),
+      };
+    });
+
+    return compilation;
   }
 
   /**
-   * Perform correlation analysis between different metrics
+   * Calculate trend for numeric values (simple trend analysis)
    */
-  private async analyzeCorrelations(data: any): Promise<AIInsight[]> {
-    const insights: AIInsight[] = [];
+  private calculateTrend(
+    values: number[]
+  ): "increasing" | "decreasing" | "stable" {
+    if (values.length < 2) return "stable";
 
-    // Extract time-series data for different metrics
-    const metrics = this.extractTimeSeriesMetrics(data.records);
-    const correlations = this.calculateCorrelations(metrics);
+    const firstHalf = values.slice(0, Math.floor(values.length / 2));
+    const secondHalf = values.slice(Math.floor(values.length / 2));
 
-    // Find significant correlations
-    const significantCorrelations = correlations.filter(
-      corr => Math.abs(corr.correlation) > 0.6 && corr.significance < 0.05
+    const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
+    const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+
+    const change = ((secondAvg - firstAvg) / firstAvg) * 100;
+
+    if (change > 5) return "increasing";
+    if (change < -5) return "decreasing";
+    return "stable";
+  }
+
+  /**
+   * Get time span for records
+   */
+  private getTimeSpan(records: any[]): string {
+    if (records.length === 0) return "No data";
+
+    const dates = records
+      .map(r => new Date(r.createdAt))
+      .sort((a, b) => a.getTime() - b.getTime());
+    const daysDiff = Math.ceil(
+      (dates[dates.length - 1].getTime() - dates[0].getTime()) /
+        (1000 * 60 * 60 * 24)
     );
 
-    for (const correlation of significantCorrelations) {
-      insights.push({
-        id: `correlation-${correlation.variable1}-${correlation.variable2}`,
+    if (daysDiff === 0) return "1 day";
+    if (daysDiff === 1) return "2 days";
+    if (daysDiff < 7) return `${daysDiff + 1} days`;
+    if (daysDiff < 30) return `${Math.ceil(daysDiff / 7)} weeks`;
+    return `${Math.ceil(daysDiff / 30)} months`;
+  }
+
+  /**
+   * Set the prompt style for this service instance
+   */
+  setPromptStyle(style: PromptStyleId): void {
+    this.promptStyle = style;
+  }
+
+  /**
+   * Get available prompt styles and recommendations
+   */
+  getPromptStyleRecommendations(dataCompilation: any) {
+    return promptRouter.getStyleRecommendations(dataCompilation);
+  }
+
+  /**
+   * Generate fallback insights when AI fails
+   */
+  private generateFallbackInsights(reason: string): AIInsight[] {
+    console.log(`🔄 Generating fallback insights due to: ${reason}`);
+
+    const timestamp = Date.now();
+    const fallbackInsights: AIInsight[] = [
+      {
+        id: `fallback-data-${timestamp}`,
         type: "behavior",
-        category: "Pattern Analysis",
-        title: `${correlation.variable1} and ${correlation.variable2} Correlation`,
-        description: correlation.description,
-        confidence: Math.abs(correlation.correlation) > 0.8 ? "high" : "medium",
+        category: "Data Tracking",
+        title: "Data Collection Progress",
+        description:
+          "Your family is building a valuable record of daily activities and wellness patterns.",
+        confidence: "medium",
         importance: "medium",
         data: {
           trend: "stable",
-          timeframe: "recent weeks",
-          dataPoints: correlation.sampleSize,
-          correlations: [
-            {
-              factor: correlation.variable2,
-              strength: Math.abs(correlation.correlation),
-              direction: correlation.correlation > 0 ? "positive" : "negative",
-            },
-          ],
+          timeframe: "ongoing",
+          dataPoints: 1,
         },
-        recommendations: this.generateCorrelationRecommendations(correlation),
+        recommendations: [
+          "Continue tracking daily activities to build more comprehensive insights",
+          "Try adding sleep or mood records for better wellness analysis",
+        ],
+        createdAt: new Date(),
+      },
+      {
+        id: `fallback-wellness-${timestamp}`,
+        type: "health",
+        category: "Family Wellness",
+        title: "Wellness Tracking Opportunity",
+        description:
+          "Regular tracking helps identify patterns that can improve your family's wellbeing.",
+        confidence: "high",
+        importance: "medium",
+        data: {
+          trend: "stable",
+          timeframe: "current",
+          dataPoints: 1,
+        },
+        recommendations: [
+          "Consider tracking key wellness metrics like sleep quality and mood",
+          "Review your data weekly to identify helpful patterns",
+        ],
+        createdAt: new Date(),
+      },
+    ];
+
+    return fallbackInsights;
+  }
+
+  /**
+   * Validate data compilation before creating prompt
+   */
+  private validateDataCompilation(compilation: any): {
+    isValid: boolean;
+    errors: string[];
+  } {
+    const errors: string[] = [];
+
+    if (!compilation) {
+      errors.push("Data compilation is null or undefined");
+      return { isValid: false, errors };
+    }
+
+    if (
+      typeof compilation.totalRecords !== "number" ||
+      compilation.totalRecords < 0
+    ) {
+      errors.push("Invalid totalRecords count");
+    }
+
+    if (typeof compilation.members !== "number" || compilation.members < 1) {
+      errors.push("Invalid members count");
+    }
+
+    if (
+      !Array.isArray(compilation.recordTypeStructures) ||
+      compilation.recordTypeStructures.length === 0
+    ) {
+      errors.push("No record type structures available");
+    }
+
+    if (!compilation.patterns || typeof compilation.patterns !== "object") {
+      errors.push("Invalid patterns object");
+    } else {
+      const patternCount = Object.keys(compilation.patterns).length;
+      if (patternCount === 0) {
+        errors.push("No patterns found");
+      }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  }
+
+  /**
+   * Validate and parse AI response into structured insights
+   */
+  private validateAndParseAIResponse(response: string): AIInsight[] {
+    console.log(`🤖 AI response validation`, {
+      householdId: this.householdId,
+      response: response,
+    });
+
+    if (!response || typeof response !== "string") {
+      console.error("❌ Invalid AI response: not a string");
+      return this.generateFallbackInsights("Invalid AI response format");
+    }
+
+    if (response.length < 20) {
+      console.error("❌ AI response too short");
+      return this.generateFallbackInsights("AI response too short");
+    }
+
+    if (response.length > 5000) {
+      console.warn("⚠️ AI response very long, truncating");
+      response = response.substring(0, 5000);
+    }
+
+    // Parse the response
+    const insights = this.parseAIResponse(response);
+
+    // Validate parsed insights
+    const validatedInsights = insights.filter(insight =>
+      this.validateInsight(insight)
+    );
+
+    if (validatedInsights.length === 0) {
+      console.warn("⚠️ No valid insights parsed from AI response");
+
+      // Create fallback insight if parsing completely failed
+      if (response.length > 50) {
+        return this.createFallbackInsight(response);
+      }
+    }
+
+    console.log(
+      `✅ Validated ${validatedInsights.length} insights from AI response`
+    );
+    return validatedInsights;
+  }
+
+  /**
+   * Validate individual insight structure
+   */
+  private validateInsight(insight: any): boolean {
+    if (!insight || typeof insight !== "object") {
+      return false;
+    }
+
+    const requiredFields = [
+      "id",
+      "type",
+      "category",
+      "title",
+      "description",
+      "confidence",
+      "importance",
+      "recommendations",
+    ];
+
+    for (const field of requiredFields) {
+      if (!insight[field]) {
+        console.warn(`⚠️ Insight missing required field: ${field}`);
+        return false;
+      }
+    }
+
+    if (
+      typeof insight.description !== "string" ||
+      insight.description.length < 10
+    ) {
+      console.warn("⚠️ Insight description too short");
+      return false;
+    }
+
+    if (
+      !Array.isArray(insight.recommendations) ||
+      insight.recommendations.length === 0
+    ) {
+      console.warn("⚠️ Insight has no recommendations");
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Create fallback insight when parsing fails
+   */
+  private createFallbackInsight(response: string): AIInsight[] {
+    return [
+      {
+        id: `ai-fallback-${Date.now()}`,
+        type: "behavior",
+        category: "General Analysis",
+        title: "AI Household Analysis",
+        description: this.extractMainContent(response),
+        confidence: "low",
+        importance: "medium",
+        data: {
+          trend: "stable",
+          timeframe: "recent",
+          dataPoints: 0,
+        },
+        recommendations: this.extractRecommendations(response),
+        createdAt: new Date(),
+      },
+    ];
+  }
+
+  /**
+   * Extract main content from unstructured response
+   */
+  private extractMainContent(response: string): string {
+    // Remove common AI response prefixes and get first meaningful paragraph
+    const cleaned = response
+      .replace(/^(Here are?|Based on|Looking at).*?:\s*/i, "")
+      .replace(/^(The|This|I can see).*?\.\s*/, "")
+      .trim();
+
+    const firstSentences = cleaned.split(".").slice(0, 3).join(".").trim();
+    return firstSentences.length > 20
+      ? firstSentences + "."
+      : cleaned.substring(0, 200);
+  }
+
+  /**
+   * Extract recommendations from unstructured response
+   */
+  private extractRecommendations(response: string): string[] {
+    const recommendations: string[] = [];
+
+    // Look for recommendation indicators
+    const patterns = [
+      /recommend[s]?\s+(.+?)(?=\.|$)/gi,
+      /suggest[s]?\s+(.+?)(?=\.|$)/gi,
+      /consider\s+(.+?)(?=\.|$)/gi,
+      /try\s+(.+?)(?=\.|$)/gi,
+    ];
+
+    for (const pattern of patterns) {
+      const matches = response.match(pattern);
+      if (matches) {
+        matches.forEach(match => {
+          const rec = match
+            .replace(/^(recommend[s]?|suggest[s]?|consider|try)\s+/i, "")
+            .trim();
+          if (rec.length > 10 && recommendations.length < 3) {
+            recommendations.push(rec);
+          }
+        });
+      }
+    }
+
+    // Fallback: provide generic recommendation
+    if (recommendations.length === 0) {
+      recommendations.push(
+        "Continue monitoring household patterns and activities"
+      );
+    }
+
+    return recommendations.slice(0, 3); // Max 3 recommendations
+  }
+
+  /**
+   * Parse AI response into structured insights (original method)
+   */
+  private parseAIResponse(response: string): AIInsight[] {
+    const insights: AIInsight[] = [];
+
+    // Simple parsing - look for INSIGHT patterns
+    const insightMatches = response.match(
+      /INSIGHT \d+: (.+?)\n(.+?)\nRECOMMENDATION: (.+?)(?=\n\nINSIGHT|\n*$)/gs
+    );
+
+    if (insightMatches) {
+      insightMatches.forEach((match, index) => {
+        const lines = match.trim().split("\n");
+        const category = lines[0].replace(/INSIGHT \d+: /, "").trim();
+        const description = lines[1]?.trim() || "";
+        const recommendation =
+          lines
+            .find(line => line.startsWith("RECOMMENDATION:"))
+            ?.replace("RECOMMENDATION: ", "")
+            .trim() || "";
+
+        if (description && recommendation) {
+          // Infer insight type from content
+          const inferredType = this.inferInsightType(category, description);
+
+          insights.push({
+            id: `ai-insight-${Date.now()}-${index}`,
+            type: inferredType,
+            category: category || "General",
+            title: `AI Insight: ${category}`,
+            description: description,
+            confidence: "medium",
+            importance: "medium",
+            data: {
+              trend: "stable",
+              timeframe: "recent",
+              dataPoints: 0,
+            },
+            recommendations: [recommendation],
+            createdAt: new Date(),
+          });
+        }
+      });
+    }
+
+    // Fallback: create one insight from the entire response if parsing fails
+    if (insights.length === 0 && response.length > 20) {
+      // Infer insight type and category from response content
+      const inferredType = this.inferInsightType("AI Analysis", response);
+      const inferredCategory = this.inferInsightCategory(
+        inferredType,
+        response
+      );
+
+      insights.push({
+        id: `ai-insight-fallback-${Date.now()}`,
+        type: inferredType,
+        category: inferredCategory,
+        title: this.inferInsightTitle(inferredType, inferredCategory),
+        description:
+          response.substring(0, 200) + (response.length > 200 ? "..." : ""),
+        confidence: "medium",
+        importance: "medium",
+        data: {
+          trend: "stable",
+          timeframe: "recent",
+          dataPoints: 0,
+        },
+        recommendations: [
+          "Review the full AI analysis for detailed recommendations",
+        ],
         createdAt: new Date(),
       });
     }
@@ -347,58 +700,130 @@ Provide insights in a structured format focusing on actionable recommendations.`
   }
 
   /**
-   * Generate predictive insights
+   * Infer insight type from category and description content
    */
-  private async generatePredictiveInsights(data: any): Promise<AIInsight[]> {
-    const insights: AIInsight[] = [];
+  private inferInsightType(
+    category: string,
+    content: string
+  ): AIInsight["type"] {
+    const lowerCategory = category.toLowerCase();
+    const lowerContent = content.toLowerCase();
 
-    // Simple trend-based predictions
-    const memberGroups = this.groupRecordsByMember(data.records);
-
-    for (const [memberId, records] of Object.entries(memberGroups)) {
-      const memberRecords = records as any[];
-      const memberName = memberRecords[0]?.createdBy?.firstName || "Member";
-
-      const numericalFields = this.extractNumericalFields(memberRecords);
-
-      for (const [fieldName, values] of Object.entries(numericalFields)) {
-        const trend = this.calculateTrend(values as number[]);
-
-        if (trend.r2 > 0.6 && values.length > 5) {
-          // Strong predictive power
-          const prediction = this.predictNextValue(values as number[], trend);
-
-          insights.push({
-            id: `prediction-${memberId}-${fieldName}`,
-            type: "prediction",
-            category: "Predictive Analysis",
-            title: `${memberName}'s ${fieldName} Prediction`,
-            description: `Based on current trends, ${fieldName} is predicted to be ${prediction.value.toFixed(2)} in the next week`,
-            confidence: trend.r2 > 0.8 ? "high" : "medium",
-            importance: "medium",
-            data: {
-              trend: trend.slope > 0 ? "increasing" : "decreasing",
-              timeframe: "next week",
-              dataPoints: values.length,
-              predictions: [
-                {
-                  metric: fieldName,
-                  value: prediction.value,
-                  timeframe: "1 week",
-                  confidence: trend.r2,
-                },
-              ],
-            },
-            recommendations: [
-              `Monitor ${fieldName} closely to validate prediction`,
-            ],
-            createdAt: new Date(),
-          });
-        }
-      }
+    // Health-related keywords
+    if (
+      lowerCategory.includes("health") ||
+      lowerContent.includes("health") ||
+      lowerContent.includes("checkup") ||
+      lowerContent.includes("symptom") ||
+      lowerContent.includes("fever") ||
+      lowerContent.includes("medicine") ||
+      lowerContent.includes("doctor") ||
+      lowerContent.includes("medical")
+    ) {
+      return "health";
     }
 
-    return insights;
+    // Growth-related keywords
+    if (
+      lowerCategory.includes("growth") ||
+      lowerContent.includes("height") ||
+      lowerContent.includes("weight") ||
+      lowerContent.includes("development") ||
+      lowerContent.includes("milestone")
+    ) {
+      return "growth";
+    }
+
+    // Prediction-related keywords
+    if (
+      lowerCategory.includes("prediction") ||
+      lowerCategory.includes("forecast") ||
+      lowerContent.includes("predict") ||
+      lowerContent.includes("future") ||
+      lowerContent.includes("trend")
+    ) {
+      return "prediction";
+    }
+
+    // Development-related keywords
+    if (
+      lowerCategory.includes("development") ||
+      lowerContent.includes("learn") ||
+      lowerContent.includes("skill") ||
+      lowerContent.includes("progress")
+    ) {
+      return "development";
+    }
+
+    // Default to behavior
+    return "behavior";
+  }
+
+  /**
+   * Infer insight category based on type and content
+   */
+  private inferInsightCategory(
+    type: AIInsight["type"],
+    _content: string
+  ): string {
+    switch (type) {
+      case "health":
+        return "Health Analysis";
+      case "growth":
+        return "Growth Patterns";
+      case "development":
+        return "Development Tracking";
+      case "prediction":
+        return "Predictive Analysis";
+      case "behavior":
+      default:
+        return "Behavioral Insights";
+    }
+  }
+
+  /**
+   * Infer insight title based on type and category
+   */
+  private inferInsightTitle(
+    type: AIInsight["type"],
+    _category: string
+  ): string {
+    switch (type) {
+      case "health":
+        return "AI Health Pattern Analysis";
+      case "growth":
+        return "Growth Trend Analysis";
+      case "development":
+        return "Development Progress Insights";
+      case "prediction":
+        return "Predictive Modeling Results";
+      case "behavior":
+      default:
+        return "Behavioral Pattern Analysis";
+    }
+  }
+
+  /**
+   * Legacy methods - now simplified to return empty arrays since we use generateAIInsights
+   */
+  private async analyzeGrowthPatterns(_data: any): Promise<AIInsight[]> {
+    return []; // Now handled by generateAIInsights
+  }
+
+  private async analyzeHealthPatterns(_data: any): Promise<AIInsight[]> {
+    return []; // Now handled by generateAIInsights
+  }
+
+  private async analyzeBehavioralPatterns(_data: any): Promise<AIInsight[]> {
+    return []; // Now handled by generateAIInsights
+  }
+
+  private async analyzeCorrelations(_data: any): Promise<AIInsight[]> {
+    return []; // Now handled by generateAIInsights
+  }
+
+  private async generatePredictiveInsights(_data: any): Promise<AIInsight[]> {
+    return []; // Now handled by generateAIInsights
   }
 
   // Helper methods
@@ -447,8 +872,24 @@ Provide insights in a structured format focusing on actionable recommendations.`
     const fields: Record<string, number[]> = {};
 
     records.forEach(record => {
-      const data =
-        typeof record.data === "string" ? JSON.parse(record.data) : record.data;
+      if (!record || !record.data) {
+        return; // Skip records without data
+      }
+
+      let data;
+      try {
+        data =
+          typeof record.data === "string"
+            ? JSON.parse(record.data)
+            : record.data;
+      } catch (error) {
+        console.warn("Failed to parse record data:", error);
+        return; // Skip records with invalid JSON
+      }
+
+      if (!data || typeof data !== "object") {
+        return; // Skip if data is null, undefined, or not an object
+      }
 
       Object.entries(data).forEach(([key, value]) => {
         if (
@@ -464,7 +905,10 @@ Provide insights in a structured format focusing on actionable recommendations.`
     return fields;
   }
 
-  private calculateTrend(values: number[]): { slope: number; r2: number } {
+  private calculateDetailedTrend(values: number[]): {
+    slope: number;
+    r2: number;
+  } {
     if (values.length < 2) return { slope: 0, r2: 0 };
 
     const n = values.length;
@@ -475,7 +919,6 @@ Provide insights in a structured format focusing on actionable recommendations.`
     const sumY = y.reduce((a, b) => a + b, 0);
     const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
     const sumX2 = x.reduce((sum, xi) => sum + xi * xi, 0);
-    const sumY2 = y.reduce((sum, yi) => sum + yi * yi, 0);
 
     const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
     const yMean = sumY / n;
@@ -541,17 +984,31 @@ Provide insights in a structured format focusing on actionable recommendations.`
   ): Array<{ date: string; hours: number }> {
     return records
       .filter(record => {
-        const data =
-          typeof record.data === "string"
-            ? JSON.parse(record.data)
-            : record.data;
+        if (!record || !record.data) return false;
+
+        let data;
+        try {
+          data =
+            typeof record.data === "string"
+              ? JSON.parse(record.data)
+              : record.data;
+        } catch {
+          return false;
+        }
+
+        if (!data || typeof data !== "object") return false;
         return data.hours || data.sleep_hours || data.sleepHours;
       })
       .map(record => {
-        const data =
-          typeof record.data === "string"
-            ? JSON.parse(record.data)
-            : record.data;
+        let data;
+        try {
+          data =
+            typeof record.data === "string"
+              ? JSON.parse(record.data)
+              : record.data;
+        } catch {
+          data = {};
+        }
         return {
           date: record.createdAt,
           hours: data.hours || data.sleep_hours || data.sleepHours,
@@ -564,7 +1021,7 @@ Provide insights in a structured format focusing on actionable recommendations.`
   ): AIInsight | null {
     const hours = sleepData.map(d => d.hours);
     const avgHours = hours.reduce((a, b) => a + b, 0) / hours.length;
-    const trend = this.calculateTrend(hours);
+    const trend = this.calculateDetailedTrend(hours);
 
     return {
       id: `sleep-pattern-${Date.now()}`,
@@ -594,17 +1051,31 @@ Provide insights in a structured format focusing on actionable recommendations.`
   ): Array<{ date: string; mood: number }> {
     return records
       .filter(record => {
-        const data =
-          typeof record.data === "string"
-            ? JSON.parse(record.data)
-            : record.data;
+        if (!record || !record.data) return false;
+
+        let data;
+        try {
+          data =
+            typeof record.data === "string"
+              ? JSON.parse(record.data)
+              : record.data;
+        } catch {
+          return false;
+        }
+
+        if (!data || typeof data !== "object") return false;
         return data.mood || data.mood_rating || data.moodRating;
       })
       .map(record => {
-        const data =
-          typeof record.data === "string"
-            ? JSON.parse(record.data)
-            : record.data;
+        let data;
+        try {
+          data =
+            typeof record.data === "string"
+              ? JSON.parse(record.data)
+              : record.data;
+        } catch {
+          data = {};
+        }
         return {
           date: record.createdAt,
           mood: data.mood || data.mood_rating || data.moodRating,
@@ -617,7 +1088,7 @@ Provide insights in a structured format focusing on actionable recommendations.`
   ): AIInsight | null {
     const moods = moodData.map(d => d.mood);
     const avgMood = moods.reduce((a, b) => a + b, 0) / moods.length;
-    const trend = this.calculateTrend(moods);
+    const trend = this.calculateDetailedTrend(moods);
 
     return {
       id: `mood-pattern-${Date.now()}`,
@@ -643,14 +1114,14 @@ Provide insights in a structured format focusing on actionable recommendations.`
   }
 
   private extractTimeSeriesMetrics(
-    records: any[]
+    _records: any[]
   ): Record<string, Array<{ date: string; value: number }>> {
     // Implementation would extract various metrics over time
     return {};
   }
 
   private calculateCorrelations(
-    metrics: Record<string, Array<{ date: string; value: number }>>
+    _metrics: Record<string, Array<{ date: string; value: number }>>
   ): CorrelationAnalysis[] {
     // Implementation would calculate correlations between different metrics
     return [];
@@ -668,7 +1139,6 @@ Provide insights in a structured format focusing on actionable recommendations.`
     values: number[],
     trend: any
   ): { value: number; confidence: number } {
-    const nextIndex = values.length;
     const lastValue = values[values.length - 1];
     const predictedValue = lastValue + trend.slope;
 

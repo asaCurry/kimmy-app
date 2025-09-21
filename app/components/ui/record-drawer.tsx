@@ -10,18 +10,8 @@ import {
 } from "~/components/ui";
 import { DynamicRecordForm } from "~/components/dynamic-record-form";
 import { useRecordManagement } from "~/contexts";
-import {
-  Edit,
-  Trash2,
-  Lock,
-  Calendar,
-  User,
-  Tag,
-  Eye,
-  Save,
-  X,
-} from "lucide-react";
-import type { Record, RecordType } from "~/db/schema";
+import { Edit, Trash2, Lock, Calendar, User, Tag } from "lucide-react";
+import type { Record } from "~/db/schema";
 
 interface RecordDrawerProps {
   householdId: string;
@@ -32,7 +22,6 @@ interface RecordDrawerProps {
 export const RecordDrawer: React.FC<RecordDrawerProps> = ({
   householdId,
   memberId,
-  category,
 }) => {
   const {
     selectedRecord: record,
@@ -53,7 +42,7 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
     if (isOpen) {
       setMode("view");
     }
-  }, [isOpen, record?.id]);
+  }, [isOpen, record?.id, setMode]);
 
   // Parse the fields JSON for the record type - moved before conditional return
   const parsedRecordType = React.useMemo(() => {
@@ -86,7 +75,7 @@ export const RecordDrawer: React.FC<RecordDrawerProps> = ({
         ...recordType,
         fields: normalizedFields,
       };
-    } catch (error) {
+    } catch {
       return {
         ...recordType,
         fields: [],

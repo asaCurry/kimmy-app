@@ -52,10 +52,11 @@ describe("AnalyticsDashboard", () => {
   });
 
   it("renders dashboard header and controls", () => {
-    mockFetch.mockResolvedValueOnce({
+    const mockResponse = {
       ok: true,
-      json: async () => mockAnalyticsResponse,
-    });
+      json: vi.fn().mockResolvedValue(mockAnalyticsResponse),
+    };
+    mockFetch.mockResolvedValueOnce(mockResponse);
 
     render(<AnalyticsDashboard />);
 
@@ -77,10 +78,11 @@ describe("AnalyticsDashboard", () => {
 
     expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
 
-    resolvePromise!({
+    const mockResponse = {
       ok: true,
-      json: async () => mockAnalyticsResponse,
-    });
+      json: vi.fn().mockResolvedValue(mockAnalyticsResponse),
+    };
+    resolvePromise!(mockResponse);
 
     await waitFor(() => {
       expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
@@ -88,10 +90,11 @@ describe("AnalyticsDashboard", () => {
   });
 
   it("displays performance metrics correctly", async () => {
-    mockFetch.mockResolvedValueOnce({
+    const mockResponse = {
       ok: true,
-      json: async () => mockAnalyticsResponse,
-    });
+      json: vi.fn().mockResolvedValue(mockAnalyticsResponse),
+    };
+    mockFetch.mockResolvedValueOnce(mockResponse);
 
     render(<AnalyticsDashboard />);
 
@@ -107,12 +110,14 @@ describe("AnalyticsDashboard", () => {
   });
 
   it("displays error state when API returns error", async () => {
-    mockFetch.mockResolvedValueOnce({
+    // Mock a proper Response object with the required properties
+    const mockResponse = {
       ok: false,
       status: 403,
       statusText: "Forbidden",
-      json: async () => mockErrorResponse,
-    });
+      json: vi.fn().mockResolvedValue(mockErrorResponse),
+    };
+    mockFetch.mockResolvedValueOnce(mockResponse);
 
     render(<AnalyticsDashboard />);
 
@@ -123,10 +128,11 @@ describe("AnalyticsDashboard", () => {
   });
 
   it("handles API JSON response error correctly", async () => {
-    mockFetch.mockResolvedValueOnce({
+    const mockResponse = {
       ok: true,
-      json: async () => mockErrorResponse,
-    });
+      json: vi.fn().mockResolvedValue(mockErrorResponse),
+    };
+    mockFetch.mockResolvedValueOnce(mockResponse);
 
     render(<AnalyticsDashboard />);
 
@@ -137,10 +143,11 @@ describe("AnalyticsDashboard", () => {
   });
 
   it("refreshes data when refresh button is clicked", async () => {
-    mockFetch.mockResolvedValue({
+    const mockResponse = {
       ok: true,
-      json: async () => mockAnalyticsResponse,
-    });
+      json: vi.fn().mockResolvedValue(mockAnalyticsResponse),
+    };
+    mockFetch.mockResolvedValue(mockResponse);
 
     render(<AnalyticsDashboard />);
 
@@ -150,17 +157,22 @@ describe("AnalyticsDashboard", () => {
       ).toBeInTheDocument();
     });
 
+    // Clear the mock call count after initial load
+    mockFetch.mockClear();
+
     const refreshButton = screen.getByText("Refresh");
     fireEvent.click(refreshButton);
 
-    expect(mockFetch).toHaveBeenCalledTimes(2);
+    // Now expect just the refresh call
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
   it("updates data when time range is changed", async () => {
-    mockFetch.mockResolvedValue({
+    const mockResponse = {
       ok: true,
-      json: async () => mockAnalyticsResponse,
-    });
+      json: vi.fn().mockResolvedValue(mockAnalyticsResponse),
+    };
+    mockFetch.mockResolvedValue(mockResponse);
 
     render(<AnalyticsDashboard />);
 
@@ -188,10 +200,11 @@ describe("AnalyticsDashboard", () => {
   });
 
   it("updates data when metric is changed", async () => {
-    mockFetch.mockResolvedValue({
+    const mockResponse = {
       ok: true,
-      json: async () => mockAnalyticsResponse,
-    });
+      json: vi.fn().mockResolvedValue(mockAnalyticsResponse),
+    };
+    mockFetch.mockResolvedValue(mockResponse);
 
     render(<AnalyticsDashboard />);
 
@@ -219,10 +232,11 @@ describe("AnalyticsDashboard", () => {
   });
 
   it("displays note when provided in response", async () => {
-    mockFetch.mockResolvedValueOnce({
+    const mockResponse = {
       ok: true,
-      json: async () => mockAnalyticsResponse,
-    });
+      json: vi.fn().mockResolvedValue(mockAnalyticsResponse),
+    };
+    mockFetch.mockResolvedValueOnce(mockResponse);
 
     render(<AnalyticsDashboard />);
 
@@ -267,10 +281,11 @@ describe("AnalyticsDashboard", () => {
       },
     };
 
-    mockFetch.mockResolvedValueOnce({
+    const mockResponse = {
       ok: true,
-      json: async () => responseWithTrends,
-    });
+      json: vi.fn().mockResolvedValue(responseWithTrends),
+    };
+    mockFetch.mockResolvedValueOnce(mockResponse);
 
     render(<AnalyticsDashboard />);
 

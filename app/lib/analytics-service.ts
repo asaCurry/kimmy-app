@@ -1,6 +1,10 @@
 import { eq, desc } from "drizzle-orm";
-import { users, records, recordTypes } from "~/db/schema";
-import type { NewAiRecommendation } from "~/db/schema";
+import {
+  users,
+  records,
+  recordTypes,
+  type NewAiRecommendation,
+} from "~/db/schema";
 
 export interface InsightSummary {
   totalRecords: number;
@@ -208,7 +212,7 @@ export class AnalyticsService {
 
   private async generateCategoryInsights(
     allRecords: any[],
-    allRecordTypes: any[]
+    _allRecordTypes: any[]
   ): Promise<CategoryInsight[]> {
     const categoryGroups = allRecords.reduce((acc: any, record) => {
       const category = record.category || "Uncategorized";
@@ -323,30 +327,35 @@ export class AnalyticsService {
   ): PatternInsight[] {
     const patterns: PatternInsight[] = [];
 
-    // Pattern 1: Detect health-related data gaps
-    const healthCategories = categoryInsights.filter(
-      c =>
-        c.category.toLowerCase().includes("health") ||
-        c.category.toLowerCase().includes("medical") ||
-        c.category.toLowerCase().includes("symptom")
-    );
+    // Pattern 1: Detect data gaps for important categories (dynamic detection)
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-    if (healthCategories.length > 0) {
-      const recentHealthRecords = allRecords.filter(
+    // Find categories that are important (have more than 3 records historically)
+    const importantCategories = categoryInsights.filter(c => c.count >= 3);
+
+    for (const category of importantCategories) {
+      const recentRecords = allRecords.filter(
         r =>
-          healthCategories.some(hc => hc.category === r.category) &&
+          r.category === category.category &&
           r.createdAt &&
-          new Date(r.createdAt) >=
-            new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          new Date(r.createdAt) >= weekAgo
       );
 
-      if (recentHealthRecords.length === 0) {
+      if (recentRecords.length === 0) {
+        // Determine category type for better messaging
+        const categoryType = this.categorizeRecordType(category.category);
         patterns.push({
-          type: "health",
-          title: "Health Data Gap Detected",
-          description:
-            "No health-related records have been logged in the past week.",
+          type: categoryType,
+          title: `${category.category} Data Gap Detected`,
+          description: `No ${category.category.toLowerCase()} records have been logged in the past week.`,
           confidence: "medium",
+          metadata: {
+            category: category.category,
+            daysSinceLastRecord: this.getDaysSinceLastRecord(
+              allRecords,
+              category.category
+            ),
+          },
         });
       }
     }
@@ -416,30 +425,122 @@ export class AnalyticsService {
     return patterns;
   }
 
+  /**
+   * Categorize a record type based on its name/category for better pattern detection
+   */
+  private categorizeRecordType(
+    category: string
+  ): "health" | "activity" | "growth" | "data_entry" {
+    const categoryLower = category.toLowerCase();
+
+    if (
+      categoryLower.includes("health") ||
+      categoryLower.includes("medical") ||
+      categoryLower.includes("symptom") ||
+      categoryLower.includes("sleep") ||
+      categoryLower.includes("mood") ||
+      categoryLower.includes("wellness")
+    ) {
+      return "health";
+    }
+
+    if (
+      categoryLower.includes("activity") ||
+      categoryLower.includes("exercise") ||
+      categoryLower.includes("sports") ||
+      categoryLower.includes("movement")
+    ) {
+      return "activity";
+    }
+
+    if (
+      categoryLower.includes("growth") ||
+      categoryLower.includes("development") ||
+      categoryLower.includes("milestone") ||
+      categoryLower.includes("learning") ||
+      categoryLower.includes("education")
+    ) {
+      return "growth";
+    }
+
+    return "data_entry";
+  }
+
+  /**
+   * Get days since last record for a category
+   */
+  private getDaysSinceLastRecord(allRecords: any[], category: string): number {
+    const categoryRecords = allRecords
+      .filter(r => r.category === category && r.createdAt)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+    if (categoryRecords.length === 0) return -1;
+
+    const lastRecord = new Date(categoryRecords[0].createdAt);
+    const now = new Date();
+    return Math.floor(
+      (now.getTime() - lastRecord.getTime()) / (1000 * 60 * 60 * 24)
+    );
+  }
+
+  /**
+   * Suggest categories that aren't currently active
+   */
+  private getSuggestedCategories(activeCategories: string[]): string[] {
+    const commonCategories = [
+      "Health",
+      "Activities",
+      "Development",
+      "Education",
+      "Social",
+      "Nutrition",
+      "Wellness",
+    ];
+    const activeLower = activeCategories.map(c => c.toLowerCase());
+
+    return commonCategories
+      .filter(category => !activeLower.includes(category.toLowerCase()))
+      .slice(0, 3); // Limit to 3 suggestions
+  }
+
   private generateRecommendations(
     patterns: PatternInsight[],
     summary: InsightSummary,
-    categoryInsights: CategoryInsight[],
-    memberInsights: MemberInsight[]
+    _categoryInsights: CategoryInsight[],
+    _memberInsights: MemberInsight[]
   ): Omit<NewAiRecommendation, "createdAt" | "updatedAt">[] {
     const recommendations: Omit<
       NewAiRecommendation,
       "createdAt" | "updatedAt"
     >[] = [];
 
-    // Recommendation based on health gap pattern
-    const healthGapPattern = patterns.find(
-      p => p.type === "health" && p.title.includes("Health Data Gap")
+    // Dynamic recommendations based on data gap patterns
+    const dataGapPatterns = patterns.filter(p =>
+      p.title.includes("Data Gap Detected")
     );
-    if (healthGapPattern) {
+    for (const gapPattern of dataGapPatterns) {
+      const category = gapPattern.metadata?.category || "data";
+      const daysSince = gapPattern.metadata?.daysSinceLastRecord || 0;
+
+      let priority: "high" | "medium" | "low" = "medium";
+      if (daysSince > 14) priority = "high";
+      else if (daysSince > 7) priority = "medium";
+      else priority = "low";
+
       recommendations.push({
         householdId: this.householdId,
-        type: "health",
-        title: "Log Health Information",
-        description:
-          "Consider logging recent health information to maintain comprehensive records.",
-        priority: "medium",
+        type: gapPattern.type,
+        title: `Log Recent ${category} Information`,
+        description: `Consider adding recent ${category.toLowerCase()} information. It's been ${daysSince} days since the last entry.`,
+        priority,
         status: "active",
+        metadata: JSON.stringify({
+          category,
+          daysSinceLastRecord: daysSince,
+        }),
       });
     }
 
@@ -477,16 +578,22 @@ export class AnalyticsService {
       });
     }
 
-    // Recommendation for new categories
+    // Dynamic recommendation for exploring new data types
     if (summary.activeCategories.length < 3) {
+      const suggestedCategories = this.getSuggestedCategories(
+        summary.activeCategories
+      );
       recommendations.push({
         householdId: this.householdId,
         type: "growth",
-        title: "Explore New Categories",
-        description:
-          "Consider adding records in new categories like Health, Activities, or Development milestones.",
+        title: "Explore Additional Record Types",
+        description: `Consider tracking ${suggestedCategories.join(", ")} to get more comprehensive insights about your household.`,
         priority: "medium",
         status: "active",
+        metadata: JSON.stringify({
+          currentCategories: summary.activeCategories,
+          suggestedCategories,
+        }),
       });
     }
 

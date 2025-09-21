@@ -38,7 +38,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     let session;
     try {
       session = JSON.parse(decodeURIComponent(sessionData));
-    } catch (error) {
+    } catch (_error) {
       throw new Response("Unauthorized", { status: 401 });
     }
 

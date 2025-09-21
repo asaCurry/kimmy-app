@@ -1,4 +1,3 @@
-import type { Route } from "./+types/api.invite-codes.regenerate";
 import { inviteCodeDb } from "~/lib/db";
 import { createAuthenticatedAction } from "~/lib/validation-layer.server";
 import { z } from "zod";
@@ -13,7 +12,7 @@ const regenerateInviteCodeSchema = z.object({
 
 export const action = createAuthenticatedAction(
   regenerateInviteCodeSchema,
-  async (data, { env, session }) => {
+  async (data, { env, session: _session }) => {
     try {
       // Authorization: verify user is admin of household (session provides userId)
       // TODO: Add household admin check when user-household relationships are implemented

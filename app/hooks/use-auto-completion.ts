@@ -35,7 +35,6 @@ export function useAutoCompletion({
   recordTypeId,
   householdId,
   memberId,
-  fieldId,
   enabled = true,
 }: UseAutoCompletionProps): UseAutoCompletionResult {
   const fetcher = useFetcher();
@@ -68,7 +67,7 @@ export function useAutoCompletion({
       method: "post",
       action: "/api/auto-completion",
     });
-  }, [enabled, recordTypeId, householdId, memberId, fetcher.submit]);
+  }, [enabled, recordTypeId, householdId, memberId, fetcher]);
 
   const getFieldSuggestions = useCallback(
     async (

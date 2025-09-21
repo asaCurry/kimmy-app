@@ -363,7 +363,7 @@ export class AutoCompletionCache {
    */
   async invalidateHouseholdCache(householdId: string): Promise<void> {
     // Clear memory cache entries for this household
-    for (const [key, cached] of this.memoryCache.entries()) {
+    for (const [key] of this.memoryCache.entries()) {
       if (key.includes(householdId)) {
         this.memoryCache.delete(key);
       }

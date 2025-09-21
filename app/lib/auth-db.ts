@@ -51,7 +51,7 @@ export const sessionStorage = {
           }
           return token;
         }
-      } catch (error) {
+      } catch {
         // Clear invalid token data
         this.clearToken();
       }
@@ -105,7 +105,7 @@ export const sessionStorage = {
           }
           return session;
         }
-      } catch (error) {
+      } catch {
         // Clear invalid session data
         this.clearSession();
       }
