@@ -297,22 +297,33 @@ async function checkRateLimit(
   try {
     // Get current count
     const stored = await kv.get(key);
-    let requests: number[] = stored ? JSON.parse(stored) : [];
+    const data: { requests: number[]; lastPutTime?: number } = stored
+      ? JSON.parse(stored)
+      : { requests: [] };
 
     // Remove old requests outside the window
-    requests = requests.filter(timestamp => timestamp > windowStart);
+    data.requests = data.requests.filter(timestamp => timestamp > windowStart);
 
     // Add current request
-    requests.push(now);
+    data.requests.push(now);
 
-    // Store updated list
-    await kv.put(key, JSON.stringify(requests), {
-      expirationTtl: Math.ceil(RATE_LIMIT_WINDOW / 1000) + 10, // Extra buffer
-    });
+    // Only update KV every 30 seconds or when approaching limit to reduce PUT operations
+    const timeSinceLastPut = now - (data.lastPutTime || 0);
+    const approachingLimit =
+      data.requests.length > MAX_REQUESTS_PER_WINDOW * 0.8; // 80% of limit
+    const needsPut =
+      timeSinceLastPut > 30000 || approachingLimit || !data.lastPutTime;
+
+    if (needsPut) {
+      data.lastPutTime = now;
+      await kv.put(key, JSON.stringify(data), {
+        expirationTtl: Math.ceil(RATE_LIMIT_WINDOW / 1000) + 10, // Extra buffer
+      });
+    }
 
     return {
-      blocked: requests.length > MAX_REQUESTS_PER_WINDOW,
-      count: requests.length,
+      blocked: data.requests.length > MAX_REQUESTS_PER_WINDOW,
+      count: data.requests.length,
     };
   } catch (error) {
     // If KV fails, don't block (fail open)

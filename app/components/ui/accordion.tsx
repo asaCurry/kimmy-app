@@ -47,32 +47,31 @@ export const AccordionItem: React.FC<AccordionItemProps> = ({
         className
       )}
     >
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 text-left hover:bg-slate-700/50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 rounded-t-lg"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            {isOpen ? (
-              <ChevronDown className="w-5 h-5 text-slate-400 flex-shrink-0" />
-            ) : (
-              <ChevronRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
-            )}
-            <div>
-              <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
-              {subtitle && <p className="text-sm text-slate-400">{subtitle}</p>}
-            </div>
+      <div className="flex items-center justify-between px-4 py-3">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center space-x-3 flex-1 text-left hover:bg-slate-700/50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 rounded-lg p-2 -m-2"
+        >
+          {isOpen ? (
+            <ChevronDown className="w-5 h-5 text-slate-400 flex-shrink-0" />
+          ) : (
+            <ChevronRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
+          )}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
+            {subtitle && <p className="text-sm text-slate-400">{subtitle}</p>}
           </div>
-          <Link
-            to={`/member/${memberId}/category/${encodeURIComponent(category)}/record/${recordType?.id}`}
-          >
-            <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-              <Plus className="w-4 h-4 mr-2" />
-              New {recordType?.name}
-            </Button>
-          </Link>
-        </div>
-      </button>
+        </button>
+
+        <Link
+          to={`/member/${memberId}/category/${encodeURIComponent(category)}/record/${recordType?.id}`}
+        >
+          <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+            <Plus className="w-4 h-4 mr-2" />
+            New {recordType?.name}
+          </Button>
+        </Link>
+      </div>
 
       {isOpen && (
         <div className="px-4 pb-4 border-t border-slate-700">{children}</div>

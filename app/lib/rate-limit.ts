@@ -86,15 +86,22 @@ export class CloudflareRateLimiter {
     const data = (await kv.get(key, { type: "json" })) as {
       count: number;
       resetTime: number;
+      lastPutTime?: number;
     } | null;
 
     let count = 1;
     let resetTime = now + config.windowMs;
+    let needsPut = true;
 
     if (data && now < data.resetTime) {
       // Within the same window
       count = data.count + 1;
       resetTime = data.resetTime;
+
+      // Only update KV every 10 seconds or when approaching limit to reduce PUT operations
+      const timeSinceLastPut = now - (data.lastPutTime || 0);
+      const approachingLimit = count > config.maxRequests * 0.8; // 80% of limit
+      needsPut = timeSinceLastPut > 10000 || approachingLimit;
     }
 
     // Check if limit exceeded
@@ -107,11 +114,17 @@ export class CloudflareRateLimiter {
       };
     }
 
-    // Update count in KV with TTL
-    const ttlSeconds = Math.ceil(config.windowMs / 1000);
-    await kv.put(key, JSON.stringify({ count, resetTime }), {
-      expirationTtl: ttlSeconds,
-    });
+    // Only update KV if necessary to reduce PUT operations
+    if (needsPut) {
+      const ttlSeconds = Math.ceil(config.windowMs / 1000);
+      await kv.put(
+        key,
+        JSON.stringify({ count, resetTime, lastPutTime: now }),
+        {
+          expirationTtl: ttlSeconds,
+        }
+      );
+    }
 
     return {
       allowed: true,

@@ -18,6 +18,8 @@ export interface UnifiedSelectProps extends BaseFormFieldProps {
   defaultValue?: string;
   placeholder?: string;
   onChange?: (value: string) => void;
+  onBlur?: (event: React.FocusEvent<HTMLDivElement>) => void;
+  name?: string;
   _onValidationChange?: (isValid: boolean, error?: string) => void;
   searchable?: boolean;
   creatable?: boolean;
@@ -46,6 +48,8 @@ export const UnifiedSelect = React.forwardRef<
       defaultValue,
       placeholder = "Select an option...",
       onChange,
+      onBlur,
+      name,
       _onValidationChange,
       searchable = false,
       creatable = false,

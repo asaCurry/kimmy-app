@@ -61,19 +61,19 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   const fetcher = useFetcher();
   const isSubmitting = customIsSubmitting || fetcher.state === "submitting";
 
-  // Auto-completion hook
+  // Auto-completion hook - disabled for now to simplify title field issues
   const {
-    titleSuggestions,
+    // titleSuggestions,
     tagSuggestions,
     smartDefaults,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getFieldSuggestions,
-    isLoading: suggestionsLoading,
+    // isLoading: suggestionsLoading,
   } = useAutoCompletion({
     recordTypeId: recordType.id,
     householdId,
     memberId,
-    enabled: mode === "create", // Only enable for new records
+    enabled: false, // Temporarily disabled to fix title field issues
   });
 
   // Generate schema based on record type fields
@@ -145,30 +145,12 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
   const watchedIsPrivate = watch("isPrivate");
   const _watchedTitle = watch("title");
 
-  // Set title to record type name on mount
+  // Set title to record type name on mount (only for create mode)
   React.useEffect(() => {
-    const timer = setTimeout(() => {
+    if (mode === "create") {
       setValue("title", recordType.name);
-      reset({
-        title: recordType.name,
-        content: "",
-        tags: "",
-        isPrivate: false,
-        datetime: new Date().toISOString().slice(0, 16),
-        ...Object.fromEntries(
-          normalizedFields.map(field => [
-            `field_${field.id}`,
-            field.type === "checkbox"
-              ? false
-              : field.type === "number"
-                ? undefined
-                : "",
-          ])
-        ),
-      });
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [recordType.name, setValue, reset, normalizedFields]);
+    }
+  }, [recordType.name, setValue, mode]);
 
   // Enhanced error summary
   const getErrorSummary = () => {
@@ -381,34 +363,24 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
 
             {/* Title Field */}
             <div className="space-y-2">
-              <SmartInput
+              <Label
+                htmlFor="title"
+                className="text-sm font-medium leading-none text-slate-200"
+              >
+                Title *
+              </Label>
+              <input
                 {...register("title")}
-                label="Title *"
+                type="text"
+                id="title"
                 placeholder="Enter record title"
-                suggestions={{
-                  recent: titleSuggestions.slice(0, 3),
-                  frequent: titleSuggestions.slice(3, 6),
-                  contextual: titleSuggestions.slice(6, 8),
-                }}
-                onSelectSuggestion={(suggestion: AutoCompletionSuggestion) => {
-                  setValue("title", suggestion.value);
-                }}
-                isLoading={suggestionsLoading}
-                error={
-                  errors.title
-                    ? String(errors.title.message) || "Title is required"
-                    : undefined
-                }
-                className="bg-slate-700/50 border-slate-600 text-slate-200 placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm min-h-[44px]"
               />
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <span>💡</span>
-                <span>
-                  {titleSuggestions.length > 0
-                    ? `${titleSuggestions.length} suggestions available based on your history`
-                    : "Start typing to see suggestions"}
-                </span>
-              </div>
+              {errors.title && (
+                <p className="text-red-400 text-sm">
+                  {String(errors.title.message) || "Title is required"}
+                </p>
+              )}
             </div>
 
             {/* Datetime Field */}
@@ -472,35 +444,24 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
             </div>
 
             {/* Dynamic Fields */}
-            {normalizedFields.map(field => (
-              <div key={field.id} className="space-y-2">
-                <Label
-                  htmlFor={`field_${field.id}`}
-                  className="text-sm font-medium leading-none text-slate-200"
-                >
-                  {field.label}
-                  {field.required && <span className="text-red-400">*</span>}
-                </Label>
+            {normalizedFields.map(field => {
+              const fieldName = `field_${field.id}` as any;
+              const fieldValue = watch(fieldName);
 
-                <DynamicField
-                  field={{
-                    ...field,
-                    id: `field_${field.id}`,
-                    register: register(`field_${field.id}` as any),
-                    error: errors[`field_${field.id}` as keyof typeof errors],
-                  }}
-                />
-
-                {errors[`field_${field.id}` as keyof typeof errors] && (
-                  <p className="text-red-400 text-sm">
-                    {String(
-                      errors[`field_${field.id}` as keyof typeof errors]
-                        ?.message
-                    ) || `${field.label} is invalid`}
-                  </p>
-                )}
-              </div>
-            ))}
+              return (
+                <div key={field.id} className="space-y-2">
+                  <DynamicField
+                    field={{
+                      ...field,
+                      id: fieldName,
+                      register: register(fieldName),
+                      error: errors[fieldName as keyof typeof errors],
+                      value: fieldValue,
+                    }}
+                  />
+                </div>
+              );
+            })}
 
             {/* Tags Field */}
             <SmartTagInput
@@ -545,9 +506,7 @@ export const DynamicRecordForm: React.FC<DynamicRecordFormProps> = ({
               <Button
                 type="submit"
                 className="bg-gradient-to-r from-blue-500 to-purple-700 hover:from-blue-600 hover:to-purple-700 w-full sm:w-auto min-h-[44px] text-base sm:text-sm"
-                disabled={
-                  isSubmitting || (mode === "edit" ? !isDirty : !isValid)
-                }
+                disabled={isSubmitting || (mode === "edit" ? !isDirty : false)}
               >
                 {isSubmitting ? (
                   <>{mode === "edit" ? "Updating..." : "Saving..."}</>

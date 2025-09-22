@@ -23,6 +23,7 @@ interface FormFieldProps {
   register: UseFormRegisterReturn;
   error?: any;
   helpText?: string;
+  value?: any;
 }
 
 // Legacy export for backwards compatibility
@@ -100,13 +101,15 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({ field }) => {
           required={field.required}
           options={selectOptions}
           placeholder={`Select ${field.label.toLowerCase()}`}
-          {...field.register}
+          name={field.register.name}
+          value={field.value || ""}
           onChange={(value: string) => {
             const syntheticEvent = {
-              target: { value },
+              target: { value, name: field.register.name },
             } as React.ChangeEvent<HTMLSelectElement>;
             field.register.onChange(syntheticEvent);
           }}
+          onBlur={field.register.onBlur}
         />
       );
 
