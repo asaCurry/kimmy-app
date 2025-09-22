@@ -14,11 +14,11 @@ const demoSlides = [
 Building a shared-infrastructure household data platform with optimistic collaboration
 
 ### Core Requirements:
-- **Household data isolation** with secure access controls (shared database, application-level filtering)
-- **Optimistic state updates** with eventual consistency (no WebSockets)
+- **Household-first data structure** with user and non-user members
+- **Optimistic state updates** with eventual consistency
 - **Server-side rendering** for performance and SEO
 - **Serverless scalability** for variable household loads
-- **Complex data relationships** (users, households, records, privacy)
+- **Modestly complex data relationships** (users, households, records, record types, and privacy)
 
 ### Real Data Model Complexity:
 \`\`\`typescript
@@ -56,7 +56,7 @@ interface HouseholdRecord {
 // Serverless Benefits for Household Data
 ✅ Cold start < 1ms globally (vs 5-10s container startup)
 ✅ Automatic scaling from 0 to millions of requests  
-✅ Built-in global edge network (low latency worldwide)
+✅ Native Cloudflare edge network (low latency worldwide)
 ✅ No infrastructure management overhead
 ✅ Pay-per-request pricing (ideal for variable usage)
 
@@ -87,7 +87,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
 ### Why This Works:
 - **Compliance**: Each request isolated, no shared state risks
-- **Performance**: Household apps need < 200ms response times
+- **Performance**: Smooth and responsive UI < 200ms response times
 - **Economics**: Pay only for actual family usage`,
     image: null,
   },
@@ -96,34 +96,50 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     title: "React Router 7 SSR vs SPA Trade-offs",
     content: `# Decision: Server-Side Rendering vs Pure SPA
 
-## Real SSR Implementation:
+## Real SSR Data Loading Implementation:
 \`\`\`typescript
-// workers/app.ts - Cloudflare Workers entry point
-import { createRequestHandler } from "@react-router/cloudflare";
-import * as build from "../build/server/index.js";
+// app/routes/member.$memberId.tsx - Server-side data loading
+export async function loader({ params, request, context }: Route.LoaderArgs) {
+  const env = (context as any).cloudflare?.env;
+  
+  // 1. Extract session from cookies (SSR authentication)
+  const session = extractSessionFromCookies(request.headers.get("cookie"));
+  if (!session?.currentHouseholdId) {
+    throw redirect("/welcome");
+  }
 
-const requestHandler = createRequestHandler({
-  build,
-  mode: process.env.NODE_ENV,
-});
+  // 2. Server-side database queries before page render
+  const db = getDatabase(env);
+  const [householdMembers, recordTypes, records] = await Promise.all([
+    db.select().from(users).where(eq(users.householdId, session.currentHouseholdId)),
+    db.select().from(recordTypes).where(eq(recordTypes.householdId, session.currentHouseholdId)),
+    db.select().from(records).where(
+      and(
+        eq(records.householdId, session.currentHouseholdId),
+        eq(records.memberId, parseInt(params.memberId))
+      )
+    )
+  ]);
 
-export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    try {
-      return await requestHandler(request, { cloudflare: { env, ctx } });
-    } catch (error) {
-      return new Response("Application Error", { status: 500 });
-    }
-  },
-} satisfies ExportedHandler<Env>;
+  // 3. Process data on server, send pre-rendered HTML
+  const categories = Array.from(new Set(recordTypes.map(rt => rt.category))).sort();
+  const recordTypesByCategory = categorizeRecords(recordTypes, records);
+
+  // 4. HTML is generated server-side with all data populated
+  return {
+    member: householdMembers.find(m => m.id === parseInt(params.memberId)),
+    recordTypesByCategory,
+    categories
+  };
+}
 \`\`\`
 
 ## Trade-offs Analysis:
 \`\`\`typescript
-// SSR Benefits for Family Apps
-✅ First paint: 1.2s → 0.3s (crucial for busy households)
-✅ SEO-friendly (sharing family milestones/records)
-✅ Works without JavaScript (accessibility requirement)
+// SSR Benefits for Modern Applications
+✅ First paint: 1.2s → 0.3s (user have a high expectation of speed and performance)
+✅ SEO-friendly for marketing and organic discovery of the application
+✅ Retains functionality and UX without client-side JavaScript
 ✅ Better Core Web Vitals (affects user trust)
 
 // SSR Challenges
@@ -133,7 +149,7 @@ export default {
 ❌ Requires careful session management
 \`\`\`
 
-### Real Session Handling:
+### Session Handling:
 \`\`\`typescript
 // app/lib/loader-helpers.ts
 export async function loadHouseholdData(request: Request, env: any) {
@@ -152,7 +168,7 @@ export async function loadHouseholdData(request: Request, env: any) {
     title: "Database Architecture: D1 vs Traditional SQL",
     content: `# Decision: Cloudflare D1 (SQLite) vs PostgreSQL
 
-## Real Schema - Shared Database with Household Isolation:
+## Household based Schema:
 \`\`\`typescript
 // db/schema.ts - Actual production schema
 export const households = sqliteTable("households", {
@@ -188,7 +204,6 @@ Global Distribution ✅ Edge       ❌ Single region
 Scaling Cost        ✅ $0.001/1K  ❌ $200+/month
 Complex Queries     ❌ Limited    ✅ Full featured
 Concurrent Writes   ❌ Limited    ✅ High throughput
-Household Isolation ✅ App-level  ✅ Row-level Security
 \`\`\`
 
 ### Why D1 Works (For Now):
@@ -215,11 +230,11 @@ Household Isolation ✅ App-level  ✅ Row-level Security
   {
     id: 5,
     title: "Authentication + Multi-tenancy Challenge",
-    content: `# Challenge: Secure Household Data Isolation
+    content: `# Challenge: Authentication and Session Management
 
 ## Problem: Multiple families sharing infrastructure safely
 
-### Real Authentication Implementation:
+### Authentication Implementation:
 \`\`\`typescript
 // app/lib/loader-helpers.ts - Session extraction
 export async function loadHouseholdData(request: Request, env: any) {
@@ -280,7 +295,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
 ### Solution - Optimistic Updates with Eventual Consistency:
 \`\`\`typescript
-// Real implementation from app/routes/trackers.tsx
+// Implementation from app/routes/trackers.tsx
 export default function TrackersPage() {
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
@@ -341,7 +356,7 @@ export default function TrackersPage() {
 
 ## Problem: Different families need different data structures
 
-### Real Dynamic Schema Solution:
+### Dynamic Schema Solution:
 \`\`\`typescript
 // Actual field configuration from our demo data
 const MEAL_RECORD_FIELDS = [
@@ -407,166 +422,119 @@ export function generateZodSchema(fields: FieldDefinition[]): z.ZodObject<any> {
   },
   {
     id: 8,
-    title: "Performance Optimization Lessons",
-    content: `# Edge Performance with Database Indexes
+    title: "AI Integration & Insight Generation",
+    content: `# Intelligent Analytics with Cloudflare AI
 
-## Database Query Optimization:
-\`\`\`sql
--- Real indexes from our production schema
-CREATE INDEX records_household_record_type_idx 
-  ON records(household_id, record_type_id, datetime);
-  
-CREATE INDEX records_household_member_idx 
-  ON records(household_id, member_id, datetime);
-  
-CREATE INDEX records_title_idx 
-  ON records(household_id, record_type_id, title);
-\`\`\`
+## Challenge: 
+Transform raw household data into actionable insights that help families make better decisions
 
-### Optimized Loader Pattern:
+## Solution Architecture:
+- **Multi-Model Flexibility**: Cloudflare AI allows seamless switching between models (Claude, GPT, Llama)
+- **Smart Prompt Engineering**: Adaptive prompts based on data maturity and user context
+- **Edge Processing**: AI inference runs globally at 300+ locations
+
+## Code Example - Intelligent Prompt Routing:
 \`\`\`typescript
-// Single query with joins instead of N+1 queries
-export async function loader({ request, context }: Route.LoaderArgs) {
-  return withDatabaseAndSession(request, context, async (db, session) => {
-    // One query with aggregate instead of multiple
-    const trackersWithEntries = await db
-      .select({
-        tracker: trackers,
-        entryCount: count(trackerEntries.id)
-      })
-      .from(trackers)
-      .leftJoin(trackerEntries, eq(trackers.id, trackerEntries.trackerId))
-      .where(eq(trackers.householdId, session.currentHouseholdId))
-      .groupBy(trackers.id);
-      
-    return { trackersWithEntries };
-  });
+// Auto-select prompt style based on data characteristics
+selectBestStyle(dataCompilation: DataCompilation): PromptStyleId {
+  const totalRecords = dataCompilation.totalRecords;
+  const categoriesCount = Object.keys(dataCompilation.patterns).length;
+  
+  if (totalRecords < 10) {
+    return "conversational"; // Encouraging for new users
+  } else if (totalRecords < 50 || categoriesCount <= 2) {
+    return "focused"; // Highlight key areas
+  } else {
+    return "comprehensive"; // Deep analysis for rich data
+  }
 }
+
+// Generate contextual prompts
+const generator = promptRouter.getPromptGenerator(styleId);
+const prompt = generator.generatePrompt(dataCompilation);
+
+// Execute AI analysis
+const insights = await ai.run('@cf/meta/llama-2-7b-chat-int8', {
+  prompt: prompt,
+  max_tokens: 2048
+});
 \`\`\`
 
-## Caching Strategy Trade-offs:
-\`\`\`typescript
-// What we DON'T cache (privacy reasons)
-❌ Personal family data (compliance requirement)  
-❌ User sessions (security requirement)
-❌ Dynamic form schemas (households customize them)
+## Business Impact:
+- **Personalized**: Insights adapt to each family's data maturity
+- **Actionable**: Focus on patterns that matter most to users  
+- **Scalable**: No infrastructure management, global edge performance
+- **Cost Efficient**: Pay per inference, not per server
 
-// What we DO cache aggressively
-✅ Static assets (30+ day TTL)
-✅ Application code bundles (immutable deployments)
-✅ Database schema metadata (rarely changes)
-\`\`\`
-
-### Edge Performance Results:
-- **Database queries**: < 1ms at edge
-- **Page load time**: 300ms average globally
-- **Time to Interactive**: < 1s on 3G connections`,
+### Example Output:
+"Emma's sleep improved when outdoor activities increased by 30% - consider more morning playground time"`,
     image: null,
   },
   {
     id: 9,
-    title: "What I'd Do Differently",
-    content: `# Technical Debt & Future Architecture
+    title: "Challenge: AI Insight Caching & Regeneration",
+    content: `# Smart Caching for AI-Powered Analytics
 
-## 1. Async Processing for Heavy Operations
+## The Challenge:
+- AI inference is expensive and slow for real-time requests (2-5 seconds)
+- Insights become stale as new data is added daily
+- Users expect fresh insights without waiting for processing
+- Data (hopefully!) accessed globally, need edge performance for low latency
+
+## Our Solution - Hybrid Processing:
+
+### 1. Scheduled Background Processing
 \`\`\`typescript
-// Current: Synchronous AI insight generation (blocks response)
-const insights = await generateFamilyInsights(householdData); // 2-5s delay
+// Cloudflare Scheduled Events (Cron Jobs)
+export const scheduled = async (event, env, ctx) => {
+  console.log("⏰ Processing insights for all households");
+  await processInsightsRequests(env, false); // Background refresh
+};
 
-// Better: Background processing with job queue
-const job = await env.QUEUE.send('generate-insights', { 
-  householdId, 
-  timeRange: 'month' 
-});
-return { jobId: job.id, status: 'processing' };
-
-// Then poll for results or use Server-Sent Events
-\`\`\`
-
-## 2. Enhanced Error Recovery
-\`\`\`typescript
-// Current: Basic error handling  
-catch (error) {
-  throw new Response("Database error", { status: 500 });
-}
-
-// Better: Graceful degradation for families
-catch (error) {
-  if (error instanceof HouseholdDataError) {
-    // Log for debugging but don't break family experience
-    await logFamilyError(error, householdContext);
-    
-    // Return cached data or graceful fallback
-    return getFallbackHouseholdData(householdId);
-  }
+// Intelligent cache invalidation  
+if (newRecordsAdded > threshold || daysSinceLastUpdate > 7) {
+  await requestInsightRegeneration(householdId);
 }
 \`\`\`
 
-## 3. Real-time Collaboration (Future - Durable Objects)
+### 2. Progressive Cache Strategy
 \`\`\`typescript
-// Future: Durable Objects for stateful WebSocket sessions
-export class HouseholdSession extends DurableObject {
-  constructor(state: DurableObjectState, env: Env) {
-    super(state, env);
-  }
-
-  async fetch(request: Request) {
-    // Handle WebSocket upgrade for real-time collaboration
-    const webSocketPair = new WebSocketPair();
-    const [client, server] = Object.values(webSocketPair);
-    
-    // Maintain household session state
-    // Real-time record editing by multiple family members
-    // Conflict resolution for concurrent edits
-    // Live cursors showing who's editing what
-    
-    return new Response(null, { status: 101, webSocket: client });
-  }
+// Fresh Data: Generate insights for new households immediately
+if (isNewHousehold) {
+  const insights = await generateFreshInsights(householdId);
+  await cacheInsights(householdId, insights, ttl: '24h');
 }
 
-// Costs & complexity trade-offs:
-// ✅ True real-time collaboration
-// ❌ Persistent object per household (increased cost)
-// ❌ More complex state management than stateless HTTP
-// ❌ Single point of failure per household session
+// Existing Data: Background regeneration 
+const cachedInsights = await getCachedInsights(householdId);
+if (cachedInsights) {
+  return cachedInsights; // < 50ms response
+}
+
+// Fallback: Generate on-demand with user feedback
+return {
+  insights: await generateInsightsWithProgress(householdId),
+  cached: false,
+  generatedAt: new Date()
+};
 \`\`\`
 
-### Architectural Evolution:
-- **Phase 1**: Individual family usage (current - shared database)
-- **Phase 2**: Real-time collaboration within families  
-- **Phase 3**: True multi-tenancy for sensitive data compliance
-- **Phase 4**: Cross-family sharing (extended family networks)
-- **Phase 5**: AI-powered insights with privacy guarantees
+## Performance Results:
+- **Initial Load**: <100ms (cached insights from edge)
+- **Background Generation**: 2-3 seconds per household  
+- **Cache Hit Rate**: >95% for active households
+- **Global Availability**: Insights available at 300+ edge locations
 
-## 4. Multi-Tenancy Architecture (Critical Future Need)
-\`\`\`typescript
-// Current limitation: Shared database architecture
-interface CurrentArchitecture {
-  isolation: "application-level";    // Not sufficient for healthcare
-  compliance: "basic";              // Can't meet HIPAA/SOX
-  scalability: "good";              // Works for households
-  security: "shared-boundary";      // Risk of data leakage
-}
+## Trade-offs:
+- ✅ **Fast user experience** with cached results
+- ✅ **Cost efficient** with background processing
+- ✅ **Global performance** with edge caching
+- ⚠️ **Eventual consistency** - insights may be 24-48 hours behind latest data
+- ⚠️ **Storage overhead** for caching strategy
+- ⚠️ **Complex invalidation** logic for data freshness
 
-// Future: True multi-tenancy options
-interface TruMultiTenancy {
-  option1: "database-per-tenant";   // Cloudflare D1 per household
-  option2: "schema-per-tenant";     // Separate schemas per household  
-  option3: "cluster-per-tenant";    // Separate Workers per household
-  
-  // Required for:
-  healthcare: true;                 // HIPAA compliance
-  finance: true;                    // SOX compliance
-  enterprise: true;                 // Security requirements
-  geographic: true;                 // Data residency (GDPR)
-}
-\`\`\`
-
-### When to Make the Jump:
-- **Regulatory pressure**: Healthcare or financial data requirements
-- **Enterprise sales**: B2B customers demand isolation guarantees  
-- **Scale problems**: Noisy neighbor issues affecting performance
-- **Security incidents**: Any cross-household data leak`,
+### Why This Architecture Works:
+Families prefer **reliable fast insights** over **real-time slow generation**. The cache-first approach provides instant access while background processing ensures freshness.`,
     image: null,
   },
   {
@@ -645,10 +613,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 export default function Demo() {
   return (
     <PageLayout>
-      <PageHeader
-        title="Kimmy App Demo"
-        subtitle="Discover what makes our household management platform unique"
-      />
+      <PageHeader title="Kimmy App Demo" />
 
       <div className="space-y-6">
         <Gallery slides={demoSlides} />

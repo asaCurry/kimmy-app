@@ -206,24 +206,17 @@ function MemberSelection({
                   description="View household activity trackers"
                   color="purple"
                 />
-                {canViewAnalytics && (
-                  <QuickActionButton
-                    to="/insights"
-                    icon="📊"
-                    title="Insights"
-                    description="View analytics and patterns"
-                    color="purple"
-                  />
-                )}
-                {!canViewAnalytics && (
-                  <QuickActionButton
-                    to="/insights"
-                    icon="📊"
-                    title="Insights"
-                    description="Analytics (Premium)"
-                    color="orange"
-                  />
-                )}
+                <QuickActionButton
+                  to="/insights"
+                  icon="📊"
+                  title="Insights"
+                  description={
+                    canViewAnalytics
+                      ? "View analytics and patterns"
+                      : "Analytics (Premium)"
+                  }
+                  color={canViewAnalytics ? "purple" : "orange"}
+                />
               </div>
             </div>
           </div>

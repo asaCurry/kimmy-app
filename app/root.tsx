@@ -8,6 +8,16 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./app.css";
 
+export const meta: Route.MetaFunction = () => [
+  { title: "Kimmy - Smart Household Management" },
+  {
+    name: "description",
+    content:
+      "Intelligent household data management with AI-powered insights. Track family records, activities, and patterns with secure, privacy-first architecture.",
+  },
+  { name: "viewport", content: "width=device-width, initial-scale=1" },
+];
+
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {

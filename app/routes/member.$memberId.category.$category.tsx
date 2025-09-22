@@ -388,7 +388,7 @@ export default function CategoryRecordTypes() {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [revalidator]);
+  }, []); // Remove revalidator dependency to prevent infinite loop
 
   // Show toast notification when data is being refreshed
   // Loading states are handled visually through UI indicators

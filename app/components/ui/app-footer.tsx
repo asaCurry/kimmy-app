@@ -55,11 +55,6 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
               Securely manage your household's records records and information
               in one place.
             </p>
-            {session?.currentHouseholdId && (
-              <div className="text-xs text-slate-400">
-                Household ID: {session.currentHouseholdId}
-              </div>
-            )}
           </div>
 
           {/* Quick Links */}
@@ -209,12 +204,8 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
         {/* Bottom Bar */}
         <div className="mt-8 pt-6 border-t border-slate-700 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-4 text-sm text-slate-500">
-            <span>© 2024 Hey, Kimmy</span>
+            <span>© {new Date().getFullYear()} Hey, Kimmy</span>
             <span className="hidden sm:inline">•</span>
-            <span className="flex items-center">
-              Made with <Heart className="mx-1 h-3 w-3 text-red-400" /> for
-              families
-            </span>
           </div>
 
           <div className="flex items-center space-x-4 text-sm text-slate-500">

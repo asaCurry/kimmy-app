@@ -56,11 +56,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 Hey, Kimmy
               </h1>
-              {session?.currentHouseholdId && (
-                <div className="text-xs text-slate-400">
-                  Household ID: {session.currentHouseholdId}
-                </div>
-              )}
             </div>
           </Link>
         </div>

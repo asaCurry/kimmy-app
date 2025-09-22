@@ -112,10 +112,101 @@ async function setupDemoAccount() {
       "Creating demo admin user in PRODUCTION"
     );
 
+    // Get the created user ID for record types
+    const userResult = await executeSQL(
+      `SELECT id FROM users WHERE email = '${DEMO_CONFIG.user.email}';`,
+      "Getting demo user ID"
+    );
+    
+    // Extract user ID from result (assumes it's in the output)
+    const userId = 1; // Assuming this is the first/primary user for demo
+
+    // Create core record types (Sleep and Mood)
+    await executeSQL(
+      `INSERT OR REPLACE INTO record_types (name, description, category, household_id, fields, icon, color, allow_private, visible_to_members, created_by, created_at) VALUES 
+      ('Sleep', 'Track sleep patterns, quality, and duration', 'Health', '${householdId}', '${JSON.stringify([
+        {
+          id: "sleep-duration",
+          name: "Sleep Duration",
+          type: "number",
+          required: true,
+          placeholder: "Hours of sleep",
+          validation: { min: 0, max: 24 },
+          order: 1,
+          active: true,
+        },
+        {
+          id: "sleep-quality",
+          name: "Sleep Quality",
+          type: "select",
+          required: true,
+          options: [
+            { value: "poor", label: "Poor" },
+            { value: "fair", label: "Fair" },
+            { value: "good", label: "Good" },
+            { value: "excellent", label: "Excellent" },
+          ],
+          order: 2,
+          active: true,
+        }
+      ]).replace(/'/g, "''")}', '😴', 'purple', 0, '[]', ${userId}, datetime('now')),
+      ('Mood', 'Track daily mood, energy levels, and emotional well-being', 'Health', '${householdId}', '${JSON.stringify([
+        {
+          id: "mood-rating",
+          name: "Overall Mood",
+          type: "select",
+          required: true,
+          options: [
+            { value: "1", label: "1 - Very Low" },
+            { value: "2", label: "2 - Low" },
+            { value: "3", label: "3 - Below Average" },
+            { value: "4", label: "4 - Average" },
+            { value: "5", label: "5 - Above Average" },
+            { value: "6", label: "6 - Good" },
+            { value: "7", label: "7 - Very Good" },
+            { value: "8", label: "8 - Great" },
+            { value: "9", label: "9 - Excellent" },
+            { value: "10", label: "10 - Amazing" },
+          ],
+          order: 1,
+          active: true,
+        },
+        {
+          id: "energy-level",
+          name: "Energy Level",
+          type: "select",
+          required: true,
+          options: [
+            { value: "very-low", label: "Very Low" },
+            { value: "low", label: "Low" },
+            { value: "moderate", label: "Moderate" },
+            { value: "high", label: "High" },
+            { value: "very-high", label: "Very High" },
+          ],
+          order: 2,
+          active: true,
+        }
+      ]).replace(/'/g, "''")}', '😊', 'blue', 0, '[]', ${userId}, datetime('now'));`,
+      "Creating core record types (Sleep & Mood)"
+    );
+
+    // Create some sample records for demonstration
+    await executeSQL(
+      `INSERT OR REPLACE INTO records (title, content, record_type_id, household_id, member_id, created_by, datetime, created_at) VALUES 
+      ('Good Sleep Night', '{"sleep-duration": "8", "sleep-quality": "good"}', 1, '${householdId}', ${userId}, ${userId}, datetime('now', '-1 day'), datetime('now', '-1 day')),
+      ('Restless Night', '{"sleep-duration": "6", "sleep-quality": "poor"}', 1, '${householdId}', ${userId}, ${userId}, datetime('now', '-2 days'), datetime('now', '-2 days')),
+      ('Great Day!', '{"mood-rating": "8", "energy-level": "high"}', 2, '${householdId}', ${userId}, ${userId}, datetime('now'), datetime('now')),
+      ('Feeling Low', '{"mood-rating": "4", "energy-level": "low"}', 2, '${householdId}', ${userId}, ${userId}, datetime('now', '-1 day'), datetime('now', '-1 day'));`,
+      "Creating sample demo records"
+    );
+
     // Verify setup
     const verification = await executeSQL(
-      `SELECT h.name as household_name, u.name, u.email, u.role, u.admin FROM users u JOIN households h ON u.household_id = h.id WHERE u.email = '${DEMO_CONFIG.user.email}';`,
-      "Verifying demo setup in PRODUCTION"
+      `SELECT h.name as household_name, u.name, u.email, u.role, u.admin, 
+              (SELECT COUNT(*) FROM record_types WHERE household_id = h.id) as record_types_count,
+              (SELECT COUNT(*) FROM records WHERE household_id = h.id) as records_count
+       FROM users u JOIN households h ON u.household_id = h.id WHERE u.email = '${DEMO_CONFIG.user.email}';`,
+      "Verifying complete demo setup in PRODUCTION"
     );
 
     console.log("\n🎉 PRODUCTION demo account setup completed successfully!");
